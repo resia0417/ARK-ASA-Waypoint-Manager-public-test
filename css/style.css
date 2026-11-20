@@ -484,6 +484,7 @@ td.icon-cell { text-align: center; }
 /* 汎用の非表示ユーティリティ(Debug Mode時のみ表示するタブ等に使用) */
 .hidden { display: none !important; }
 
+.label-note { font-size: 10.5px; color: var(--text-muted); font-weight: 400; white-space: nowrap; }
 .modal-hint {
   font-size: 11px;
   color: var(--text-muted);

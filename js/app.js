@@ -852,7 +852,7 @@ function openIconPickerPopover(e) {
   popover.className = 'icon-picker-popover';
   popover.innerHTML = MARK_ICON_DEFINITIONS.map((def) => `
     <div class="icon-picker-row ${def.id === selectedMarkIconId ? 'selected' : ''}" data-id="${def.id}">
-      ${renderWaypointIconHtml({ type: def.id, baseColor: defaultColor(), iconColor: { r: 0.28, g: 0.82, b: 0.77, a: 1 }, size: 30, title: '' }, () => openIconPickerPopover(e))}
+      ${renderWaypointIconHtml({ type: def.id, baseColor: colorEditorApi?.getValue() ?? defaultColor(), iconColor: iconColorEditorApi?.getValue() ?? defaultColor(), size: 30, title: '' }, () => openIconPickerPopover(e))}
     </div>
   `).join('');
   document.body.appendChild(popover);
@@ -887,7 +887,7 @@ function closeIconPickerPopover() {
 
 function updateWaypointPreview() {
   const def = findMarkIconById(selectedMarkIconId);
-  els.markIconPickerBtn.innerHTML = `${renderWaypointIconHtml({ type: def.id, baseColor: colorEditorApi?.getValue() ?? defaultColor(), iconColor: iconColorEditorApi?.getValue() ?? defaultColor(), size: 22 }, updateWaypointPreview)}<span>${escapeHtml(def.displayName)}</span>`;
+  els.markIconPickerBtn.innerHTML = `${renderWaypointIconHtml({ type: def.id, baseColor: colorEditorApi?.getValue() ?? defaultColor(), iconColor: iconColorEditorApi?.getValue() ?? defaultColor(), size: 22, title: '' }, updateWaypointPreview)}`;
 
   mountWaypointIcon(els.waypointPreview, {
     type: def.id,
