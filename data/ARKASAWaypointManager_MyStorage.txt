@@ -1,2 +1,0 @@
-SavedMinimapMarks=(Location=(X=100,Y=200,Z=0),MarkIcon="/Script/Engine.Texture2D'/Game/PrimalEarth/CoreBlueprints/Resources/Icons/MetalOre_Icon.MetalOre_Icon'",MapName="Aberration_WP",CustomTag="Waypoint",Name="Metal")
-SavedMinimapMarks=(Location=(X=150,Y=250,Z=0),MarkIcon="/Script/Engine.Texture2D'/Game/PrimalEarth/Test_Craig/Crystal_Icon.Crystal_Icon'",MapName="Aberration_WP",CustomTag="Waypoint2",Name="Crystal")
