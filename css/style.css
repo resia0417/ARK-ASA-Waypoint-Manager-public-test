@@ -406,17 +406,27 @@ html, body {
 }
 .color-channel input[type="range"] {
   width: 100%; margin: 0; -webkit-appearance: none; appearance: none;
-  height: 4px; border-radius: 2px; outline: none;
+  height: 16px; background: transparent; outline: none; cursor: pointer;
+  border: none; padding: 0; border-radius: 0; /* .modal input の枠・余白を打ち消し、ハンドルが端まで届くようにする */
+}
+.color-channel input[type="range"]::-webkit-slider-runnable-track {
+  height: 3px; border-radius: 2px;
   background: linear-gradient(90deg, var(--accent-dim), var(--accent));
   box-shadow: 0 0 6px rgba(77,210,255,0.35);
 }
 .color-channel input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none; appearance: none;
-  width: 11px; height: 20px; background: #bfefff; border: 1px solid var(--accent);
+  width: 9px; height: 18px; margin-top: -7.5px;
+  background: #bfefff; border: 1px solid var(--accent);
   box-shadow: 0 0 9px rgba(77,210,255,0.85); cursor: pointer;
 }
+.color-channel input[type="range"]::-moz-range-track {
+  height: 3px; border-radius: 2px;
+  background: linear-gradient(90deg, var(--accent-dim), var(--accent));
+  box-shadow: 0 0 6px rgba(77,210,255,0.35);
+}
 .color-channel input[type="range"]::-moz-range-thumb {
-  width: 11px; height: 20px; border-radius: 0; background: #bfefff; border: 1px solid var(--accent);
+  width: 9px; height: 18px; border-radius: 0; background: #bfefff; border: 1px solid var(--accent);
   box-shadow: 0 0 9px rgba(77,210,255,0.85); cursor: pointer;
 }
 .color-channel input[type="number"] {
