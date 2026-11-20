@@ -1,4 +1,9 @@
-# ARK ASA Waypoint Manager Web — 仕様書 (v0.8.7)
+# ARK ASA Waypoint Manager Web — 仕様書 (v0.8.8)
+
+## 0.30 v0.8.8での変更点(Settingsパネルの整理)
+
+- Settingsモーダルを「表示」「保存される設定」の2セクションに再構成した。自動保存の説明とリセットボタンを同じセクションにまとめ、リセットで前回ファイルの記憶も消えることを明記した。モーダル下部のアクション行は Close のみとした。
+- 「今後の予定」から、取り下げが決まったルート表示・距離測定とSettingsパネル拡充を削除した(README・§5も同様)。
 
 ## 0.29 v0.8.7での変更点(Add時にマップのクリック座標を引き継ぐ)
 
@@ -421,6 +426,4 @@ DatabaseFile=ARKASAWaypointManager_MyStorage.txt
 (Map Viewer本体は v0.3.7 で実装済み。`js/map_viewer.js` が担当し、外部ライブラリを使わずDOM/CSS transformで描画する。Grid表示も含む)
 
 
-- Route表示・距離計測・Grid表示
-- Community Library
-- Settingsパネルの拡充(Debug Mode以外の項目)
+- Community Library(保留中)

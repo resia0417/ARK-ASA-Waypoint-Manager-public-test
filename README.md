@@ -1,10 +1,8 @@
-# ARK ASA Waypoint Manager Web (v0.8.7)
+# ARK ASA Waypoint Manager Web (v0.8.8)
 
 ARK: Survival Ascended のWaypoint(マップに打ったマーカー)を、ブラウザでまとめて編集できるツールです。
 
 ゲーム内で1つずつ編集するのは大変なので、PCのブラウザで一覧と地図を見ながら、追加・編集・削除できるようにしました。インストールは不要で、ファイルがPCの外に送信されることもありません。
-
-**▶ 使ってみる: https://resia0417.github.io/ARK-ASA-Waypoint-Manager-public-test/**
 
 ## 使い方
 
@@ -35,15 +33,8 @@ ARK: Survival Ascended のWaypoint(マップに打ったマーカー)を、ブ�
 
 ## 今後の予定
 
-- ルート表示と距離測定
 - Community Library
 
 ## ライセンス
 
 本プロジェクトは [MIT License](./LICENSE) の下で公開されています。
-
----
-
-## 地図画像について
-
-地図画像は、れしあがゲーム内で撮影・合成したものです。ARK: Survival Ascended © Studio Wildcard. 本ツールは非公式のファンワークです。

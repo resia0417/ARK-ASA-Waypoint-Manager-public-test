@@ -33,7 +33,7 @@
       <button id="reconnectBtn" class="btn-bracket btn-small" hidden>[ 前回のファイルを再接続 ]</button>
 
       <div class="header-right">
-        <span class="header-version">v0.8.7</span>
+        <span class="header-version">v0.8.8</span>
         <button id="mapsToggleBtn" class="btn-bracket btn-small">[ 全Waypoint表示 ]</button>
         <a id="githubLink" class="header-link" href="https://github.com/resia0417/ARK-ASA-Waypoint-Manager" target="_blank" rel="noopener">GitHub</a>
         <button id="settingsBtn" class="header-link header-link-btn">Settings</button>
@@ -295,13 +295,19 @@
   <div id="settingsModal" class="modal-overlay hidden">
     <div class="modal">
       <h3>Settings</h3>
-      <p class="choice-message">Splitter位置・選択中のMap・Libraryタブ・列幅・検索文字・ソート状態は自動的に保存されます。</p>
+      <h4 class="settings-section-title">表示</h4>
       <label class="settings-checkbox-row">
         <input type="checkbox" id="debugModeCheckbox" />
-        Debug Mode(Map Calibrationタブを表示する)
+        Debug Mode
       </label>
-      <div class="modal-actions">
+      <p class="settings-desc">Map Calibrationタブを表示します(マップ座標の校正用)。</p>
+      <h4 class="settings-section-title">保存される設定</h4>
+      <p class="settings-desc">Splitter位置・選択中のMap・Libraryタブ・列幅・検索文字・ソート状態は、自動的に保存されます。</p>
+      <p class="settings-desc">リセットすると、これらの設定と前回開いたファイルの記憶が、初期状態に戻ります。</p>
+      <div class="settings-reset-row">
         <button id="settingsResetBtn" class="btn-bracket">[ 設定をリセット ]</button>
+      </div>
+      <div class="modal-actions">
         <button id="settingsCloseBtn" class="btn-bracket btn-accent">[ Close ]</button>
       </div>
     </div>
