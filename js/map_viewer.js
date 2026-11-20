@@ -174,19 +174,21 @@ export function createMapViewer(handlers, root) {
     state.markerItems = [];
 
     let shown = 0;
-    let skipped = 0;
+    let clamped = 0;
     for (const { waypoint, listKey } of handlers.getWaypoints()) {
       // Genesis_WP はZ座標で陸・海へ振り分けた実効MapNameで照合する
       if (resolveEffectiveMapName(waypoint.parsed.map, waypoint.parsed.z) !== state.mapName) continue;
       const latLon = handlers.getLatLon(waypoint);
-      if (!latLon || !isFinite(latLon.lat) || !isFinite(latLon.lon) ||
-          latLon.lat < 0 || latLon.lat > 100 || latLon.lon < 0 || latLon.lon > 100) {
-        skipped++;
-        continue;
-      }
+      if (!latLon || !isFinite(latLon.lat) || !isFinite(latLon.lon)) continue;
+      // 範囲外(0〜100を超える)座標は、地図の端に寄せて表示する(v0.8.0)。
+      // データ自体は元の座標のまま保持し、表示位置だけをクランプする。
+      const outOfRange = latLon.lat < 0 || latLon.lat > 100 || latLon.lon < 0 || latLon.lon > 100;
+      if (outOfRange) clamped++;
+      const dispLat = Math.min(100, Math.max(0, latLon.lat));
+      const dispLon = Math.min(100, Math.max(0, latLon.lon));
       const el = document.createElement('div');
-      el.className = 'mv-marker';
-      el.title = waypoint.parsed.name || '(無名)';
+      el.className = 'mv-marker' + (outOfRange ? ' out-of-range' : '');
+      el.title = (waypoint.parsed.name || '(無名)') + (outOfRange ? '(範囲外: 地図の端に表示中)' : '');
       el.innerHTML = handlers.getIconMarkup(waypoint);
       el.addEventListener('pointerdown', (e) => e.stopPropagation());
       el.addEventListener('click', (e) => {
@@ -194,11 +196,11 @@ export function createMapViewer(handlers, root) {
         handlers.onSelect(waypoint, listKey);
       });
       els.markers.appendChild(el);
-      state.markerItems.push({ el, lat: latLon.lat, lon: latLon.lon, waypoint });
+      state.markerItems.push({ el, lat: dispLat, lon: dispLon, waypoint });
       shown++;
     }
-    els.info.textContent = skipped > 0
-      ? `${shown} Waypoints を表示中(範囲外のため ${skipped} 件を非表示)`
+    els.info.textContent = clamped > 0
+      ? `${shown} Waypoints を表示中(範囲外 ${clamped} 件は地図の端に表示)`
       : `${shown} Waypoints を表示中`;
     render();
   }

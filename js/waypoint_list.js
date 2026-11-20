@@ -45,6 +45,10 @@ const CONFIGURABLE_COLUMNS = [
 /** Icon列の初期幅(px)。要件通り40〜48pxの範囲で固定する。 */
 const ICON_COLUMN_DEFAULT_WIDTH = 44;
 
+/** Lat/Lon列の初期幅(px)。表示は最大でも「100.0」程度(3桁+小数)なので、
+ * 等幅フォント5文字+セル余白に収まるギリギリの幅にする(v0.8.2)。 */
+const LAT_LON_COLUMN_DEFAULT_WIDTH = 64;
+
 export class WaypointListController {
   /**
    * @param {object} config
@@ -106,6 +110,12 @@ export class WaypointListController {
     // 管理する。初回はここで既定幅(40〜48px)を補完する。
     if (this.columnConfig.widths.icon == null) {
       this.columnConfig.widths.icon = ICON_COLUMN_DEFAULT_WIDTH;
+    }
+    if (this.columnConfig.widths.lat == null) {
+      this.columnConfig.widths.lat = LAT_LON_COLUMN_DEFAULT_WIDTH;
+    }
+    if (this.columnConfig.widths.lon == null) {
+      this.columnConfig.widths.lon = LAT_LON_COLUMN_DEFAULT_WIDTH;
     }
 
     this.searchInputEl.value = this.searchText;
@@ -312,21 +322,26 @@ export class WaypointListController {
     }
   }
 
-  /** Categoryフィルターの選択肢を、このリストに実際に存在するCategoryから生成する(件数付き) */
+  /** Categoryフィルターの選択肢を、このリストに実際に存在するCategoryから生成する(件数付き)
+   * 件数は表示中のマップ(ExternalMapFilter)で絞った範囲で数える(v0.8.0) */
   _renderCategoryFilterOptions() {
     if (!this.categoryFilterEl) return;
     const current = this.categoryFilterEl.value || '__all__';
     const counts = new Map();
     let unsetCount = 0;
 
-    for (const w of this.items) {
+    const scoped = (this.externalMapFilter && this.externalMapFilter !== '__all__')
+      ? this.items.filter((w) => this.getMapKey(w) === this.externalMapFilter)
+      : this.items;
+
+    for (const w of scoped) {
       const c = (w.parsed.category || '').trim();
       if (!c) { unsetCount += 1; continue; }
       counts.set(c, (counts.get(c) || 0) + 1);
     }
 
     const cats = Array.from(counts.keys()).sort((a, b) => a.localeCompare(b, 'ja'));
-    const options = [`<option value="__all__">All (${this.items.length})</option>`];
+    const options = [`<option value="__all__">All (${scoped.length})</option>`];
     if (unsetCount > 0) options.push(`<option value="__none__">(未設定) (${unsetCount})</option>`);
     options.push(...cats.map((c) => `<option value="${esc(c)}">${esc(c)} (${counts.get(c)})</option>`));
 

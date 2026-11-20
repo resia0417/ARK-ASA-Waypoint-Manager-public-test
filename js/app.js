@@ -98,7 +98,7 @@ function cacheElements() {
     'storageReadBtn', 'storageAddBtn', 'storageSaveBtn',
     'storageSearchInput', 'storageCount', 'storageTheadRow', 'storageTableBody', 'storageEmptyState', 'storageDropZone',
     // Location Library
-    'libraryReadBtn', 'libraryAddBtn',
+    'libraryReadBtn',
     'librarySearchInput', 'libraryCategoryFilter', 'libraryCount', 'libraryTheadRow', 'libraryTableBody', 'libraryEmptyState', 'libraryDropZone',
     // Waypoint Log
     'logOpenBtn',
@@ -183,7 +183,7 @@ function createControllers() {
     listKey: 'library', theadRow: els.libraryTheadRow, tbody: els.libraryTableBody,
     emptyStateEl: els.libraryEmptyState, countEl: els.libraryCount, searchInputEl: els.librarySearchInput,
     categoryFilterEl: els.libraryCategoryFilter, settingsStore, onSelect: handleSelect, getLatLon, getIconMarkup, getMapKey,
-    ...rowActionHandlers('library'),
+    // Location Libraryは固定データのため、編集/削除ボタンは付けない(v0.8.1)
   });
   controllers.log = new WaypointListController({
     listKey: 'log', theadRow: els.logTheadRow, tbody: els.logTableBody,
@@ -535,7 +535,6 @@ function bindToolbarEvents() {
   els.storageSaveBtn.addEventListener('click', onStorageSave);
 
   els.libraryReadBtn.addEventListener('click', onLibraryRead);
-  els.libraryAddBtn.addEventListener('click', () => openAddEditModal('library', null));
 
   els.logOpenBtn.addEventListener('click', onLogOpen);
 
@@ -1149,6 +1148,10 @@ function onDrop(e, targetKey) {
   let payload;
   try { payload = JSON.parse(e.dataTransfer.getData('text/plain')); } catch { return; }
   if (!payload?.listKey || !payload?.id || payload.listKey === targetKey) return;
+  if (targetKey === 'library') {
+    setStatus('Location Libraryは固定データのため、Waypointを追加できません。');
+    return;
+  }
 
   const wp = controllers[payload.listKey].find(payload.id);
   if (!wp) return;
@@ -1158,15 +1161,18 @@ function onDrop(e, targetKey) {
 
 /**
  * Waypointをsource側からtarget側へ移動/コピーする。
- * - source が ini/storage/library(編集可能リスト)の場合は移動元から削除する(真の移動)。
- * - source が log(読み取り専用の参照元)の場合は移動元を変更しない(コピー)。
+ * - source が ini/storage(編集可能リスト)の場合は移動元から削除する(真の移動)。
+ * - source が log(読み取り専用の参照元)と library(収録データの参照元)の場合は
+ *   移動元を変更しない(コピー)。コピーには新しいIDを振る(v0.8.0)。
  * - target が log の場合は、編集機能自体が無いため衝突確認を行わず
  *   そのまま追加する(「追加のみ・編集禁止」の要件に対応)。
  * - target が ini/storage/library の場合は、①座標衝突 → ②CustomTag衝突 の順で
  *   共通の競合処理を行う。
  */
 async function moveWaypoint(sourceKey, targetKey, wp) {
-  const removesFromSource = EDITABLE_LISTS.has(sourceKey);
+  const removesFromSource = EDITABLE_LISTS.has(sourceKey) && sourceKey !== 'library';
+  const verb = removesFromSource ? '移動' : 'コピー';
+  const newId = removesFromSource ? wp.id : undefined;
   const wasSelected = !!(currentSelection && currentSelection.listKey === sourceKey && currentSelection.waypoint.id === wp.id);
 
   const finalize = (newWp) => {
@@ -1188,7 +1194,7 @@ async function moveWaypoint(sourceKey, targetKey, wp) {
 
   if (!EDITABLE_LISTS.has(targetKey)) {
     // Location Library / Waypoint Log は編集不可のため、衝突確認なしで追加のみ行う
-    const copy = createWaypoint({ id: wp.id, rawText: wp.rawText, parsed: { ...wp.parsed }, source: SOURCE_FIELD[targetKey] });
+    const copy = createWaypoint({ id: newId, rawText: wp.rawText, parsed: { ...wp.parsed }, source: SOURCE_FIELD[targetKey] });
     controllers[targetKey].add(copy);
     finalize(copy);
     setStatus(`Waypoint「${wp.parsed.name}」を${LABELS[targetKey]}へ追加しました。`);
@@ -1209,7 +1215,7 @@ async function moveWaypoint(sourceKey, targetKey, wp) {
     const merged = createWaypoint({ id: locationConflict.id, rawText: wp.rawText, parsed: { ...wp.parsed }, source: SOURCE_FIELD[targetKey] });
     controllers[targetKey].replace(locationConflict.id, merged);
     finalize(merged);
-    setStatus(`Waypoint「${wp.parsed.name}」を${LABELS[targetKey]}へ移動しました(上書き)。`);
+    setStatus(`Waypoint「${wp.parsed.name}」を${LABELS[targetKey]}へ${verb}しました(上書き)。`);
     return;
   }
 
@@ -1227,23 +1233,25 @@ async function moveWaypoint(sourceKey, targetKey, wp) {
       const merged = createWaypoint({ id: tagConflict.id, rawText: wp.rawText, parsed: { ...wp.parsed }, source: SOURCE_FIELD[targetKey] });
       controllers[targetKey].replace(tagConflict.id, merged);
       finalize(merged);
-      setStatus(`Waypoint「${wp.parsed.name}」を${LABELS[targetKey]}へ移動しました(上書き)。`);
+      setStatus(`Waypoint「${wp.parsed.name}」を${LABELS[targetKey]}へ${verb}しました(上書き)。`);
       return;
     }
 
     const newTag = generateUniqueTag(wp.parsed.customTag, targetList);
-    const renamed = createWaypoint({ id: wp.id, rawText: wp.rawText, parsed: { ...wp.parsed, customTag: newTag }, source: SOURCE_FIELD[targetKey] });
+    const renamed = createWaypoint({ id: newId, rawText: wp.rawText, parsed: { ...wp.parsed, customTag: newTag }, source: SOURCE_FIELD[targetKey] });
     controllers[targetKey].add(renamed);
     finalize(renamed);
-    setStatus(`Waypoint「${wp.parsed.name}」を${LABELS[targetKey]}へ移動しました(CustomTag: ${newTag})。`);
+    setStatus(`Waypoint「${wp.parsed.name}」を${LABELS[targetKey]}へ${verb}しました(CustomTag: ${newTag})。`);
     return;
   }
 
   // 衝突なし
-  const moved = createWaypoint({ id: wp.id, rawText: wp.rawText, parsed: { ...wp.parsed }, source: SOURCE_FIELD[targetKey] });
+  const moved = createWaypoint({ id: newId, rawText: wp.rawText, parsed: { ...wp.parsed }, source: SOURCE_FIELD[targetKey] });
   controllers[targetKey].add(moved);
   finalize(moved);
-  setStatus(`Waypoint「${wp.parsed.name}」を${LABELS[sourceKey]}から${LABELS[targetKey]}へ移動しました。`);
+  setStatus(removesFromSource
+    ? `Waypoint「${wp.parsed.name}」を${LABELS[sourceKey]}から${LABELS[targetKey]}へ移動しました。`
+    : `Waypoint「${wp.parsed.name}」を${LABELS[targetKey]}へコピーしました。`);
 }
 
 // --- 汎用選択ダイアログ(Promiseベース) ------------------------------------
@@ -1378,9 +1386,16 @@ function restoreLayoutSettings() {
 function bindHeaderEvents() {
   els.settingsBtn.addEventListener('click', () => els.settingsModal.classList.remove('hidden'));
   els.settingsCloseBtn.addEventListener('click', () => els.settingsModal.classList.add('hidden'));
-  els.settingsResetBtn.addEventListener('click', () => {
-    if (!window.confirm('保存されている設定(レイアウト・選択中のMap・タブ・列幅・検索文字・ソート・Debug Mode)をすべて初期状態に戻しますか？')) return;
+  els.settingsResetBtn.addEventListener('click', async () => {
+    if (!window.confirm('保存されている設定(レイアウト・選択中のMap・タブ・列幅・検索文字・ソート・Debug Mode)と、前回のセッション情報(前回開いたファイルの記憶)をすべて初期状態に戻しますか？')) return;
     settingsStore.clearAll();
+    // 前回のセッション情報(IndexedDB内のファイルハンドルとINIバックアップ)も消す(v0.8.3)
+    try {
+      await Promise.all([
+        fm.clearLastIniHandle(), fm.clearLastJsonHandle(), fm.clearLastLogHandle(),
+        fm.clearLastLibraryHandle(), fm.clearLastMapsRootHandle(), fm.clearIniBackup(),
+      ]);
+    } catch (err) { console.info('セッション情報の消去に失敗しました:', err.message); }
     window.location.reload();
   });
 }

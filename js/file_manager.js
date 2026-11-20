@@ -291,6 +291,11 @@ export async function saveIniBackup(text) {
   }
 }
 
+/** 緊急用INIバックアップを破棄する(Settingsリセット用)。 */
+export async function clearIniBackup() {
+  await idbDelete(KEY_INI_BACKUP);
+}
+
 export async function saveLastJsonHandle(handle) {
   await idbSet(KEY_JSON_HANDLE, handle);
 }
