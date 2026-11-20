@@ -415,6 +415,26 @@ async function tryRestoreLastSession() {
     markClean('library');
   }, () => fm.clearLastLibraryHandle());
 
+  // Location Library: 前回開いたファイルが無い(再接続待ちでもない)場合は、
+  // 同梱ライブラリ(location_library.json)を初期表示する。編集しても自動保存先が
+  // 無いため保存はされない(次回は同梱データが読み直される)。
+  let bundledCount = 0;
+  const libraryPending = pendingReconnect.some((p) => p.label === 'Location Library');
+  if (!libraryFileHandle && !libraryPending && controllers.library.getAll().length === 0) {
+    try {
+      const res = await fetch('location_library.json');
+      if (res.ok) {
+        const list = parseLibrary(await res.text());
+        if (list.length > 0) {
+          controllers.library.setAll(list);
+          markRead('library');
+          markClean('library');
+          bundledCount = list.length;
+        }
+      }
+    } catch (err) { console.info('同梱ライブラリの読み込みをスキップしました:', err.message); }
+  }
+
   applySavedMapSelection();
 
   if (pendingReconnect.length > 0 && els.reconnectBtn) els.reconnectBtn.hidden = false;
@@ -424,6 +444,8 @@ async function tryRestoreLastSession() {
     setStatus(`前回のセッション情報を復元しました(${restored.join('・')})。`);
   } else if (pendingReconnect.length > 0) {
     setStatus('前回のファイルへのアクセス許可が必要です。[ 前回のファイルを再接続 ]を押してください。');
+  } else if (bundledCount > 0) {
+    setStatus(`Location Library(同梱データ)から${bundledCount}件のWaypointを表示しています。`);
   }
 }
 

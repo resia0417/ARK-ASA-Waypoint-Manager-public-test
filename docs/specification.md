@@ -1,4 +1,14 @@
-# ARK ASA Waypoint Manager Web — 仕様書 (v0.6.12)
+# ARK ASA Waypoint Manager Web — 仕様書 (v0.7.0)
+
+## 0.20 v0.7.0での変更点(Location Library収録データの同梱)
+
+Location Library本来の目的(既知の重要スポットをあらかじめ収録し、誰でも使えるようにする)を実装した。
+
+- **同梱データ `location_library.json` をリポジトリ直下に配置**(695件)。起動時の復元で、Location Libraryの前回ファイルが無く再接続待ちでもない場合に限り、fetchして初期表示する。ユーザーが自分のファイルをReadした場合はそちらが優先され、同梱データは表示されない。
+- 同梱表示中の編集は自動保存先が無いため保存されない(次回は同梱データが読み直される)。INIやMy Storageへはドラッグ&ドロップでコピーして使える。
+- **収録範囲**: 全10マップ分。カテゴリは Obelisk / Artifact(洞窟入口) / Cave / Explorer Note / Loot Crate / OSD / Boss / Mission。座標はコミュニティで共有されている **ASA (Survival Ascended) の情報のみ** を採用し、ASE (Survival Evolved) の座標は混ぜていない。Lat/LonからUE座標への変換は各マップの校正値を使用し、Genesis の海側スポットは海側校正値+Z=266892で収録した。
+- **出典**: ARK公式Wiki(ark.wiki.gg)のASA版マップデータ(arkstatus.com転載分を含む)、dyadica/ASA_Note_Marker_Maker(Explorer NoteのUE座標、公式WikiのASA版Explorer Mapデータ由来)、gamesomg等のASA専門ガイド。出典同士の食い違いは作業ファイル library_data/CONFLICTS.md に45件記録(リポジトリには含めない)。
+- **既知の欠け**: Aberration / Extinction のExplorer NoteはASAで検証できる全件リストが無く大半が未収録(確認できた1件のみ)。The Island の深海クレートはASA検証済みリストが無く未収録。The Center / Ragnarok / Valguero のExplorer NoteはASA版に配置自体が無い(仕様)。座標がマップ端(0〜100)を超える4件は出典どおりの値で収録した。
 
 ## 0.19 v0.6.12での変更点(READMEの書き直し)
 

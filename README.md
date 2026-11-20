@@ -1,4 +1,4 @@
-# ARK ASA Waypoint Manager Web (v0.6.12)
+# ARK ASA Waypoint Manager Web (v0.7.0)
 
 ARK: Survival Ascended のWaypoint(マップに打ったマーカー)を、ブラウザでまとめて編集できるツールです。
 
@@ -24,7 +24,7 @@ ARK: Survival Ascended のWaypoint(マップに打ったマーカー)を、ブ�
 - 名前で検索
 - リストの間でのドラッグ&ドロップによる移動
 - 「My Storage」: 自分用のWaypoint集を別ファイルに保存して使い回せます(使い始めは、空の `.txt` ファイルを用意して Read で開いてください)
-- 「Location Library」: Waypointをカテゴリ分けしてコレクションできます
+- 「Location Library」: オベリスク、アーティファクト洞窟、エクスプローラーノートなど、有名な場所のWaypointが最初から入っています。自分のINIやMy Storageへドラッグ&ドロップでコピーして使えます(収録データはASA版の情報がもとになっています)
 - 前回開いたファイルは、次に開いたとき自動で読み込み直せます
 
 ## 注意
