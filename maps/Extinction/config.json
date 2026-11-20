@@ -1,0 +1,11 @@
+{
+  "mapName": "Extinction_WP",
+  "displayName": "Extinction",
+  "latitudeScale": 6858,
+  "longitudeScale": 6858,
+  "latitudeOrigin": -342900,
+  "longitudeOrigin": -342900,
+  "defaultZoom": 1.0,
+  "minZoom": 0.5,
+  "maxZoom": 4.0
+}

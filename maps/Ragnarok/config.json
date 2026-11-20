@@ -1,0 +1,11 @@
+{
+  "mapName": "Ragnarok_WP",
+  "displayName": "Ragnarok",
+  "latitudeScale": 13100,
+  "longitudeScale": 13100,
+  "latitudeOrigin": -655000,
+  "longitudeOrigin": -655000,
+  "defaultZoom": 1.0,
+  "minZoom": 0.5,
+  "maxZoom": 4.0
+}

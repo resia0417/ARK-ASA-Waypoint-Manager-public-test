@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ARK ASA Waypoint Manager</title>
+<link rel="stylesheet" href="css/style.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <div class="hud-bg" aria-hidden="true"></div>
+
+  <div class="app-shell">
+
+    <!-- ヘッダー -->
+    <header class="topbar">
+      <div class="brand">
+        <svg class="brand-mark" viewBox="0 0 40 40" width="26" height="26" aria-hidden="true">
+          <circle cx="20" cy="20" r="17" fill="none" stroke="var(--accent)" stroke-width="1.5"/>
+          <line x1="20" y1="2" x2="20" y2="10" stroke="var(--accent)" stroke-width="1.5"/>
+          <line x1="20" y1="30" x2="20" y2="38" stroke="var(--accent)" stroke-width="1.5"/>
+          <line x1="2" y1="20" x2="10" y2="20" stroke="var(--accent)" stroke-width="1.5"/>
+          <line x1="30" y1="20" x2="38" y2="20" stroke="var(--accent)" stroke-width="1.5"/>
+          <circle cx="20" cy="20" r="3" fill="var(--accent)"/>
+        </svg>
+        <div class="brand-text"><h1>ARK ASA <span>Waypoint Manager</span></h1></div>
+      </div>
+
+      <span id="statusText" class="status-text">GameUserSettings.ini を読み込んでください。</span>
+
+      <div class="header-right">
+        <span class="header-version">v0.3</span>
+        <a id="githubLink" class="header-link" href="https://github.com/resia0417/ARK-ASA-Waypoint-Manager" target="_blank" rel="noopener">GitHub</a>
+        <button id="settingsBtn" class="header-link header-link-btn">Settings</button>
+      </div>
+    </header>
+
+    <!-- グローバルツールバー: Current Map(画面全体で1つのMapフィルター) -->
+    <div class="global-bar">
+      <label class="current-map-label">Current Map:
+        <select id="currentMapSelect"><option value="__all__">All Maps</option></select>
+      </label>
+    </div>
+
+    <!-- メイン: GameUserSettings.ini | Library(タブ) -->
+    <main class="workspace">
+
+      <!-- カラム1: GameUserSettings.ini -->
+      <section class="column" id="col-ini" data-list-key="ini">
+        <div class="column-head"><h2>GameUserSettings.ini</h2></div>
+        <div class="column-toolbar">
+          <button id="iniReadBtn" class="btn-bracket btn-small">[ Read ]</button>
+          <button id="iniAddBtn" class="btn-bracket btn-small">[ Add ]</button>
+          <button id="iniEditBtn" class="btn-bracket btn-small">[ Edit ]</button>
+          <button id="iniDeleteBtn" class="btn-bracket btn-small btn-danger">[ Delete ]</button>
+          <button id="iniSaveBtn" class="btn-bracket btn-small btn-accent" disabled>[ Save ]</button>
+        </div>
+        <div class="column-search">
+          <input id="iniSearchInput" type="search" placeholder="Search Name / CustomTag / Map" />
+          <button id="iniColumnSettingsBtn" class="btn-bracket btn-small" title="表示列・列順">⚙</button>
+        </div>
+        <div class="column-meta"><span id="iniCount" class="meta-item">0 Waypoints</span></div>
+        <div class="column-body" id="iniDropZone">
+          <table class="wp-table">
+            <thead><tr id="iniTheadRow"></tr></thead>
+            <tbody id="iniTableBody"></tbody>
+          </table>
+          <p class="empty-state" id="iniEmptyState">GameUserSettings.iniを読み込んでください。</p>
+        </div>
+      </section>
+
+      <!-- スプリッター(左右カラムの幅をドラッグで変更) -->
+      <div class="splitter" id="mainSplitter" title="ドラッグして幅を変更"></div>
+
+      <!-- カラム2: Library(My Storage / Location Library / Waypoint Log をタブ切替) -->
+      <section class="column library-panel" id="col-library">
+        <div class="column-head"><h2>Library</h2></div>
+        <div class="library-tabs" id="libraryTabs">
+          <button class="library-tab" data-tab="storage">My Storage</button>
+          <button class="library-tab" data-tab="library">Location Library</button>
+          <button class="library-tab" data-tab="log">Waypoint Log</button>
+          <button class="library-tab" data-tab="mapviewer">Map Viewer</button>
+          <button class="library-tab debug-only hidden" data-tab="calibration" id="calibrationTabBtn">Map Calibration</button>
+          <!-- 将来追加: <button class="library-tab" data-tab="community">Community Library</button> -->
+        </div>
+
+        <!-- タブ1: My Storage -->
+        <div class="library-tab-panel" id="tabpanel-storage" data-list-key="storage">
+          <div class="column-toolbar">
+            <button id="storageReadBtn" class="btn-bracket btn-small">[ Read ]</button>
+            <button id="storageAddBtn" class="btn-bracket btn-small">[ Add ]</button>
+            <button id="storageEditBtn" class="btn-bracket btn-small">[ Edit ]</button>
+            <button id="storageDeleteBtn" class="btn-bracket btn-small btn-danger">[ Delete ]</button>
+            <button id="storageSaveBtn" class="btn-bracket btn-small btn-accent" disabled>[ Save ]</button>
+          </div>
+          <div class="column-search">
+            <input id="storageSearchInput" type="search" placeholder="Search Name / CustomTag / Map" />
+            <button id="storageColumnSettingsBtn" class="btn-bracket btn-small" title="表示列・列順">⚙</button>
+          </div>
+          <div class="column-meta"><span id="storageCount" class="meta-item">0 Waypoints</span></div>
+          <div class="column-body" id="storageDropZone">
+            <table class="wp-table">
+              <thead><tr id="storageTheadRow"></tr></thead>
+              <tbody id="storageTableBody"></tbody>
+            </table>
+            <p class="empty-state" id="storageEmptyState">Waypointがまだありません。「Add」で追加するか、他のリストからドラッグしてください。</p>
+          </div>
+        </div>
+
+        <!-- タブ2: Location Library -->
+        <div class="library-tab-panel" id="tabpanel-library" data-list-key="library">
+          <div class="column-toolbar">
+            <button id="libraryReadBtn" class="btn-bracket btn-small">[ Read ]</button>
+            <button id="libraryAddBtn" class="btn-bracket btn-small">[ Add ]</button>
+            <button id="libraryEditBtn" class="btn-bracket btn-small">[ Edit ]</button>
+            <button id="libraryDeleteBtn" class="btn-bracket btn-small btn-danger">[ Delete ]</button>
+            <button id="librarySaveBtn" class="btn-bracket btn-small btn-accent" disabled>[ Save ]</button>
+          </div>
+          <div class="column-search">
+            <input id="librarySearchInput" type="search" placeholder="Search Name / CustomTag / Map" />
+            <select id="libraryCategoryFilter" class="category-filter"><option value="__all__">All Categories</option></select>
+            <button id="libraryColumnSettingsBtn" class="btn-bracket btn-small" title="表示列・列順">⚙</button>
+          </div>
+          <div class="column-meta"><span id="libraryCount" class="meta-item">0 Waypoints</span></div>
+          <div class="column-body" id="libraryDropZone">
+            <table class="wp-table">
+              <thead><tr id="libraryTheadRow"></tr></thead>
+              <tbody id="libraryTableBody"></tbody>
+            </table>
+            <p class="empty-state" id="libraryEmptyState">「Open」から waypoints.json を新規作成・読み込みしてください。</p>
+          </div>
+        </div>
+
+        <!-- タブ3: Waypoint Log -->
+        <div class="library-tab-panel" id="tabpanel-log" data-list-key="log">
+          <div class="column-toolbar">
+            <button id="logOpenBtn" class="btn-bracket btn-small">[ Open Log ]</button>
+            <button id="logReloadBtn" class="btn-bracket btn-small">[ Reload ]</button>
+          </div>
+          <div class="column-search">
+            <input id="logSearchInput" type="search" placeholder="Search Name / CustomTag / Map" />
+            <button id="logColumnSettingsBtn" class="btn-bracket btn-small" title="表示列・列順">⚙</button>
+          </div>
+          <div class="column-meta"><span id="logCount" class="meta-item">0 Waypoints</span></div>
+          <div class="column-body" id="logDropZone">
+            <table class="wp-table">
+              <thead><tr id="logTheadRow"></tr></thead>
+              <tbody id="logTableBody"></tbody>
+            </table>
+            <p class="empty-state" id="logEmptyState">「Open Log」からPython版WaypointLoggerの出力ファイルを開いてください。</p>
+          </div>
+        </div>
+
+        <!-- タブ4: Map Viewer -->
+        <div class="library-tab-panel" id="tabpanel-mapviewer" data-list-key="mapviewer">
+          <div class="column-toolbar">
+            <select id="mvMapSelect" title="表示するマップ"></select>
+            <button id="mvFitBtn" class="btn-bracket btn-small">[ Fit ]</button>
+            <button id="mvZoomOutBtn" class="btn-bracket btn-small">[ − ]</button>
+            <button id="mvZoomInBtn" class="btn-bracket btn-small">[ + ]</button>
+            <label class="meta-item"><input type="checkbox" id="mvGridToggle" checked /> Grid</label>
+            <span id="mvReadout" class="meta-item mv-readout"></span>
+          </div>
+          <div class="column-meta"><span id="mvInfo" class="meta-item">0 Waypoints を表示中</span></div>
+          <div class="mv-viewport" id="mvViewport">
+            <div class="mv-stage" id="mvStage">
+              <img id="mvImage" alt="Map" />
+              <div class="mv-grid" id="mvGrid"></div>
+            </div>
+            <div class="mv-markers" id="mvMarkers"></div>
+            <div class="mv-labels" id="mvLabels"></div>
+            <p class="mv-notice hidden" id="mvNotice"></p>
+          </div>
+        </div>
+
+        <!-- タブ5: Map Calibration / MapConfig Manager(Debug Mode専用) -->
+        <div class="library-tab-panel debug-only hidden" id="tabpanel-calibration" data-list-key="calibration">
+          <div class="column-toolbar">
+            <span class="meta-item calibration-current-map">Target: <strong id="calibrationTargetMapLabel">-</strong></span>
+            <button id="calibrationAutoDetectBtn" class="btn-bracket btn-small">[ Auto Detect ]</button>
+            <button id="calibrationCalculateBtn" class="btn-bracket btn-small btn-accent" disabled>[ Calculate ]</button>
+            <button id="calibrationSaveBtn" class="btn-bracket btn-small" disabled>[ Save MapConfig ]</button>
+          </div>
+          <p class="calibration-subtitle">Map Calibration(MapConfig Manager) — 画面上部の Current Map を対象に動作します。</p>
+          <p id="calibrationNoMapNotice" class="calibration-notice hidden">Current Mapで特定のMapを選択すると、Map Calibrationを利用できます(現在: All Maps)。</p>
+          <div class="column-body calibration-body">
+            <table class="wp-table calibration-table">
+              <thead>
+                <tr><th>Game Coordinate</th><th class="num">UE X</th><th class="num">UE Y</th><th>Detected</th></tr>
+              </thead>
+              <tbody id="calibrationTableBody"></tbody>
+            </table>
+            <p id="calibrationDetectSummary" class="meta-item calibration-summary"></p>
+            <pre id="calibrationSaveMessage" class="calibration-save-message hidden"></pre>
+            <div id="calibrationResult" class="calibration-result hidden">
+              <h3>Calculate 結果</h3>
+              <pre id="calibrationResultText"></pre>
+            </div>
+            <div id="calibrationValidateResult" class="calibration-result hidden">
+              <h3>Validate</h3>
+              <ul id="calibrationValidateList" class="calibration-validate-list"></ul>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- Waypoint詳細ペイン(下部固定) -->
+    <footer class="detail-bar" id="detailBar">
+      <p class="detail-placeholder" id="detailPlaceholder">Waypointを選択すると詳細が表示されます。</p>
+      <div class="detail-content hidden" id="detailContent">
+        <div class="detail-field"><span class="detail-label">Name</span><span id="detailName" class="detail-value"></span></div>
+        <div class="detail-field"><span class="detail-label">Map</span><span id="detailMap" class="detail-value"></span></div>
+        <div class="detail-field"><span class="detail-label">X</span><span id="detailX" class="detail-value num"></span></div>
+        <div class="detail-field"><span class="detail-label">Y</span><span id="detailY" class="detail-value num"></span></div>
+        <div class="detail-field"><span class="detail-label">Z</span><span id="detailZ" class="detail-value num"></span></div>
+        <div class="detail-field"><span class="detail-label">CustomTag</span><span id="detailTag" class="detail-value"></span></div>
+        <div class="detail-field"><span class="detail-label">MarkIcon</span><span id="detailIcon" class="detail-value detail-icon"></span></div>
+        <div class="detail-field detail-rawtext">
+          <span class="detail-label">RawText</span>
+          <textarea id="detailRawText" class="detail-rawtext-box" readonly rows="2"></textarea>
+          <button id="copyRawTextBtn" class="btn-bracket btn-small">[ Copy ]</button>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Waypoint 追加/編集モーダル -->
+  <div id="editModal" class="modal-overlay hidden">
+    <div class="modal modal-wide">
+      <div class="modal-form-col">
+        <h3 id="modalTitle">Waypoint を追加</h3>
+
+        <label>Name
+          <input id="formName" type="text" placeholder="例: Base Camp" />
+        </label>
+
+        <label id="formCategoryField">Category
+          <div class="combo-row">
+            <input id="formCategory" type="text" list="categoryCandidates" placeholder="未設定(自由入力・選択可)" />
+            <datalist id="categoryCandidates"></datalist>
+          </div>
+        </label>
+
+        <label>CustomTag<input id="formTag" type="text" placeholder="任意" /></label>
+
+        <fieldset class="field-group">
+          <legend>Location</legend>
+          <div class="grid-3">
+            <label>Lat<input id="formLat" type="number" step="any" value="0" /></label>
+            <label>Lon<input id="formLon" type="number" step="any" value="0" /></label>
+            <label>Z<input id="formZ" type="number" step="any" value="0" /></label>
+          </div>
+          <p class="modal-hint">Lat/Lonはゲーム内マップ座標です(保存時にUE座標へ自動変換されます)。Zのみ従来通りUE座標です。</p>
+        </fieldset>
+
+        <label>MapName
+          <div class="combo-row">
+            <input id="formMap" type="text" list="mapCandidates" placeholder="例: TheIsland_WP(自由入力可)" />
+            <datalist id="mapCandidates"></datalist>
+          </div>
+        </label>
+
+        <div class="modal-actions">
+          <button id="modalCancelBtn" class="btn-bracket">[ Cancel ]</button>
+          <button id="modalSaveBtn" class="btn-bracket btn-accent">[ Save ]</button>
+        </div>
+      </div>
+
+      <div class="modal-preview-col">
+        <div class="preview-label">Waypoint Preview</div>
+        <div id="waypointPreview" class="waypoint-preview"></div>
+        <div id="waypointPreviewName" class="preview-name">-</div>
+
+        <fieldset class="field-group">
+          <legend>Base Color</legend>
+          <div id="colorEditor" class="color-editor" data-target="color"></div>
+        </fieldset>
+
+        <label>MarkIcon
+          <button type="button" id="markIconPickerBtn" class="icon-picker-btn"></button>
+        </label>
+
+        <fieldset class="field-group">
+          <legend>Icon Color</legend>
+          <div id="iconColorEditor" class="color-editor" data-target="iconColor"></div>
+        </fieldset>
+      </div>
+    </div>
+  </div>
+
+  <!-- 汎用の選択ダイアログ(座標/CustomTag衝突確認、INI保存確認などに使用) -->
+  <div id="choiceModal" class="modal-overlay hidden">
+    <div class="modal">
+      <h3 id="choiceTitle">確認</h3>
+      <p id="choiceMessage" class="choice-message"></p>
+      <div id="choiceButtons" class="modal-actions choice-buttons"></div>
+    </div>
+  </div>
+
+  <!-- Settings -->
+  <div id="settingsModal" class="modal-overlay hidden">
+    <div class="modal">
+      <h3>Settings</h3>
+      <p class="choice-message">Splitter位置・Current Map・Libraryタブ・列幅・列順・表示列・検索文字・ソート状態は自動的に保存されます。</p>
+      <label class="settings-checkbox-row">
+        <input type="checkbox" id="debugModeCheckbox" />
+        Debug Mode(Map Calibrationタブを表示する)
+      </label>
+      <div class="modal-actions">
+        <button id="settingsCloseBtn" class="btn-bracket btn-accent">[ Close ]</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- スマートフォンアクセス警告(app.jsが起動前に表示判定する) -->
+  <div id="mobileWarningOverlay" class="mobile-warning-overlay hidden">
+    <div class="mobile-warning-box">
+      <h2>ARK ASA Waypoint Manager</h2>
+      <p>このアプリはPC向けに設計されています。<br />スマートフォンでは正常に利用できません。<br />続行しますか?</p>
+      <div class="mobile-warning-actions">
+        <button id="mobileBackBtn" class="btn-bracket">[ 戻る ]</button>
+        <button id="mobileContinueBtn" class="btn-bracket btn-accent">[ 続行 ]</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

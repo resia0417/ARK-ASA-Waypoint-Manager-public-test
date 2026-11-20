@@ -1,0 +1,11 @@
+{
+  "mapName": "TheCenter_WP",
+  "displayName": "TheCenter",
+  "latitudeScale": 10374.04,
+  "longitudeScale": 10374.04,
+  "latitudeOrigin": -337215,
+  "longitudeOrigin": -524364,
+  "defaultZoom": 1.0,
+  "minZoom": 0.5,
+  "maxZoom": 4.0
+}

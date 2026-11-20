@@ -1,0 +1,11 @@
+{
+  "mapName": "Aberration_WP",
+  "displayName": "Aberration",
+  "latitudeScale": 8000,
+  "longitudeScale": 8000,
+  "latitudeOrigin": -400000,
+  "longitudeOrigin": -400000,
+  "defaultZoom": 1.0,
+  "minZoom": 0.5,
+  "maxZoom": 4.0
+}

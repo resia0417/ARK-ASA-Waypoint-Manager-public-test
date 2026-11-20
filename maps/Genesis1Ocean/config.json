@@ -1,0 +1,11 @@
+{
+  "mapName": "Genesis_WP",
+  "displayName": "Genesis1Ocean",
+  "latitudeScale": 22150,
+  "longitudeScale": 22150,
+  "latitudeOrigin": -1107500,
+  "longitudeOrigin": -1107501,
+  "defaultZoom": 1.0,
+  "minZoom": 0.5,
+  "maxZoom": 4.0
+}

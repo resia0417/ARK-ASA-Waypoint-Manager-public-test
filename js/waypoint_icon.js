@@ -1,0 +1,148 @@
+// =============================================================
+// waypoint_icon.js
+// WaypointIcon — Waypointのアイコン(六角形の背景 + MarkIconの図形)を
+// 描画するための共通モジュール。
+//
+// 要件7〜9(WaypointIconコンポーネント)への対応。元の要件は
+// Reactコンポーネント(.tsx)として書かれているが、本プロジェクトは
+// v0.1以来ビルド不要の素のJavaScript構成を採用しているため、
+// 同じ役割・同じAPIの発想を持つ関数として実装している。
+//
+//   本来の要件のAPI:
+//     <WaypointIcon type="Location" baseColor={Color} iconColor={IconColor} size={20} />
+//
+//   本実装でのAPI(同じ入力で同じ見た目を作れる関数として提供):
+//     renderWaypointIconHtml({ type, baseColor, iconColor, size }, onLoaded)
+//       → HTML文字列を返す(WaypointListControllerのセル描画に直接埋め込める)
+//     mountWaypointIcon(container, { type, baseColor, iconColor, size })
+//       → 指定した要素の中にアイコンを描画する(Waypoint Preview等で使用)
+//
+// 一覧・詳細・Add/Edit・Map Viewer(将来)は、すべてこのモジュールだけを
+// 経由してアイコンを描画する(要件12「アイコン描画処理はWaypointIconへ
+// 集約してください」への対応)。個々の画面がSVGやfill処理を直接書くことはない。
+// =============================================================
+
+import { MARK_ICON_DEFINITIONS, findMarkIconById, findMarkIconByRawText, DEFAULT_MARK_ICON_ID } from './mark_icon.js';
+
+const ICON_ASSET_DIR = 'assets/waypoint-icons/';
+const BASE_ICON_ID = 'BaseIcon';
+
+// アイコンID(またはBaseIcon) -> 取得済みのSVGマークアップ文字列
+const svgCache = new Map();
+// アイコンID -> 読み込み中のPromise(重複fetch防止)
+const pendingFetches = new Map();
+
+/**
+ * 指定したSVGアセットを同期的にキャッシュから取得する。
+ * キャッシュに無い場合は null を返し、裏でfetchを開始する。
+ * 完了時に onLoaded コールバックを呼び出す(呼び出し側はこれを使って
+ * 再描画をトリガーする。MapConfigのgetCachedMapConfig()と同じ設計)。
+ * @param {string} assetId - 'BaseIcon' またはMarkIconDefinitionのsvgフィールド
+ * @param {() => void} [onLoaded]
+ * @returns {string|null}
+ */
+function getCachedSvg(assetId, onLoaded) {
+  if (svgCache.has(assetId)) return svgCache.get(assetId);
+
+  if (!pendingFetches.has(assetId)) {
+    const promise = fetch(`${ICON_ASSET_DIR}${assetId}.svg`)
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.text();
+      })
+      .then((text) => {
+        svgCache.set(assetId, text);
+        pendingFetches.delete(assetId);
+        onLoaded?.();
+        return text;
+      })
+      .catch((err) => {
+        console.warn(`アイコンSVGの読み込みに失敗しました(${assetId}):`, err);
+        svgCache.set(assetId, ''); // 空文字をキャッシュし、以後リトライで詰まらないようにする
+        pendingFetches.delete(assetId);
+        onLoaded?.();
+        return '';
+      });
+    pendingFetches.set(assetId, promise);
+  }
+  return null;
+}
+
+/**
+ * RGBA(0〜1の各成分)をCSSのrgba()文字列へ変換する。
+ * @param {{r:number,g:number,b:number,a:number}} color
+ * @returns {string}
+ */
+function toCssColor(color) {
+  const c = color ?? { r: 1, g: 1, b: 1, a: 1 };
+  const r = Math.round(clamp01(c.r) * 255);
+  const g = Math.round(clamp01(c.g) * 255);
+  const b = Math.round(clamp01(c.b) * 255);
+  const a = clamp01(c.a ?? 1);
+  return `rgba(${r}, ${g}, ${b}, ${a})`;
+}
+
+function clamp01(n) {
+  const v = Number(n);
+  if (!Number.isFinite(v)) return 1;
+  return Math.min(1, Math.max(0, v));
+}
+
+/**
+ * WaypointIconのHTML文字列を生成する。一覧のセルなど、innerHTMLへ
+ * そのまま挿入できる文字列が必要な場面で使用する。
+ * @param {{type:string, baseColor:object, iconColor:object, size?:number, title?:string}} props
+ * @param {() => void} [onLoaded] - SVGアセット読み込み完了時に呼ばれる(再描画トリガー用)
+ * @returns {string}
+ */
+export function renderWaypointIconHtml({ type, baseColor, iconColor, size = 20, title }, onLoaded) {
+  const def = findMarkIconById(type) ?? findMarkIconById(DEFAULT_MARK_ICON_ID);
+  const baseSvg = getCachedSvg(BASE_ICON_ID, onLoaded);
+  const glyphSvg = getCachedSvg(def.svg, onLoaded);
+
+  const tooltip = escapeHtml(title ?? def.displayName);
+
+  if (baseSvg == null || glyphSvg == null) {
+    // 読み込み中: 枠だけのプレースホルダーを表示し、読み込み完了後に再描画される
+    return `<span class="waypoint-icon waypoint-icon-loading" style="width:${size}px;height:${size}px;" title="${tooltip}"></span>`;
+  }
+
+  const baseColorCss = toCssColor(baseColor);
+  const iconColorCss = toCssColor(iconColor);
+
+  return `
+    <span class="waypoint-icon" style="width:${size}px;height:${size}px;" title="${tooltip}">
+      <span class="waypoint-icon-layer waypoint-icon-base" style="color:${baseColorCss}">${baseSvg}</span>
+      <span class="waypoint-icon-layer waypoint-icon-glyph" style="color:${iconColorCss}">${glyphSvg}</span>
+    </span>`;
+}
+
+/**
+ * 指定したDOM要素の中身をWaypointIconで置き換える。
+ * Add/Editダイアログの Waypoint Preview のように、DOM要素へ直接
+ * マウントしたい場面で使用する(内部的には renderWaypointIconHtml を使う)。
+ * @param {HTMLElement} container
+ * @param {{type:string, baseColor:object, iconColor:object, size?:number, title?:string}} props
+ */
+export function mountWaypointIcon(container, props) {
+  const html = renderWaypointIconHtml(props, () => mountWaypointIcon(container, props));
+  container.innerHTML = html;
+}
+
+/**
+ * Add/Editのドロップダウンなど、全MarkIcon候補を一覧表示したい場面向けに、
+ * 各定義について現在の描画状況を返す(まだ読み込み中のものはnull)。
+ * @param {(() => void)} onLoaded
+ * @returns {Array<{def: object, svg: string|null}>}
+ */
+export function getAllIconPreviewStates(onLoaded) {
+  return MARK_ICON_DEFINITIONS.map((def) => ({ def, svg: getCachedSvg(def.svg, onLoaded) }));
+}
+
+export { findMarkIconById, findMarkIconByRawText, DEFAULT_MARK_ICON_ID, MARK_ICON_DEFINITIONS };
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = String(str ?? '');
+  return div.innerHTML;
+}
