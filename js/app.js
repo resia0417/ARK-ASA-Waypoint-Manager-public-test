@@ -221,12 +221,26 @@ function getLatLon(wp) {
  * @param {object} wp - Waypointモデル
  * @returns {string} HTML文字列
  */
+// アイコンHTMLのメモ化(v0.8.6 軽量化③)。組み合わせは「アイコン種×Color×
+// IconColor」で決まり、件数が多くても実質数十通りしかない。
+const iconMarkupCache = new Map();
 function getIconMarkup(wp) {
   const def = findMarkIconByRawText(wp.parsed.markIcon) ?? findMarkIconById(DEFAULT_MARK_ICON_ID);
-  return renderWaypointIconHtml(
-    { type: def.id, baseColor: wp.parsed.color, iconColor: wp.parsed.iconColor, size: 20 },
-    () => { for (const key of LIST_KEYS) controllers[key].render(); }
+  const c = wp.parsed.color;
+  const ic = wp.parsed.iconColor;
+  const key = `${def.id}|${c?.r},${c?.g},${c?.b},${c?.a}|${ic?.r},${ic?.g},${ic?.b},${ic?.a}`;
+  const hit = iconMarkupCache.get(key);
+  if (hit) return hit;
+  const html = renderWaypointIconHtml(
+    { type: def.id, baseColor: c, iconColor: ic, size: 20 },
+    () => { iconMarkupCache.clear(); for (const k of LIST_KEYS) controllers[k].render(); }
   );
+  // SVG読み込み中のプレースホルダーはメモ化しない(読み込み完了後に正しく作り直す)
+  if (!html.includes('waypoint-icon-loading')) {
+    if (iconMarkupCache.size > 500) iconMarkupCache.clear();
+    iconMarkupCache.set(key, html);
+  }
+  return html;
 }
 
 // --- 選択 → 詳細ペイン & 同期ハイライト & Map Viewer通知 ------------------
@@ -350,8 +364,7 @@ function applyCurrentMapFilter(persist) {
   const value = mapsCollapsed ? '' : viewerMapName; // 地図を隠している間は全表示(v0.6.2)
   const showMapColumn = value === ''; // 特定マップ選択中はMap列が冗長なため隠す
   for (const key of LIST_KEYS) {
-    controllers[key].setExternalMapFilter(value === '' ? '__all__' : value);
-    controllers[key].setMapColumnVisible(showMapColumn);
+    controllers[key].setMapFilter(value === '' ? '__all__' : value, showMapColumn);
   }
   if (persist) settingsStore.set('currentMap', value);
   syncCalibrationToCurrentMap();

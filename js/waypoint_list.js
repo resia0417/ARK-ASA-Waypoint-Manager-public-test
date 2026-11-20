@@ -175,29 +175,58 @@ export class WaypointListController {
 
   clearSelection() {
     this.selectedId = null;
-    this.render();
+    this._updateSelectionClasses();
     this.onSelect(null, this.listKey);
   }
 
   setSelectedId(id) {
     this.selectedId = id;
-    this.render();
+    this._updateSelectionClasses();
   }
 
   setHighlightMatcher(fn) {
     this.highlightMatcher = fn;
-    this.render();
+    this._updateHighlightClasses();
+  }
+
+  // 選択ハイライトだけを付け替える(全行再描画しない。v0.8.6 軽量化①)
+  _updateSelectionClasses() {
+    for (const tr of this.tbody.querySelectorAll('tr.selected')) tr.classList.remove('selected');
+    if (this.selectedId) {
+      const tr = this.tbody.querySelector(`tr[data-id="${CSS.escape(this.selectedId)}"]`);
+      if (tr) tr.classList.add('selected');
+    }
+  }
+
+  // 同期ハイライトだけを付け替える(全行再描画しない。v0.8.6 軽量化①)
+  _updateHighlightClasses() {
+    for (const tr of this.tbody.querySelectorAll('tr')) {
+      const wp = this.find(tr.dataset.id);
+      tr.classList.toggle('sync-highlight', !!(this.highlightMatcher && wp && this.highlightMatcher(wp)));
+    }
   }
 
   /** Current Map(グローバルフィルター)が変化した際に app.js から呼ばれる */
   setExternalMapFilter(mapValue) {
-    this.externalMapFilter = mapValue || '__all__';
+    const v = mapValue || '__all__';
+    if (this.externalMapFilter === v) return; // 無変化なら描画しない(v0.8.6 軽量化④)
+    this.externalMapFilter = v;
     this.render();
   }
 
   /** Map列の表示/非表示(Current Mapが「All Maps」かどうか)を切り替える */
   setMapColumnVisible(visible) {
+    if (this.mapColumnVisible === visible) return; // 無変化なら描画しない(v0.8.6 軽量化④)
     this.mapColumnVisible = visible;
+    this.render();
+  }
+
+  /** フィルターとMap列表示をまとめて設定し、描画は最大1回にする(v0.8.6 軽量化④) */
+  setMapFilter(mapValue, columnVisible) {
+    const v = mapValue || '__all__';
+    if (this.externalMapFilter === v && this.mapColumnVisible === columnVisible) return;
+    this.externalMapFilter = v;
+    this.mapColumnVisible = columnVisible;
     this.render();
   }
 
@@ -219,7 +248,7 @@ export class WaypointListController {
     const id = tr.dataset.id;
 
     this.selectedId = this.selectedId === id ? null : id;
-    this.render();
+    this._updateSelectionClasses();
     this.onSelect(this.getSelected(), this.listKey);
   }
 

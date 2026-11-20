@@ -82,6 +82,7 @@ export function createMapViewer(handlers, root) {
     selected: null, // 選択中Waypoint(リスト側と同期)
     clickPoint: null, // { lat, lon } 地図クリック位置
     markerItems: [], // { el, lat, lon, waypoint }
+    markerSignature: null, // 表示中マーカー集合の署名(無変化なら再構築しない。v0.8.6 軽量化②)
     loadSeq: 0, // 地図切替の競合防止
     applyingRemoteView: false, // 連動で相手の視点適用中(通知ループ防止)
   };
@@ -120,6 +121,7 @@ export function createMapViewer(handlers, root) {
     state.selected = null;
     state.clickPoint = null;
     state.markerItems = [];
+    state.markerSignature = null;
     els.markers.innerHTML = '';
     setNotice('読み込み中…');
 
@@ -170,20 +172,32 @@ export function createMapViewer(handlers, root) {
 
   function refreshMarkers() {
     if (!state.mapName || !state.imgW) return;
-    els.markers.innerHTML = '';
-    state.markerItems = [];
 
-    let shown = 0;
+    // 表示対象を先に確定し、集合の署名が前回と同じならDOM再構築を
+    // スキップする(選択変更などではマーカーを作り直さない。v0.8.6 軽量化②)
+    const items = [];
     for (const { waypoint, listKey } of handlers.getWaypoints()) {
       // Genesis_WP はZ座標で陸・海へ振り分けた実効MapNameで照合する
       if (resolveEffectiveMapName(waypoint.parsed.map, waypoint.parsed.z) !== state.mapName) continue;
       const latLon = handlers.getLatLon(waypoint);
       if (!latLon || !isFinite(latLon.lat) || !isFinite(latLon.lon)) continue;
+      items.push({ waypoint, listKey, lat: latLon.lat, lon: latLon.lon });
+    }
+    const signature = items.map(({ waypoint, lat, lon }) => {
+      const p = waypoint.parsed;
+      return [waypoint.id, p.name, p.markIcon,
+        p.color?.r, p.color?.g, p.color?.b, p.iconColor?.r, p.iconColor?.g, p.iconColor?.b,
+        lat.toFixed(3), lon.toFixed(3)].join(':');
+    }).join('|');
+    if (signature === state.markerSignature) { render(); return; }
+    state.markerSignature = signature;
+
+    els.markers.innerHTML = '';
+    state.markerItems = [];
+    for (const { waypoint, listKey, lat, lon } of items) {
       // 範囲外(0〜100を超える)座標も、地図画像の外側に相対位置のまま
       // 通常のマーカーとして表示する(ゲーム内でもマップ外に存在する
       // Waypointがあるため、特別な強調はしない。v0.8.5)。
-      const dispLat = latLon.lat;
-      const dispLon = latLon.lon;
       const el = document.createElement('div');
       el.className = 'mv-marker';
       el.title = waypoint.parsed.name || '(無名)';
@@ -194,10 +208,9 @@ export function createMapViewer(handlers, root) {
         handlers.onSelect(waypoint, listKey);
       });
       els.markers.appendChild(el);
-      state.markerItems.push({ el, lat: dispLat, lon: dispLon, waypoint });
-      shown++;
+      state.markerItems.push({ el, lat, lon, waypoint });
     }
-    els.info.textContent = `${shown} Waypoints を表示中`;
+    els.info.textContent = `${items.length} Waypoints を表示中`;
     render();
   }
 
