@@ -437,5 +437,5 @@ export function createMapViewer(handlers, root) {
   }
   bindViewportEvents();
 
-  return { refresh, loadMap, refreshMarkers, getView, setView };
+  return { refresh, loadMap, refreshMarkers, getView, setView, getClickPoint: () => state.clickPoint };
 }

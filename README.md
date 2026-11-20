@@ -1,4 +1,4 @@
-# ARK ASA Waypoint Manager Web (v0.8.6)
+# ARK ASA Waypoint Manager Web (v0.8.7)
 
 ARK: Survival Ascended のWaypoint(マップに打ったマーカー)を、ブラウザでまとめて編集できるツールです。
 

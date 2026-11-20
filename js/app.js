@@ -831,7 +831,11 @@ async function openAddEditModal(listKey, id) {
     // データがあれば常に特定マップが選択されている。Genesis陸/海の別名は保存時に正規化される)
     const defaultMap = viewerMapName;
     editingOriginalForm = null;
-    fillForm({ ...createWaypoint().parsed, lat: 0, lon: 0, map: defaultMap });
+    // 対応するマップ(INI=左 / My Storage=右)をクリックして座標を指して
+    // いる場合は、その座標を初期値にする(v0.8.7)
+    const viewer = listKey === 'ini' ? mapViewerIni : listKey === 'storage' ? mapViewerLib : null;
+    const click = viewer?.getClickPoint();
+    fillForm({ ...createWaypoint().parsed, lat: click?.lat ?? 0, lon: click?.lon ?? 0, map: defaultMap });
   }
   els.editModal.classList.remove('hidden');
   els.formName.focus();
