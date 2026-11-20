@@ -360,22 +360,31 @@ export function rebuildIniText(originalIniText, waypoints) {
 }
 
 /**
- * [ARKASAWaypointManager] セクションの有無を確認し、
- * 存在しない場合はINIテキスト末尾へ追加する。
- * 既に存在する場合は変更しない(重複追加を防止)。
+ * [ARKASAWaypointManager] セクションが「目印だけ」(DatabaseFile行のみ)
+ * の場合に限り取り除く。このセクションは旧版が目印として書き込んでいた
+ * だけで、実際には何にも使われていないため v0.6.10 で廃止した。
+ * 中身が目印以外の行を含む場合は、ユーザーが転用している可能性を
+ * 考えて触らない。
  * @param {string} iniText
- * @returns {{text: string, added: boolean}}
+ * @returns {{text: string, removed: boolean}}
  */
-export function ensureWaypointManagerSection(iniText) {
-  if (iniText.includes('[ARKASAWaypointManager]')) {
-    return { text: iniText, added: false };
-  }
-
+export function removeWaypointManagerSection(iniText) {
   const newline = iniText.includes('\r\n') ? '\r\n' : '\n';
-  const needsNewline = iniText.length > 0 && !iniText.endsWith('\n');
-  // v0.3.6より My Storage は ARKASAWaypointManager_MyStorage.txt
-  // (プレーンテキスト形式)で保存するため、DatabaseFileの参照先もそれに合わせる。
-  const section = `${needsNewline ? newline : ''}${newline}[ARKASAWaypointManager]${newline}DatabaseFile=ARKASAWaypointManager_MyStorage.txt${newline}`;
+  const lines = iniText.split(/\r?\n/);
+  const start = lines.findIndex((l) => l.trim() === '[ARKASAWaypointManager]');
+  if (start === -1) return { text: iniText, removed: false };
 
-  return { text: iniText + section, added: true };
+  let end = start + 1;
+  const body = [];
+  while (end < lines.length && !/^\s*\[.*\]\s*$/.test(lines[end])) {
+    body.push(lines[end]);
+    end++;
+  }
+  const meaningful = body.filter((l) => l.trim() !== '');
+  const isMarkerOnly = meaningful.length === 1
+    && /^DatabaseFile=(ARKASAWaypointManager_MyStorage\.txt|ARKASAWaypoints\.json)$/.test(meaningful[0].trim());
+  if (!isMarkerOnly) return { text: iniText, removed: false };
+
+  const kept = lines.slice(0, start).concat(lines.slice(end));
+  return { text: kept.join(newline), removed: true };
 }

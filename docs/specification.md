@@ -1,4 +1,11 @@
-# ARK ASA Waypoint Manager Web — 仕様書 (v0.6.9)
+# ARK ASA Waypoint Manager Web — 仕様書 (v0.6.10)
+
+## 0.17 v0.6.10での変更点([ARKASAWaypointManager]セクションの廃止)
+
+- **[ARKASAWaypointManager]セクションを廃止した**。このセクションの DatabaseFile は、アプリが書き込むだけで値を読むコードが無く、ゲーム本体も無視する目印だった(My Storageの場所は、Readで選んだファイルのハンドルをIndexedDBに記憶して復元する方式)。ユーザー判断により廃止した。
+- ensureWaypointManagerSection() は削除し、追加処理は無くなった。
+- 代わりに removeWaypointManagerSection() を追加し、INI保存時に「目印だけ(DatabaseFile行のみ、旧ファイル名 ARKASAWaypoints.json の場合も含む)」のセクションが残っていれば取り除く。中身が他にもある場合はユーザーが転用している可能性を考えて触らない。
+- rebuildIniTextの挿入位置フォールバック(セクションが残っているファイルでは、その手前へWaypoint行を入れる)は、既存ファイル保護のため残している。
 
 ## 0.16 v0.6.9での変更点(外部コードレビューの「中」「軽微」対応)
 

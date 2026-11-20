@@ -28,7 +28,7 @@
 import {
   parseSavedMinimapMarks,
   convertToWaypointData,
-  ensureWaypointManagerSection,
+  removeWaypointManagerSection,
   buildRawText,
   rebuildIniText,
   countUnrecognizedMarkLines,
@@ -550,12 +550,7 @@ async function onIniRead() {
     await fm.saveLastIniHandle(handle);
     markRead('ini');
     markClean('ini');
-    // [ARKASAWaypointManager]セクションの追加はINI保存時に行う。
-    // Readするだけでゲームの設定ファイルを書き換えないため(v0.6.9)
-    const sectionNote = ensureWaypointManagerSection(iniOriginalText).added
-      ? '[ARKASAWaypointManager]セクションはINI保存時に追加されます。'
-      : '';
-    setStatus(`GameUserSettings.iniから${result.list.length}件のWaypointを読み込みました。${loadNoticeText(result)}${sectionNote}`);
+    setStatus(`GameUserSettings.iniから${result.list.length}件のWaypointを読み込みました。${loadNoticeText(result)}`);
     refreshMapSelection();
 
     // My Storage(ARKASAWaypointManager_MyStorage.txt)がまだ紐付いていない
@@ -612,13 +607,15 @@ async function onIniSave() {
     }
 
     let newText = rebuildIniText(baseText, controllers.ini.getAll());
-    const ensured = ensureWaypointManagerSection(newText);
-    newText = ensured.text;
+    // 旧版が書き込んだ目印だけの[ARKASAWaypointManager]セクションは
+    // 取り除く(v0.6.10で廃止。中身がある場合は触らない)
+    const cleaned = removeWaypointManagerSection(newText);
+    newText = cleaned.text;
     await fm.saveIniBackup(currentText);
     await fm.writeFile(iniFileHandle, newText);
     iniOriginalText = newText;
     markClean('ini');
-    setStatus(`GameUserSettings.iniへ保存しました(${controllers.ini.getAll().length}件)${usedFreshBase ? '。読み込み後の外部変更も保持しました' : ''}${ensured.added ? '。[ARKASAWaypointManager]セクションを追加しました' : ''}。`);
+    setStatus(`GameUserSettings.iniへ保存しました(${controllers.ini.getAll().length}件)${usedFreshBase ? '。読み込み後の外部変更も保持しました' : ''}${cleaned.removed ? '。目印の[ARKASAWaypointManager]セクションを削除しました' : ''}。`);
   } catch (err) {
     console.error(err);
     setStatus('GameUserSettings.iniの保存中にエラーが発生しました: ' + err.message);
