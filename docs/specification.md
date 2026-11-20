@@ -1,4 +1,9 @@
-# ARK ASA Waypoint Manager Web — 仕様書 (v0.9.0)
+# ARK ASA Waypoint Manager Web — 仕様書 (v0.9.1)
+
+## 0.32 v0.9.1での変更概要(ボタンの英語表記の見直し)
+
+- ファイル読み込みボタンの表記を **[ Read ] → [ Load ]** に変更した(UI英語として「Read」はプログラム用語寄りで不自然なため。Saveと対になる表現としてLoadが標準的)。対象はINI / My Storage / Location Library の3ボタンと、読み込み完了後の「[ Load ✓ ]」表示、ステータスメッセージ・READMEの該当表記。
+- ついでに、Location Libraryの空状態テキストに残っていた旧形式名「waypoints.json を新規作成・読み込みしてください」を現行の案内に修正した。
 
 ## 0.31 v0.9.0での変更概要(Map Calibration / Debug Mode の廃止)
 

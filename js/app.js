@@ -515,7 +515,7 @@ function loadNoticeText({ warningCount, unrecognizedCount }) {
 // --- ツールバー: GameUserSettings.ini ------------------------------------
 
 // Read状態(✓表示)を管理するボタン要素のマップ。v0.5.0でツールバーは廃止され、
-// Readボタンは各リストの空状態の中、Addボタンはリスト末尾の行に移った。
+// Loadボタンは各リストの空状態の中、Addボタンはリスト末尾の行に移った。
 // Edit/Deleteは行内アイコン、SaveはStorage/Libraryでは自動保存に置き換わった。
 // 例外としてGameUserSettings.iniはゲーム本体のファイルのため自動保存せず、
 // v0.5.1でカラム見出し右端のSaveボタン+確認ダイアログによる手動保存に戻した。
@@ -545,11 +545,11 @@ function bindToolbarEvents() {
   els.copyRawTextBtn.addEventListener('click', onCopyRawText);
 }
 
-/** Readボタンを「Read ✓」表示へ切り替える(再読込時も呼び直して最新状態を示す)。 */
+/** Loadボタンを「Load ✓」表示へ切り替える(再読込時も呼び直して最新状態を示す)。 */
 function markRead(listKey) {
   const btn = READ_BTN_EL[listKey];
   if (!btn) return;
-  btn.textContent = '[ Read ✓ ]';
+  btn.textContent = '[ Load ✓ ]';
   btn.classList.add('is-read');
 }
 
@@ -676,7 +676,7 @@ async function onStorageRead() {
 /** My Storageの手動保存(v0.6.0でINIと同じくボタン式に変更。変更時はボタンが有効化される) */
 async function onStorageSave() {
   if (!storageFileHandle) {
-    setStatus('My Storage: 先にファイルを読み込んでください(Read)。');
+    setStatus('My Storage: 先にファイルを読み込んでください(Load)。');
     return;
   }
   try {
