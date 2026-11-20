@@ -1,4 +1,9 @@
-# ARK ASA Waypoint Manager Web — 仕様書 (v0.8.3)
+# ARK ASA Waypoint Manager Web — 仕様書 (v0.8.4)
+
+## 0.26 v0.8.4での変更点(範囲外の相対位置表示・フィルターとマップの連動)
+
+- 範囲外Waypointの表示を「地図の端に寄せる」から「地図画像の外側に相対位置のまま表示」に変更した。ゲーム内でもマップ外に実在するWaypoint(例: AstraeosのShallocis (Kraken) terminal、Lon 116.3)があるため。パン/ズームで視界に入れば見え、範囲外マーカーのオレンジのグローとツールチップ表記は維持する。
+- リストの検索・Categoryフィルターで絞り込んだとき、マップ上のマーカーも同じ条件で絞り込むようにした。リストコントローラに getVisibleItems() と onVisibleChange 通知を追加し、Map Viewerは全件ではなく表示中アイテムからマーカーを描く。
 
 ## 0.25 v0.8.3での変更点(Settingsリセットでセッション情報も消去)
 

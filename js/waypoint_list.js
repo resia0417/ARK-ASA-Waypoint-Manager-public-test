@@ -64,7 +64,7 @@ export class WaypointListController {
   constructor({
     listKey, theadRow, tbody, emptyStateEl, countEl, searchInputEl,
     categoryFilterEl, settingsStore, onSelect, getLatLon, getIconMarkup,
-    rowActions, onEditRequest, onDeleteRequest, getMapKey,
+    rowActions, onEditRequest, onDeleteRequest, getMapKey, onVisibleChange,
   }) {
     this.listKey = listKey;
     this.theadRow = theadRow;
@@ -87,6 +87,8 @@ export class WaypointListController {
     this.rowActions = !!rowActions;
     this.onEditRequest = onEditRequest || (() => {});
     this.onDeleteRequest = onDeleteRequest || (() => {});
+    // 表示件数(検索・フィルター適用後)が変わり得る描画の通知先(v0.8.4: マップ連動用)
+    this.onVisibleChange = onVisibleChange || (() => {});
 
     this.items = [];
     this.selectedId = null;
@@ -141,6 +143,9 @@ export class WaypointListController {
   // --- データ操作(管理ロジック) -------------------------------------
 
   getAll() { return this.items; }
+
+  /** 検索・Category・Current Mapフィルター適用後の表示中アイテム(v0.8.4: マップのマーカー連動用) */
+  getVisibleItems() { return this._visibleItems(); }
 
   setAll(items) {
     this.items = items;
@@ -293,6 +298,7 @@ export class WaypointListController {
     this._renderCategoryFilterOptions();
 
     const visible = this._visibleItems();
+    this.onVisibleChange();
     // Current Map等のフィルターが効いている間は「現在表示中の件数」を、
     // 何もフィルターされていない状態(=全件表示)では自然に全件数と
     // 一致する。要件の「ALL選択時のみ全Waypoint数」は、フィルター無しなら

@@ -170,25 +170,25 @@ function createControllers() {
   controllers.ini = new WaypointListController({
     listKey: 'ini', theadRow: els.iniTheadRow, tbody: els.iniTableBody,
     emptyStateEl: els.iniEmptyState, countEl: els.iniCount, searchInputEl: els.iniSearchInput,
-    settingsStore, onSelect: handleSelect, getLatLon, getIconMarkup, getMapKey,
+    settingsStore, onSelect: handleSelect, getLatLon, getIconMarkup, getMapKey, onVisibleChange: () => refreshMapViewers(),
     ...rowActionHandlers('ini'),
   });
   controllers.storage = new WaypointListController({
     listKey: 'storage', theadRow: els.storageTheadRow, tbody: els.storageTableBody,
     emptyStateEl: els.storageEmptyState, countEl: els.storageCount, searchInputEl: els.storageSearchInput,
-    settingsStore, onSelect: handleSelect, getLatLon, getIconMarkup, getMapKey,
+    settingsStore, onSelect: handleSelect, getLatLon, getIconMarkup, getMapKey, onVisibleChange: () => refreshMapViewers(),
     ...rowActionHandlers('storage'),
   });
   controllers.library = new WaypointListController({
     listKey: 'library', theadRow: els.libraryTheadRow, tbody: els.libraryTableBody,
     emptyStateEl: els.libraryEmptyState, countEl: els.libraryCount, searchInputEl: els.librarySearchInput,
-    categoryFilterEl: els.libraryCategoryFilter, settingsStore, onSelect: handleSelect, getLatLon, getIconMarkup, getMapKey,
+    categoryFilterEl: els.libraryCategoryFilter, settingsStore, onSelect: handleSelect, getLatLon, getIconMarkup, getMapKey, onVisibleChange: () => refreshMapViewers(),
     // Location Libraryは固定データのため、編集/削除ボタンは付けない(v0.8.1)
   });
   controllers.log = new WaypointListController({
     listKey: 'log', theadRow: els.logTheadRow, tbody: els.logTableBody,
     emptyStateEl: els.logEmptyState, countEl: els.logCount, searchInputEl: els.logSearchInput,
-    settingsStore, onSelect: handleSelect, getLatLon, getIconMarkup, getMapKey,
+    settingsStore, onSelect: handleSelect, getLatLon, getIconMarkup, getMapKey, onVisibleChange: () => refreshMapViewers(),
   });
 }
 
@@ -273,8 +273,9 @@ function initMapViewers() {
     getIconMarkup,
     onSelect: (waypoint, listKey) => handleSelect(waypoint, listKey),
   };
+  // v0.8.4: マーカーはリストの絞り込み(検索・Category・Current Map)に連動させる
   const collect = (keys) => () => keys.flatMap((key) =>
-    controllers[key].getAll().map((waypoint) => ({ waypoint, listKey: key })));
+    controllers[key].getVisibleItems().map((waypoint) => ({ waypoint, listKey: key })));
 
   // 右の地図の表示元はLibraryのアクティブタブに追随する(v0.6.0)
   const libSourceKeys = () => activeLibraryTab === 'storage' ? ['storage']
