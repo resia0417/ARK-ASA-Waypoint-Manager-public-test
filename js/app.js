@@ -76,18 +76,20 @@ let libraryFileHandle = null;
 let lastCalibrationResult = null; // { config, axisReport, residualError, warnings } | null
 let mapViewerIni = null; // 地図ビューア: GameUserSettings.ini 専用(v0.4.0で2台構成に)
 let mapViewerLib = null; // 地図ビューア: My Storage / Location Library 専用
-let viewerMapName = ''; // 2台のビューアで共有する表示マップ名
+let viewerMapName = ''; // 選択中のマップ(実効名)。v0.6.0からリスト絞り込みと地図の唯一の正
+let availableMapNames = []; // データに存在する実効マップ名の一覧(refreshMapSelectionが維持)
+let activeLibraryTab = 'storage'; // 右の地図が追随するLibraryタブ(v0.6.0)
 
 const els = {};
 
 function cacheElements() {
   const ids = [
-    'statusText', 'settingsBtn', 'settingsModal', 'settingsCloseBtn', 'currentMapSelect', 'debugModeCheckbox', 'mapsToggleBtn',
+    'statusText', 'settingsBtn', 'settingsModal', 'settingsCloseBtn', 'debugModeCheckbox', 'mapsToggleBtn', 'libMapChip',
     // GameUserSettings.ini
     'iniReadBtn', 'iniAddBtn', 'iniSaveBtn',
     'iniSearchInput', 'iniColumnSettingsBtn', 'iniCount', 'iniTheadRow', 'iniTableBody', 'iniEmptyState', 'iniDropZone',
     // My Storage
-    'storageReadBtn', 'storageAddBtn',
+    'storageReadBtn', 'storageAddBtn', 'storageSaveBtn',
     'storageSearchInput', 'storageColumnSettingsBtn', 'storageCount', 'storageTheadRow', 'storageTableBody', 'storageEmptyState', 'storageDropZone',
     // Location Library
     'libraryReadBtn', 'libraryAddBtn',
@@ -133,14 +135,12 @@ function init() {
   bindSplitter();
   bindMapsSplitter();
   bindMapsToggle();
-  bindGlobalMapFilter();
   bindDebugMode();
   bindCalibrationEvents();
   initMapViewers();
   restoreLayoutSettings();
   refreshMapViewers();
 
-  AUTO_SAVE_HANDLERS.storage = autoSaveStorage;
   AUTO_SAVE_HANDLERS.library = autoSaveLibrary;
 
   if (!fm.isFileSystemAccessSupported()) {
@@ -261,21 +261,10 @@ function notifyMapViewer(waypoint) {
  * マーカーのクリックは通常のリスト選択(handleSelect)へそのまま流す。
  */
 function initMapViewers() {
-  const getAvailableMaps = () => {
-    // Genesis_WP 自体は表示対象の地図ではないため候補から外し、
-    // WaypointからはZ判別後の実効MapName(Genesis1_WP/Genesis1Ocean_WP)を候補にする。
-    // また KNOWN_MAP_FOLDERS にはフォルダ解決専用の別名(末尾 _WP なしの
-    // "Extinction" 等)が含まれるため、候補の種は _WP で終わる名前に限る
-    const names = new Set(Object.keys(KNOWN_MAP_FOLDERS).filter((n) => n !== GENESIS_MAP_NAME && n.endsWith('_WP')));
-    for (const key of LIST_KEYS) {
-      for (const wp of controllers[key].getAll()) {
-        if (wp.parsed.map) names.add(resolveEffectiveMapName(wp.parsed.map, wp.parsed.z));
-      }
-    }
-    return [...names].sort();
-  };
+  // v0.6.0: 選択肢はデータに存在する実効マップ名のみ(refreshMapSelectionが維持する)
+  const getAvailableMaps = () => availableMapNames;
   const shared = {
-    getCurrentMap: () => els.currentMapSelect.value || '__all__',
+    getCurrentMap: () => viewerMapName || '__all__',
     getMapName: () => viewerMapName,
     getAvailableMaps,
     getLatLon,
@@ -285,22 +274,32 @@ function initMapViewers() {
   const collect = (keys) => () => keys.flatMap((key) =>
     controllers[key].getAll().map((waypoint) => ({ waypoint, listKey: key })));
 
+  // 右の地図の表示元はLibraryのアクティブタブに追随する(v0.6.0)
+  const libSourceKeys = () => activeLibraryTab === 'storage' ? ['storage']
+    : activeLibraryTab === 'library' ? ['library']
+    : activeLibraryTab === 'log' ? ['log'] : ['storage', 'library'];
+
   mapViewerIni = createMapViewer({
     ...shared,
     getWaypoints: collect(['ini']),
-    onMapChange: (name) => { viewerMapName = name; mapViewerLib?.refresh(); },
+    onMapChange: (name) => { viewerMapName = name; applyCurrentMapFilter(true); },
     onViewChange: (view) => mapViewerLib?.setView(view),
   }, els.mapPaneIni);
   mapViewerLib = createMapViewer({
     ...shared,
-    getWaypoints: collect(['storage', 'library']),
-    onMapChange: (name) => { viewerMapName = name; mapViewerIni?.refresh(); },
+    getWaypoints: () => collect(libSourceKeys())(),
+    onMapChange: (name) => { viewerMapName = name; applyCurrentMapFilter(true); },
     onViewChange: (view) => mapViewerIni?.setView(view),
   }, els.mapPaneLib);
 }
 
-/** 両方の地図ビューアを最新データで再描画する */
+/** 両方の地図ビューアを最新データで再描画する(右ペインのラベルもタブに合わせて更新) */
 function refreshMapViewers() {
+  if (els.libMapChip) {
+    els.libMapChip.textContent = activeLibraryTab === 'storage' ? 'Storage'
+      : activeLibraryTab === 'library' ? 'Library'
+      : activeLibraryTab === 'log' ? 'Log' : 'Storage ・ Library';
+  }
   mapViewerIni?.refresh();
   mapViewerLib?.refresh();
 }
@@ -323,14 +322,13 @@ function renderDetailBar(wp) {
   els.detailRawText.value = wp.rawText || '(RawTextなし: 手動追加されたWaypoint)';
 }
 
-// --- Current Map(グローバルフィルター) -----------------------------------
+// --- マップ選択(グローバルフィルター) -------------------------------------
+// v0.6.0: ヘッダーのCurrent Map行を廃止し、左の地図のドロップダウンに統一した。
+// 選択中のマップは viewerMapName が唯一の正で、リストの絞り込みと2枚の地図は
+// 常にこれに追随する。選択肢はデータに存在する実効マップ名のみ(All Mapsなし、
+// Genesisは陸/海に分割)。
 
-function bindGlobalMapFilter() {
-  els.currentMapSelect.addEventListener('change', () => applyCurrentMapFilter(true));
-}
-
-function refreshGlobalMapOptions() {
-  // v0.5.1: 「All Maps」を廃止し、実効マップ名(Genesisは陸/海に分割)で選択肢を作る
+function refreshMapSelection() {
   const maps = new Set();
   for (const key of LIST_KEYS) {
     for (const wp of controllers[key].getAll()) {
@@ -338,18 +336,15 @@ function refreshGlobalMapOptions() {
       if (m) maps.add(resolveEffectiveMapName(m, wp.parsed.z));
     }
   }
-  const sorted = Array.from(maps).sort((a, b) => a.localeCompare(b, 'ja'));
-  const current = els.currentMapSelect.value || '';
-
-  els.currentMapSelect.innerHTML =
-    sorted.map((m) => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join('');
-  els.currentMapSelect.value = sorted.includes(current) ? current : (sorted[0] || '');
-
+  availableMapNames = Array.from(maps).sort((a, b) => a.localeCompare(b, 'ja'));
+  if (!availableMapNames.includes(viewerMapName)) {
+    viewerMapName = availableMapNames[0] || '';
+  }
   applyCurrentMapFilter(false);
 }
 
 function applyCurrentMapFilter(persist) {
-  const value = els.currentMapSelect.value || '';
+  const value = viewerMapName;
   const showMapColumn = value === ''; // 特定マップ選択中はMap列が冗長なため隠す
   for (const key of LIST_KEYS) {
     controllers[key].setExternalMapFilter(value === '' ? '__all__' : value);
@@ -403,10 +398,10 @@ async function tryRestoreLastSession() {
     }
   } catch (err) { console.info('前回のLocation Library情報はありません:', err.message); }
 
-  refreshGlobalMapOptions();
+  refreshMapSelection();
   const savedMap = settingsStore.get('currentMap', '');
-  if ([...els.currentMapSelect.options].some((o) => o.value === savedMap)) {
-    els.currentMapSelect.value = savedMap;
+  if (availableMapNames.includes(savedMap)) {
+    viewerMapName = savedMap;
     applyCurrentMapFilter(false);
   }
 
@@ -444,6 +439,7 @@ function bindToolbarEvents() {
   READ_BTN_EL.storage = els.storageReadBtn;
   READ_BTN_EL.library = els.libraryReadBtn;
   SAVE_BTN_EL.ini = els.iniSaveBtn;
+  SAVE_BTN_EL.storage = els.storageSaveBtn;
 
   els.iniReadBtn.addEventListener('click', onIniRead);
   els.iniAddBtn.addEventListener('click', () => openAddEditModal('ini', null));
@@ -451,6 +447,7 @@ function bindToolbarEvents() {
 
   els.storageReadBtn.addEventListener('click', onStorageRead);
   els.storageAddBtn.addEventListener('click', () => openAddEditModal('storage', null));
+  els.storageSaveBtn.addEventListener('click', onStorageSave);
 
   els.libraryReadBtn.addEventListener('click', onLibraryRead);
   els.libraryAddBtn.addEventListener('click', () => openAddEditModal('library', null));
@@ -491,7 +488,7 @@ async function onIniRead() {
     markRead('ini');
     markClean('ini');
     setStatus(`GameUserSettings.iniから${list.length}件のWaypointを読み込みました。`);
-    refreshGlobalMapOptions();
+    refreshMapSelection();
 
     const { text: updatedText, added } = ensureWaypointManagerSection(iniOriginalText);
     if (added) {
@@ -559,25 +556,31 @@ async function onStorageRead() {
     markRead('storage');
     markClean('storage');
     setStatus(`My Storageから${list.length}件のWaypointを読み込みました。`);
-    refreshGlobalMapOptions();
+    refreshMapSelection();
   } catch (err) {
     console.error(err);
     setStatus('My Storageの読み込み中にエラーが発生しました: ' + err.message);
   }
 }
 
-/** My Storageへの変更があるたびに自動保存する(「終了時自動保存」の実務的な近似実装)。
- *  ブラウザは真の意味での「終了時フック」で非同期ファイル書き込みを保証できないため、
- *  変更の都度即座に保存することで、実質的に同等の安全性を提供する。 */
-async function autoSaveStorage() {
-  if (!storageFileHandle) return;
+/** My Storageの手動保存(v0.6.0でINIと同じくボタン式に変更。変更時はボタンが有効化される) */
+async function onStorageSave() {
+  if (!storageFileHandle) {
+    setStatus('My Storage: 先にファイルを読み込んでください(Read)。');
+    return;
+  }
   try {
     const granted = await fm.verifyPermission(storageFileHandle, 'readwrite');
-    if (!granted) return;
+    if (!granted) {
+      setStatus('My Storage: ファイルへの書き込み権限が許可されませんでした。');
+      return;
+    }
     await fm.writeFile(storageFileHandle, serializeStorage(controllers.storage.getAll()));
     markClean('storage');
+    setStatus(`My Storageを保存しました(${controllers.storage.getAll().length} Waypoints)。`);
   } catch (err) {
-    console.warn('My Storageの自動保存に失敗しました:', err);
+    console.error(err);
+    setStatus('My Storageの保存に失敗しました: ' + err.message);
   }
 }
 
@@ -597,14 +600,14 @@ async function onLibraryRead() {
     markRead('library');
     markClean('library');
     setStatus(`Location Libraryから${list.length}件のWaypointを読み込みました。`);
-    refreshGlobalMapOptions();
+    refreshMapSelection();
   } catch (err) {
     console.error(err);
     setStatus('Location Libraryの読み込み中にエラーが発生しました: ' + err.message);
   }
 }
 
-/** Location Libraryへの変更があるたびに自動保存する(My Storageと同じ方針。詳細はautoSaveStorage参照)。 */
+/** Location Libraryへの変更があるたびに自動保存する(自動保存はLibraryのみ。INIとMy Storageはv0.6.0から手動Save)。 */
 async function autoSaveLibrary() {
   if (!libraryFileHandle) return;
   try {
@@ -627,7 +630,7 @@ async function onLogOpen() {
     await fm.saveLastLogHandle(handle);
     const list = await loadIniLikeFile(handle, 'log');
     setStatus(`Waypoint Logから${list.length}件のWaypointを読み込みました。`);
-    refreshGlobalMapOptions();
+    refreshMapSelection();
   } catch (err) {
     console.error(err);
     setStatus('Waypoint Logの読み込み中にエラーが発生しました: ' + err.message);
@@ -656,7 +659,7 @@ function onDeleteWaypoint(listKey, wp) {
   setStatus(`Waypoint「${wp.parsed.name}」を${LABELS[listKey]}から削除しました。`);
   markDirty(listKey);
   AUTO_SAVE_HANDLERS[listKey]?.();
-  refreshGlobalMapOptions(); // 削除でマップが消えた場合にCurrent Mapの選択肢と絞り込みを追随させる
+  refreshMapSelection(); // 削除でマップが消えた場合にCurrent Mapの選択肢と絞り込みを追随させる
 }
 
 // --- Add/Editモーダル -------------------------------------------------------
@@ -692,7 +695,7 @@ async function openAddEditModal(listKey, id) {
     els.modalTitle.textContent = `Waypoint を追加 (${LABELS[listKey]})`;
     // MapNameの初期値はCurrent Mapの選択中マップ(v0.5.1: All Maps廃止のため、
     // データがあれば常に特定マップが選択されている。Genesis陸/海の別名は保存時に正規化される)
-    const defaultMap = els.currentMapSelect.value || '';
+    const defaultMap = viewerMapName;
     fillForm({ ...createWaypoint().parsed, lat: 0, lon: 0, map: defaultMap });
   }
   els.editModal.classList.remove('hidden');
@@ -980,7 +983,7 @@ async function onModalSave() {
     setStatus(`Waypoint「${finalParsed.name}」を${LABELS[listKey]}へ追加しました。`);
   }
 
-  refreshGlobalMapOptions();
+  refreshMapSelection();
   markDirty(listKey);
   AUTO_SAVE_HANDLERS[listKey]?.();
   closeModal();
@@ -1038,7 +1041,7 @@ async function moveWaypoint(sourceKey, targetKey, wp) {
 
   const finalize = (newWp) => {
     if (removesFromSource) controllers[sourceKey].remove(wp.id);
-    refreshGlobalMapOptions();
+    refreshMapSelection();
     if (removesFromSource && wasSelected) {
       controllers[targetKey].setSelectedId(newWp.id);
       handleSelect(newWp, targetKey);
@@ -1149,6 +1152,7 @@ function bindLibraryTabs() {
 }
 
 function switchLibraryTab(tab) {
+  activeLibraryTab = tab;
   els.libraryTabs.querySelectorAll('.library-tab').forEach((btn) => {
     btn.classList.toggle('active', btn.dataset.tab === tab);
   });
@@ -1156,6 +1160,7 @@ function switchLibraryTab(tab) {
     panel.classList.toggle('active', panel.dataset.listKey === tab);
   });
   settingsStore.set('activeLibraryTab', tab);
+  refreshMapViewers(); // 右の地図の表示元をタブに追随させる(v0.6.0)
 }
 
 // --- Splitter(左右カラム幅、ドラッグで変更・保存) ---------------------------
@@ -1294,8 +1299,8 @@ function bindCalibrationEvents() {
  * 通知を表示し、Auto Detect/Calculateを無効化する。
  */
 function syncCalibrationToCurrentMap() {
-  const mapName = els.currentMapSelect.value;
-  const hasTarget = !!mapName && mapName !== '__all__';
+  const mapName = viewerMapName;
+  const hasTarget = !!mapName;
 
   els.calibrationTargetMapLabel.textContent = hasTarget ? mapName : '-';
   els.calibrationNoMapNotice.classList.toggle('hidden', hasTarget);
@@ -1344,8 +1349,8 @@ function calibrationInput(pointId, axis) {
  * 5点すべてのUE X/Yが数値として入力されている場合のみ有効化する。
  */
 function updateCalculateButtonState() {
-  const mapName = els.currentMapSelect.value;
-  const hasTarget = !!mapName && mapName !== '__all__';
+  const mapName = viewerMapName;
+  const hasTarget = !!mapName;
   const allValid = hasTarget && CALIBRATION_POINTS.every((p) => {
     const xInput = calibrationInput(p.id, 'x');
     const yInput = calibrationInput(p.id, 'y');
@@ -1387,8 +1392,8 @@ function onAutoDetect() {
 
 /** 5点のUE座標からMapConfigを算出し(map_calibration.js)、結果を表示する */
 function onCalculate() {
-  const mapName = els.currentMapSelect.value;
-  if (!mapName || mapName === '__all__') {
+  const mapName = viewerMapName;
+  if (!mapName) {
     setStatus('Map Calibration: Current Mapで特定のMapを選択してください。');
     return;
   }

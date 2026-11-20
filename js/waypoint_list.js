@@ -276,6 +276,10 @@ export class WaypointListController {
 
   render() {
     this._renderHeader();
+    // tfoot(Add行)のcolspanは実際の列数に合わせる。固定値(99等)にすると
+    // table-layout:fixed の列数が膨らみ、可変幅の列が潰れる(v0.6.0で実測特定)
+    const footCell = this.theadRow.closest('table')?.querySelector('tfoot .add-row-cell');
+    if (footCell) footCell.colSpan = this._activeColumns().length + (this.rowActions ? 1 : 0);
     this._renderCategoryFilterOptions();
 
     const visible = this._visibleItems();

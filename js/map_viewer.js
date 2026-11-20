@@ -349,9 +349,7 @@ export function createMapViewer(handlers, root) {
         return;
       }
       state.clickPoint = { lat, lon };
-      const ue = state.converter.gameToUe(lat, lon);
-      els.readout.textContent =
-        `Lat ${lat.toFixed(1)} / Lon ${lon.toFixed(1)}  (X: ${Math.round(ue.x)}, Y: ${Math.round(ue.y)})`;
+      els.readout.textContent = `Lat ${lat.toFixed(1)} / Lon ${lon.toFixed(1)}`; // v0.6.0: Lat/Lonのみ
       render();
     });
     els.viewport.addEventListener('wheel', (e) => {

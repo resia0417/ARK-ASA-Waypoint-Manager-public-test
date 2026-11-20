@@ -31,19 +31,12 @@
       <span id="statusText" class="status-text">GameUserSettings.ini を読み込んでください。</span>
 
       <div class="header-right">
-        <span class="header-version">v0.5.1</span>
+        <span class="header-version">v0.6</span>
+        <button id="mapsToggleBtn" class="btn-bracket btn-small">[ 地図を隠す ]</button>
         <a id="githubLink" class="header-link" href="https://github.com/resia0417/ARK-ASA-Waypoint-Manager" target="_blank" rel="noopener">GitHub</a>
         <button id="settingsBtn" class="header-link header-link-btn">Settings</button>
       </div>
     </header>
-
-    <!-- グローバルツールバー: Current Map(画面全体で1つのMapフィルター) -->
-    <div class="global-bar">
-      <label class="current-map-label">Current Map:
-        <select id="currentMapSelect"><option value="__all__">All Maps</option></select>
-      </label>
-      <button id="mapsToggleBtn" class="btn-bracket btn-small">[ 地図を隠す ]</button>
-    </div>
 
     <!-- 地図エリア(v0.4.0: 2枚並べて常時表示。左=INI / 右=Storage・Library、パン・ズーム連動) -->
     <section class="maps-row" id="mapsRow">
@@ -71,7 +64,7 @@
           </div>
           <div class="mv-markers"></div>
           <div class="mv-labels"></div>
-          <span class="mv-chip">Storage ・ Library</span>
+          <span class="mv-chip" id="libMapChip">Storage</span>
           <span class="mv-readout mv-overlay-bc"></span>
           <span class="mv-info mv-overlay-br">0 Waypoints を表示中</span>
           <p class="mv-notice hidden"></p>
@@ -97,7 +90,7 @@
           <table class="wp-table">
             <thead><tr id="iniTheadRow"></tr></thead>
             <tbody id="iniTableBody"></tbody>
-            <tfoot><tr><td class="add-row-cell" colspan="99"><button id="iniAddBtn" class="add-row-btn">＋ Add Waypoint</button></td></tr></tfoot>
+            <tfoot><tr><td class="add-row-cell" colspan="8"><button id="iniAddBtn" class="add-row-btn">＋ Add Waypoint</button></td></tr></tfoot>
           </table>
           <p class="empty-state" id="iniEmptyState">GameUserSettings.iniを読み込んでください。<br /><button id="iniReadBtn" class="btn-bracket btn-small empty-action">[ Read ]</button></p>
         </div>
@@ -123,12 +116,12 @@
             <input id="storageSearchInput" type="search" placeholder="Search Name / CustomTag / Map" />
             <button id="storageColumnSettingsBtn" class="btn-bracket btn-small" title="表示列・列順">⚙</button>
           </div>
-          <div class="column-meta"><span id="storageCount" class="meta-item">0 Waypoints</span></div>
+          <div class="column-meta"><span id="storageCount" class="meta-item">0 Waypoints</span><button id="storageSaveBtn" class="btn-bracket btn-small btn-accent" disabled>[ Save ]</button></div>
           <div class="column-body" id="storageDropZone">
             <table class="wp-table">
               <thead><tr id="storageTheadRow"></tr></thead>
               <tbody id="storageTableBody"></tbody>
-              <tfoot><tr><td class="add-row-cell" colspan="99"><button id="storageAddBtn" class="add-row-btn">＋ Add Waypoint</button></td></tr></tfoot>
+              <tfoot><tr><td class="add-row-cell" colspan="8"><button id="storageAddBtn" class="add-row-btn">＋ Add Waypoint</button></td></tr></tfoot>
             </table>
             <p class="empty-state" id="storageEmptyState">Waypointがまだありません。下の「Add」で追加するか、他のリストからドラッグしてください。<br /><button id="storageReadBtn" class="btn-bracket btn-small empty-action">[ Read ]</button></p>
           </div>
@@ -146,7 +139,7 @@
             <table class="wp-table">
               <thead><tr id="libraryTheadRow"></tr></thead>
               <tbody id="libraryTableBody"></tbody>
-              <tfoot><tr><td class="add-row-cell" colspan="99"><button id="libraryAddBtn" class="add-row-btn">＋ Add Waypoint</button></td></tr></tfoot>
+              <tfoot><tr><td class="add-row-cell" colspan="8"><button id="libraryAddBtn" class="add-row-btn">＋ Add Waypoint</button></td></tr></tfoot>
             </table>
             <p class="empty-state" id="libraryEmptyState">waypoints.json を新規作成・読み込みしてください。<br /><button id="libraryReadBtn" class="btn-bracket btn-small empty-action">[ Read ]</button></p>
           </div>
