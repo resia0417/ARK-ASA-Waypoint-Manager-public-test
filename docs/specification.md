@@ -1,0 +1,334 @@
+# ARK ASA Waypoint Manager Web — 仕様書 (v0.6.9)
+
+## 0.16 v0.6.9での変更点(外部コードレビューの「中」「軽微」対応)
+
+Claudeによるv0.6.7のコードレビュー(REVIEW_CLAUDE_v067.md)で挙がった「中」7件と「軽微」のうち、実害のあるものを直した。
+
+- **中6(SavedMinimapMarksが無いINIへの追加位置)**: rebuildIniTextは、Waypoint行が元々無いINIでは追加行をファイル末尾ではなく [/Script/ShooterGame.ShooterGameUserSettings] セクション内へ入れる(末尾だと別セクションに属してゲームに読まれない恐れがあった)。
+- **中7(ReadでINIを書き換えない)**: [ARKASAWaypointManager]セクションの追加をRead時からINI保存時へ移した。Readはファイルを変更しない。
+- **中8(改行コードの保持)**: rebuildIniTextと ensureWaypointManagerSection は元ファイルの改行コード(CRLF/LF)をそのまま使う。
+- **中9(座標の丸め保持)**: 編集モーダルでLat/Lon・MapNameが未編集の場合、表示の丸め(小数3桁)を経由せず元のUE座標を保持する。編集開始時点のフォーム値を記録し、保存時に一致すれば元のx/yを使う。
+- **中10(パーサーのエスケープと警告)**: parseParenObjectが引用符内のエスケープ(\")を処理し、自前で書き戻した名前と往復できるようにした。LocationやX/Y/Zが欠けた行には警告フラグを付け、読込時に件数を知らせる(黙って座標0にしない)。
+- **中11(未認識行の通知)**: SavedMinimapMarks= で始まらない MinimapMarks行(先頭のS欠けなど)の件数を数え、読込時に知らせる。行自体は従来通り書き戻しで保持される。
+- **中12(Libraryのmap乖離)**: Location Libraryの entry.map は、rawTextにMapNameが無い場合の予備としてのみ使う(rawText側を正とする)。
+- **中15(zの数値化)**: 編集保存時の z は数値として保持する。Z欄が空欄・非数値の場合は入力エラーにする。
+- **中16(MapName必須)**: validateWaypointにMapName必須を追加した。
+- **軽微13(古いハンドルの破棄)**: 起動時復元でNotFoundErrorになったファイルハンドルはIndexedDBから破棄する。ハンドルの記憶は、読込が成功した後に行うよう各Read処理を直した。
+- **軽微14(MapConfig自己修復の限定)**: saveMapConfigToProjectの自己修復(ハンドル破棄+再選択)は、NotFoundError / NotAllowedError / SecurityError の場合に限る。
+- **軽微17(Genesis config表記の統一)**: MapConfig.toJSON() は、Genesis陸/海どちらの保存でも mapName を Genesis_WP に統一する。
+- **軽微18(保守性)**: 未使用の pickSaveTextFile / getAllIconPreviewStates を削除。escapeHtml・formatNum・clamp01 の重複定義を js/util.js へ集約した。READMEを現行仕様に全面更新した。app.jsの分割は動作安定を優先して見送った。
+
+## 0.15 v0.6.8での変更概要(Claudeコードレビュー重大指摘の修正)
+
+外部コードレビュー(Claude、v0.6.7のzip添付方式)で挙がった重大指摘5件をすべて修正した。
+
+- 重大1・2: INI書き戻し(buildRawText)のフィールド置換を、正規表現から「最上位フィールド単位の置換」(splitTopLevelFields / setTopLevelField)へ書き換えた。従来は Name が MapName の、Color が IconColor の内側に先にマッチし、フィールドの並び順(アプリ生成行など)によっては改名とColor編集が保存されなかった。置換文字列中の $ パターン展開による名前の破損も解消。未知フィールドは元の文字列のまま保持される。検証用に uitest/ini_test.mjs(実INIで20項目)を追加。
+- 重大3: INI保存時に、保存直前に現在のファイル内容を読み直す。読み込み後に外部(ゲーム)で変わっていた場合、Waypoint以外の変更は最新の内容を土台にして保持し、Waypoint行自体が変わっていたら追加の確認ダイアログを出す。上書き前の内容は緊急用バックアップとしてIndexedDBへ保持する(saveIniBackup)。
+- 重大4: 起動時のセッション復元で requestPermission を呼ばないようにした(queryPermissionState で状態だけ確認)。granted のものだけ自動復元し、prompt のものはヘッダーの[ 前回のファイルを再接続 ]ボタン(クリックの中で許可を取り直す)へ回す。復元状況のステータス表示も実態に合わせた。
+- 重大5: 地図ドロップダウンの option を innerHTML から DOM生成(createElement + textContent)へ変更し、MapName 由来のXSSを塞いだ。index.html に Content-Security-Policy (script-src 'self' 等)も追加。
+
+## 0.14 v0.6.7での変更概要(アイコン名を出さない・説明文の整理・ピッカーへの色反映)
+
+- MarkIconの選択ボタンにもアイコン名を表示しないようにした(アイコンのみ、ツールチップでも名前は出ない)。ゲーム内ではアイコン名を確認できないため、それに合わせた。
+- Location欄の下にあった説明文(Lat/LonとZの座標系の説明)を削除し、代わりにZのラベルを「Z (UE座標)」と表記するようにした。
+- MarkIconピッカーの一覧アイコンを、編集中のBASE COLOR / ICON COLORで描画するようにした(従来は固定色)。色を変えながらアイコンを選べる。
+
+## 0.13 v0.6.6での変更概要(色スライダーの改善)
+
+- 編集モーダルの色スライダー(BASE COLOR / ICON COLOR)を細くした(トラック3px、ツマミ9×18px)。
+- スライダーに `.modal input` の枠線と内側余白(padding 8px 10px)が効いていて、ハンドルが両端まで届かず途中で止まって見えた問題を修正した。range入力だけ枠・余白を打ち消し、トラックが入力幅いっぱいに広がってハンドルが0/最大で端と一致するようになった。
+
+## 0.12 v0.6.5での変更概要(モーダルに削除ボタン・ピッカーはアイコンのみ・フォントを太いゴシックに)
+
+- 編集モーダルのボタン列で、Cancelの右に削除ボタン(ゴミ箱アイコン)を追加した。編集時のみ表示され、行のゴミ箱と同じ確認ダイアログ付きの削除フローを使う。Save/Cancelの並びは v0.6.4 のまま変更なし。
+- MarkIconのドロップダウン(ピッカー)を、ゲーム内UIに合わせてアイコンのみのグリッド表示(5列)に変更し、名前の文字を出さないようにした。ツールチップでも名前は出ない。選択中のアイコン名はピッカーを開くボタン側には従来通り表示される。
+- タイトル・タブ・ボタン・見出し・ヘッダーリンクのフォントを、太めのゴシック体(--font-gothic: Noto Sans JP 700、なければ游ゴシック等のシステムゴシック)に変更した。数値や座標などの等幅表示は従来通り JetBrains Mono。
+
+## 0.11 v0.6.4での変更概要(ゲーム内UIへの寄せ第2弾・Star差し替え・デフォルト半々)
+
+- Starアイコンを実物に合わせて差し替えた(5角星を2つ36°ずらして重ねた10角星)。Timerは実物スクショでストップウォッチ型と判明したため描き直し、CircleSlashは実物と現行SVGの一致を確認した。
+- 資源アイコン4種(Crystal/Metal/Obsidian/Pearl)の画像を高解像度スクショ(2588×1455)から切り抜き直した。並び順は左からCrystal/Metal/Obsidian/Pearl(ユーザー確認済み)。
+- アイコンのグリフ(SVGの白い部分)を拡大し、BaseIconの六角形の縁ギリギリまで大きくした(CSSのscale 0.56→1.02)。資源画像も84%→88%に拡大。
+- INI列のデフォルト幅を420px固定から「ワークスペースの50%」に変更した。設定リセット後の初期状態が左右半々になる(ドラッグした場合は従来通りpxで保存)。
+- Libraryタブ(My Storage/Location Library/Waypoint Log)は枠線を廃止し、選択中を太いアンダーバー(内側シャドウ4px+発光)で示すようにした。GameUserSettings.iniの見出しにも同じ太さのアンダーバーを追加。
+- パネル枠(.column/.map-pane/.modal)を、上部が明るく光る発光グラデーション枠に変更。モーダルにも角カットを追加した。
+- ヘッダー(.topbar)の背景を、ゲーム内UI風の明るい青グラデーションに変更した。
+- 編集モーダル: 右上隅に閉じる(✕)ボタンを追加(Cancelと同じ動作)。Save/Cancelの並びを入れ替え(Saveが左)、ボタンをフォーム列幅いっぱいのバー型にした。色スライダーをゲーム内UI風(グラデーションのトラック+発光する四角いツマミ)に変更。
+
+## 0.10 v0.6.3での変更概要(切替ボタンの文言・列設定の廃止・設定リセット・アイコン実物合わせ)
+
+- 地図表示トグルの文言を、実際の作用(リストの絞り込み切替)が分かる文言へ変更した: 地図表示中は「[ 全Waypoint表示 ]」、全表示中は「[ マップ別表示に戻す ]」。
+- リストの「表示列/列順」設定(⚙ボタンとポップオーバー)を廃止した。列順・表示列は常にデフォルト(全列表示)となり、保存済み設定からは列幅だけを引き継ぐ。列幅のドラッグリサイズと保存は従来どおり。
+- Settingsに「設定をリセット」ボタンを追加した。保存済みの設定(レイアウト・選択中Map・タブ・列幅・検索文字・ソート・Debug Mode)をすべて削除し、再読み込みでデフォルトに戻す。セッション復元(ファイルハンドル)は対象外。
+- WaypointアイコンSVG 12点をゲーム内の実物に合わせて描き直した(Kill=照準、Wait=時計、Root/Collectible=手、Dino=3本指の足跡、Crystal=結晶クラスタ、Pearl=真珠の山、ArrowDown=二重シェブロン、MultiPlayer=3人、Star=星+破片、Location=二重丸ピン、Metal/Obsidian=岩塊)。TimerとCircleSlashは実物未確認のため据え置き。
+- 資源系4点(Metal/Obsidian/Crystal/Pearl)はゲーム内でアイテムのテクスチャ画像が使われているため、SVGではなく実物画像で描画するようにした。ユーザーがゲーム内で撮影したスクリーンショットから切り抜き、背景を透過したWebPを data URI として js/icon_images.js に埋め込み、waypoint_icon.js が該当IDを画像レイヤーで描画する(SVGファイルは残置するが未使用)。
+
+## 0.9 v0.6.2での変更概要(地図を隠した間は全表示)
+
+- 地図エリアを隠している間は、リストのマップ絞り込みを解除して全Waypointを表示する(マップ選択UI自体が隠れて切り替えられないため)。Map列も再表示される。地図を再表示すると、選択中マップ(viewerMapName)の絞り込みに戻る。`applyMapsCollapsed` が `applyCurrentMapFilter` を呼び、フィルター側は `mapsCollapsed` の間だけ実効値を空にする。
+- タイトル行の検索欄プレースホルダを「Search」に短縮(狭い行で切れるため)。
+- Libraryのタブ行を廃止し、タブをタイトル行へ統合した(「Library」見出しは廃止)。左右のタイトル行の高さを54pxに統一し、折り返しを禁止(狭い幅では見出しを省略表示)することで、両リストのテーブル開始位置が一致するようにした。
+- (v0.6.1修正として先行反映) 行内アクションボタンがセルからはみ出し、削除アイコンが省略記号「…」に化ける問題を修正(flexラッパー追加+列幅84px)。
+
+## 0.8 v0.6.1での変更概要(検索・件数をタイトル行へ集約)
+
+- リスト内の検索欄(.column-search)と件数表示(.column-meta)の専用行を廃止し、GameUserSettings.ini / Library 両方のタイトル行(.column-head)右側の `.head-tools` へ移した(行の節約)。
+- Library側のツール群はタブごとに `.head-tool-group` で切り替わり、`switchLibraryTab` がパネルと連動して表示を切り替える(Storage群にはSaveボタンも含む)。
+- Map Calibration内の「Current Map」表記の残りも「地図のドロップダウンで選択中のMap」へ更新。
+- テストは実ブラウザ(puppeteer-core + chrome-headless-shell)方式に移行し、`uitest/test.mjs`(作業フォルダ側)に27項目を実装。
+
+## 0.7 v0.6.0での変更概要(マップ選択の統一・列幅不具合修正・My Storage手動保存)
+
+- **リスト列幅の不具合修正**: v0.5.0で追加したtfoot(Add行)の `colspan="99"` が `table-layout: fixed` の列数を99列に膨らませ、可変幅の列(Name/Map/Lat/Lon/CustomTag)が約3pxに潰れてIcon列しか見えなくなっていた。実ブラウザで計測して特定。`waypoint_list.js` の `render()` で colspan を実際の列数(表示列+アクション列)に設定するよう修正。
+- **マップ選択の統一**: ヘッダーのCurrent Map行(.global-bar)を廃止し、左の地図のドロップダウンに一本化した。選択中のマップは `viewerMapName` が唯一の正で、リストの絞り込みと2枚の地図は常にこれに追随する。選択肢は全リストのデータに存在する実効マップ名のみ(All Mapsなし、Genesisは陸/海分割)。「地図を隠す」トグルはヘッダー右側へ移動。
+- **右の地図がLibraryタブに追随**: 右ペインの表示元はアクティブなタブ(Storage/Library/Log)だけになり、CalibrationタブではStorage+Library両方。右上のチップ表示もタブ名に連動する。
+- **座標リードアウトはLat/Lonのみ**に簡素化(UE X/Yを削除)。地図クリック時の十字マーカーは `mix-blend-mode: difference` で背景の反転色表示に変更。
+- **My Storageも手動保存化**: Storageパネルのメタ行右端に[ Save ]ボタンを追加し、変更時のみ有効化される。自動保存が残るのはLocation Libraryのみになった。
+- **配色を青寄りに調整**: ゲーム内UIに寄せ、背景をネイビー系(--bg #040b18 / --panel #071426)、ライン・発光を蛍光ブルー(--accent #4dd2ff)に変更。
+
+## 0.6 v0.5.1での変更概要(保存方式とCurrent Mapの見直し)
+
+- GameUserSettings.ini の保存は自動保存を取りやめ、手動保存に戻した。Saveボタンは INI カラムの見出し「GameUserSettings.ini」の右端に置き、未保存の変更があるときだけ有効になる。保存時は従来の確認ダイアログを挟む。Storage/Library の自動保存は継続。
+- Current Map の「All Maps」を廃止した。選択肢はデータに存在する実効マップ名のみで、Genesis は陸(Genesis1_WP)と海(Genesis1Ocean_WP)に分かれて表示される。絞り込みは waypoint_list.js の getMapKey(実効名)で比較する。特定マップ選択中は各リストの Map 列を隠す。
+- 座標リードアウト(クリック地点の Lat/Lon・UE座標)は、ゲーム内マップに倣って地図の下部中央オーバーレイへ移した。
+
+## 0.5 v0.5.0での変更概要(UI簡素化・全リスト自動保存・ARK風デザイン強化)
+
+- リスト上部のツールバー(Read/Add/Edit/Delete/Save)を全リストで廃止した。
+  - Read/Open: リストが空のときに表示される空状態メッセージの中のボタンへ移設した。
+  - Add: テーブル末尾(tfoot)の「＋ Add Waypoint」行へ移設した。
+  - Edit/Delete: 各行の右端にペン/ゴミ箱のアイコンボタンとして表示する(waypoint_list.js の rowActions。log は読み取り専用のため無し)。削除時の確認ダイアログは従来どおり。
+  - Save: 廃止し、全リストで変更のたびに自動保存する。GameUserSettings.ini も AUTO_SAVE_HANDLERS.ini(autoSaveIni)で確認ダイアログなしに書き戻す(未読込時は無効)。これにより「保存せずに閉じて変更を破棄する」ことはできなくなった。
+  - Waypoint Log の Reload ボタンは廃止した(再読込は Open から行う)。
+- 地図ペインのタイトル行とツールバー行を廃止し、オーバーレイUIへ移した。
+  - マップ選択ドロップダウンは左ペイン左上の1個のみ(2枚連動)。右ペインは createMapViewer の mapSelect が null でも動作する。
+  - ペインの識別は右上の小ラベル(INI / Storage ・ Library)で行う。
+  - 件数表示は右下、クリック地点の座標リードアウトは左下へオーバーレイ表示する。
+  - Grid は常時表示とし、Fit/ズームボタンは廃止した(Fit は地図のダブルクリックで代替)。
+- デザインを ARK 本編へ寄せた: 電光シアン(#5ee9ff)を基調に、パネルとボタンへ角カット(clip-path)と発光(box-shadow)を適用し、リスト行はゼブラ+選択時の左バー+発光、行内ボタンは六角チップ風にした。
+
+## 0.4 v0.4.1での変更概要
+
+- 地図エリアが縦幅を圧迫するため、Current Map バー右端に「地図を隠す/表示」トグルを追加した。状態は layout.mapsCollapsed に保存される。
+- 地図エリアの初期高さを 320px → 260px に縮小した(ドラッグ変更・保存は従来どおり)。
+
+## 0.3 v0.4.0での変更概要(レイアウト刷新・2枚地図+ARK風テーマ)
+
+- Map Viewerを Library のタブから廃止し、画面上部の地図エリアに2台のビューアを常時表示する構成へ変更した。左は GameUserSettings.ini のWaypoint、右は My Storage / Location Library のWaypointを表示する。
+- 2台のビューアは表示マップを共有し、パン/ズームが連動する(片方を操作するともう片方も同じ視点になる)。これによりINI側(ゲーム内の現状)と保存側のWaypointを見比べられる。
+- 地図エリアの高さは専用Splitterでドラッグ変更でき、レイアウト設定として保存される(layout.mapsRowHeight)。
+- map_viewer.js は複数インスタンス対応となり、要素参照は生成時に渡された root 配下のクラス指定へ変更した(id参照は廃止)。公開APIに getView/setView を追加した。
+- テーマをARK本編UI寄りの配色へ変更した(濃いティールの背景、シアンのアクセント、発光を伴うヘッダー/アクティブタブ)。色はCSS変数で一元管理する。
+- 旧バージョンで保存された activeLibraryTab='mapviewer' は 'storage' へ読み替える。
+
+## 0.2 v0.3.9での変更概要
+
+Map Viewerの表示候補に、フォルダ解決専用の別名である "Extinction"（末尾 _WP なし）が "Extinction_WP" と重複して現れる問題を修正した。候補の種は _WP で終わる MapName に限るようにし、別名はフォルダ解決（KNOWN_MAP_FOLDERS）には引き続き使える。
+
+## 0.1 v0.3.8での変更概要(Genesis Part 1 の陸・海判別)
+
+Genesis Part 1 の Waypoint は全バイオーム共通で MapName="Genesis_WP" となるため、MapNameだけでは陸(Genesis1)/海(Genesis1Ocean)のどちらの座標変換・地図が適用か決められなかった。v0.3.8 では、陸と海でZ座標の範囲が重ならないこと(実測: 陸 -390453〜25888 / 海 255450〜338334)を利用し、`map_config.js` の `resolveEffectiveMapName()` が Z >= 140000 を海として実効MapName(Genesis1_WP / Genesis1Ocean_WP)へ振り分けるようにした。一覧のLat/Lon表示、Map Viewerのマーカー照合・候補、Add/Editモーダルの座標変換がこの振り分けを使う。Waypointに保存されるMapNameは変更せず、INI書き戻しでも Genesis_WP のまま出力する。Add/Editモーダルで実効MapNameを入力した場合は Genesis_WP へ戻し、意図はZ座標(各バイオームの代表Z)で表す。
+
+## 0. v0.3.6での変更概要(v0.3.5からの差分のみ)
+
+| 項目 | v0.3.5 | v0.3.6 |
+|---|---|---|
+| Map Calibration保存 | 書き込み成功のみで成功表示 | 保存後に再読み込みして内容を検証し、一致した場合のみ成功表示 |
+| Categoryの対象 | 4リスト共通(ini/storage/library/logのうちini/storage/libraryにフィルターUIあり) | Location Library専用(ini/storage/logのCategory UI・データを廃止) |
+| My Storageの保存形式 | JSON(`ARKASAWaypoints.json`) | プレーンテキスト・1行1Waypoint(`ARKASAWaypointManager_MyStorage.txt`) |
+
+その他の仕様・UI・動作(v0.3.5までに実装済みのすべての機能)は変更していない。
+
+## 1. Map Calibration保存処理の修正
+
+### 1.1 不具合
+
+`Save MapConfig`実行時、`maps/<MapName>/`フォルダの作成・空の
+`config.json`の作成までは行われるが、実際の座標値(JSON本文)が
+書き込まれない場合があった。
+
+### 1.2 修正内容
+
+`map_config.js`の`writeMapConfigFiles()`を以下の手順へ変更した。
+
+```
+1. Current Map(mapConfig.mapName)からフォルダ名を導出する
+2. maps/<フォルダ名>/ が存在しなければ作成する
+3. config.json が存在しなければ作成する(getOrCreateFile)
+4. 現在のMapConfigをJSONとして書き込む(上書き)
+5. 同じファイルハンドルから再度 readFile() し、書き込んだ内容を読み戻す
+6. 読み戻した内容(JSON.parse結果)と、書き込もうとした内容
+   (mapConfig.toJSON())の主要フィールドを比較する
+7. 一致しない場合は success:false を返す(例外は投げない)
+8. 一致した場合のみ success:true を返し、呼び出し元(app.js)が
+   「MapConfig saved.」という成功メッセージを表示する
+```
+
+比較は`mapConfigJsonEquals(a, b)`が、`mapName` / `displayName` /
+`latitudeScale` / `longitudeScale` / `latitudeOrigin` / `longitudeOrigin` /
+`defaultZoom` / `minZoom` / `maxZoom` の全フィールドについて厳密等価
+(`===`)で行う。
+
+この検証により、「画面上だけ更新されていても完了とはしないこと」
+「実際にconfig.jsonの内容が更新されていることを成功条件とする」という
+要件を、根本原因(ハンドルの不整合・書き込みタイミングの問題等)を
+特定できない場合でも確実に満たせるようにしている。検証に失敗した場合は
+`app.js`の`onSaveMapConfig()`が既存の失敗処理(エラーメッセージ表示、
+成功表示のスキップ)をそのまま行う。
+
+なお、v0.3.2で実装済みの「ハンドルが無効な場合の自己修復リトライ」
+(`saveMapConfigToProject()`の`try/catch`によるフォルダ再選択)は
+そのまま維持しており、`writeMapConfigFiles()`が**例外を投げた場合**の
+リトライ対象である(検証失敗による`success:false`はリトライ対象外とし、
+そのまま失敗として報告する)。
+
+## 2. Categoryの扱い変更
+
+### 2.1 対象範囲
+
+Categoryは元々ARKのSavedMinimapMarksフォーマットに存在しない、
+アプリ独自の管理情報である。この性質を踏まえ、Categoryを保持・編集・
+フィルターできる対象を**Location Libraryのみ**に限定した。
+
+| リスト | v0.3.5 | v0.3.6 |
+|---|---|---|
+| GameUserSettings.ini | Categoryフィルターあり | Categoryフィルターなし |
+| My Storage | Categoryフィルターあり | Categoryフィルターなし |
+| Location Library | Categoryフィルターあり | 変更なし(維持) |
+| Waypoint Log | Categoryフィルターなし(元々ini同様のデータ) | 変更なし |
+
+### 2.2 UI変更
+
+- 一覧のCategoryフィルター(`<select class="category-filter">`)を
+  GameUserSettings.ini / My Storage / Waypoint Logの検索行から削除した
+  (`index.html`)。Location Libraryのみ引き続き表示する
+- `WaypointListController`の生成時、`categoryFilterEl`をLocation Library
+  以外へは渡さないよう変更した(`app.js`の`createControllers()`)。
+  `WaypointListController`自体の実装(Categoryフィルターに対応する
+  ロジック)は変更していない。単に利用箇所を制限しただけである
+- Add/Editモーダルの Category入力欄(`#formCategoryField`)は、
+  `openAddEditModal(listKey, id)`が`listKey === 'library'`の場合のみ
+  表示するよう変更した(`classList.toggle('hidden', !isLibrary)`)。
+  GameUserSettings.ini / My StorageのWaypointを追加・編集する際は
+  Category欄自体が表示されない
+- Category入力欄の候補(`populateCategoryCandidates()`)も、
+  Location Library自身に存在するCategoryのみから生成するよう変更した
+  (v0.3.5まではLocation Library・My Storage・GameUserSettings.iniの
+  3つから候補を集めていたが、後者2つは元々Categoryを持たなくなった
+  ため対象から外した)
+
+### 2.3 データモデル
+
+`waypoint.js`の`parsed.category`フィールド自体は、内部データモデルの
+一貫性を保つため引き続き存在する(すべてのWaypointが同じ形のオブジェクト
+であることを保つ設計を維持するため)。ただし、GameUserSettings.ini /
+My Storageから生成されるWaypointの`category`は、UIから設定する手段が
+無いため常に空文字列のままとなり、実質的に「Categoryが存在しない」状態と
+同義になる。RawTextやMy Storageのテキスト形式にはそもそもCategoryを
+表現するフィールドが無いため、保存・読込のいずれの経路でもCategoryが
+これらのデータへ混入することはない。
+
+## 3. My Storageの保存形式変更
+
+### 3.1 フォーマット
+
+保存ファイル名を`ARKASAWaypoints.json`から
+`ARKASAWaypointManager_MyStorage.txt`(UTF-8プレーンテキスト)へ変更した。
+
+```text
+SavedMinimapMarks=(Name="Metal",CustomTag="Waypoint",Location=(...),...)
+SavedMinimapMarks=(Name="Crystal",CustomTag="Waypoint",Location=(...),...)
+```
+
+1行に1つのWaypoint(1つの`SavedMinimapMarks=`行)を書き込む。JSON形式
+(角括弧・波括弧によるオブジェクト配列)は一切使用しない。
+
+### 3.2 実装
+
+`storage.js`を全面的に書き換えた。
+
+```js
+export function serializeStorage(waypoints) {
+  const lines = waypoints.map((wp) => wp.rawText).filter((line) => line?.trim() !== '');
+  return lines.length > 0 ? lines.join('\n') + '\n' : '';
+}
+
+export function parseStorage(text) {
+  if (!text || text.trim() === '') return [];
+  const entries = parseSavedMinimapMarks(text); // GameUserSettings.iniと同じParser
+  return entries.map((e) => createWaypoint({ rawText: e.rawText, parsed: convertToWaypointData(e), source: 'Storage' }));
+}
+```
+
+`parseSavedMinimapMarks()`(`ini_parser.js`)は元々「`SavedMinimapMarks=`で
+始まる行のみを読み込み、それ以外の行(空行を含む)は無視する」という
+実装になっているため、要件の「空行は無視する」「`SavedMinimapMarks=`で
+始まる行のみ読み込む」は、GameUserSettings.ini用のParserをそのまま
+再利用するだけで自然に満たされる。JSON用の読み書き処理
+(旧`JSON_VERSION`・`createEmptyStorage`等)はすべて削除した。
+
+### 3.3 ファイル操作の変更
+
+`file_manager.js`へ、プレーンテキスト(.txt)用のファイルピッカーを
+新設した。
+
+- `pickOpenTextFile(description)`: 既存の`.txt`ファイルを開く
+  (`showOpenFilePicker`、`text/plain`/`.txt`フィルター)
+- `pickSaveTextFile(suggestedName, description)`: 任意の場所へ`.txt`
+  ファイルを保存する(`showSaveFilePicker`)
+
+`app.js`の`onStorageRead()` / `onStorageSave()` / `autoSaveStorage()`は、
+これらのテキスト用ピッカーおよび`serializeStorage()`/`parseStorage()`
+(新実装)を使うよう変更した。JSON専用だった`pickOrCreateJsonFile()`
+(`file_manager.js`)は、My Storageでの利用が無くなったため削除した
+(Location Libraryは引き続きJSON形式のため、`pickOpenJsonFile()` /
+`pickSaveJsonFile()`は維持している)。
+
+### 3.4 [ARKASAWaypointManager]セクションの修正
+
+`ini_parser.js`の`ensureWaypointManagerSection()`が、
+`GameUserSettings.ini`へ追加する`[ARKASAWaypointManager]`セクションの
+`DatabaseFile`値を、新しいファイル名に合わせて修正した。
+
+```ini
+[ARKASAWaypointManager]
+DatabaseFile=ARKASAWaypointManager_MyStorage.txt
+```
+
+(v0.3.5までは`DatabaseFile=ARKASAWaypoints.json`のままになっており、
+実際のファイル名と一致していなかった)
+
+### 3.5 保存場所について(v0.3.1から継続の既知の制約)
+
+要件の「保存場所は従来通り、GameUserSettings.iniと同じフォルダとする」
+について、File System Access APIには「あるファイルハンドルから、その
+親ディレクトリや兄弟ファイルを取得する」手段が存在しないため、
+アプリが自動的にGameUserSettings.iniと同じフォルダを検出して保存する
+ことは技術的にできない。この制約はv0.1以来一貫して同じであり、
+ユーザーがファイル選択ダイアログで手動的に同じフォルダを選ぶ運用を
+前提としている。
+
+## 4. モジュール構成(変更分)
+
+| ファイル | v0.3.6での変更 |
+|---|---|
+| `js/map_config.js` | `writeMapConfigFiles()`へ保存後の再読み込み検証を追加 |
+| `js/storage.js` | JSON形式を廃止し、プレーンテキスト(1行1Waypoint)形式へ全面書き換え |
+| `js/ini_parser.js` | `ensureWaypointManagerSection()`のDatabaseFile値を新ファイル名に修正 |
+| `js/file_manager.js` | `pickOpenTextFile`/`pickSaveTextFile`を追加、`pickOrCreateJsonFile`を削除 |
+| `js/app.js` | My Storageの読込/保存/自動保存をテキスト形式へ切替。Category関連のUI配線をLocation Library専用に縮小 |
+| `index.html` | GameUserSettings.ini / My Storage / Waypoint LogのCategoryフィルターを削除。Add/EditモーダルのCategory欄にIDを付与(表示切替用) |
+
+`waypoint.js` / `waypoint_list.js` / `location_library.js` /
+`coordinate_converter.js` / `map_calibration.js` / `mark_icon.js` /
+`waypoint_icon.js` / `settings_store.js` / `css/style.css` は、
+今回の差分に関係する箇所以外は変更していない。
+
+## 5. 今回実装しない機能
+
+(Map Viewer本体は v0.3.7 で実装済み。`js/map_viewer.js` が担当し、外部ライブラリを使わずDOM/CSS transformで描画する。Grid表示も含む)
+
+
+- Route表示・距離計測・Grid表示
+- Community Library
+- Settingsパネルの拡充(Debug Mode以外の項目)

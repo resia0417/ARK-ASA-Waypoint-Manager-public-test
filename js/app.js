@@ -31,6 +31,7 @@ import {
   ensureWaypointManagerSection,
   buildRawText,
   rebuildIniText,
+  countUnrecognizedMarkLines,
 } from './ini_parser.js';
 import {
   createWaypoint,
@@ -50,6 +51,7 @@ import { getCachedMapConfig, resolveMapConfig, setCachedMapConfig, saveMapConfig
 import { createMapViewer } from './map_viewer.js';
 import { CALIBRATION_POINTS, autoDetectCalibrationPoints, calculateMapConfig } from './map_calibration.js';
 import { MARK_ICON_DEFINITIONS, findMarkIconById, findMarkIconByRawText, DEFAULT_MARK_ICON_ID, renderWaypointIconHtml, mountWaypointIcon } from './waypoint_icon.js';
+import { escapeHtml, formatNum, clamp01 } from './util.js';
 
 const LIST_KEYS = ['ini', 'storage', 'library', 'log'];
 const LABELS = { ini: 'GameUserSettings.ini', storage: 'My Storage', library: 'Location Library', log: 'Waypoint Log' };
@@ -64,6 +66,9 @@ const AUTO_SAVE_HANDLERS = {}; // listKey -> () => Promise<void> (init()の末�
 const controllers = {};
 let currentSelection = null; // { listKey, waypoint } | null
 let editingRef = null; // { listKey, id: string|null }
+// 編集開始時点のフォーム値と元のUE座標。Lat/Lon表示は小数3桁に
+// 丸められるため、未編集の保存で座標がずれるのを防ぐ(中9)
+let editingOriginalForm = null;
 let selectedMarkIconId = DEFAULT_MARK_ICON_ID; // Add/Editモーダルで現在選択中のMarkIcon
 let colorEditorApi = null; // Add/Editモーダル内のColor編集UI(getValue/setValue)
 let iconColorEditorApi = null; // 同、IconColor用
@@ -362,7 +367,7 @@ const pendingReconnect = [];
 async function tryRestoreLastSession() {
   const restored = [];
 
-  const attempt = async (label, mode, loadHandle, doLoad) => {
+  const attempt = async (label, mode, loadHandle, doLoad, clearHandle) => {
     try {
       const handle = await loadHandle();
       if (!handle) return;
@@ -373,7 +378,13 @@ async function tryRestoreLastSession() {
       } else if (state === 'prompt') {
         pendingReconnect.push({ label, mode, handle, doLoad });
       }
-    } catch (err) { console.info(`前回の${label}情報はありません:`, err.message); }
+    } catch (err) {
+      // ファイルが移動・削除されていたら、古いハンドルを破棄する(軽微13)
+      if (err?.name === 'NotFoundError' && clearHandle) {
+        try { await clearHandle(); } catch { /* 破棄の失敗は無視する */ }
+      }
+      console.info(`前回の${label}情報はありません:`, err.message);
+    }
   };
 
   await attempt('GameUserSettings.ini', 'readwrite', () => fm.loadLastIniHandle(), async (handle) => {
@@ -381,7 +392,7 @@ async function tryRestoreLastSession() {
     await loadIniLikeFile(handle, 'ini');
     markRead('ini');
     markClean('ini');
-  });
+  }, () => fm.clearLastIniHandle());
 
   await attempt('My Storage', 'readwrite', () => fm.loadLastJsonHandle(), async (handle) => {
     storageFileHandle = handle;
@@ -389,12 +400,12 @@ async function tryRestoreLastSession() {
     controllers.storage.setAll(parseStorage(text));
     markRead('storage');
     markClean('storage');
-  });
+  }, () => fm.clearLastJsonHandle());
 
   await attempt('Waypoint Log', 'read', () => fm.loadLastLogHandle(), async (handle) => {
     logFileHandle = handle;
     await loadIniLikeFile(handle, 'log');
-  });
+  }, () => fm.clearLastLogHandle());
 
   await attempt('Location Library', 'readwrite', () => fm.loadLastLibraryHandle(), async (handle) => {
     libraryFileHandle = handle;
@@ -402,7 +413,7 @@ async function tryRestoreLastSession() {
     controllers.library.setAll(parseLibrary(text));
     markRead('library');
     markClean('library');
-  });
+  }, () => fm.clearLastLibraryHandle());
 
   applySavedMapSelection();
 
@@ -460,7 +471,19 @@ async function loadIniLikeFile(handle, listKey) {
     createWaypoint({ rawText: e.rawText, parsed: convertToWaypointData(e), source: SOURCE_FIELD[listKey] })
   );
   controllers[listKey].setAll(list);
-  return list;
+  return {
+    list,
+    warningCount: entries.filter((e) => e.warning).length,
+    unrecognizedCount: countUnrecognizedMarkLines(text),
+  };
+}
+
+/** 読込結果への注意書き(座標が不完全な行・未認識の行)を組み立てる。 */
+function loadNoticeText({ warningCount, unrecognizedCount }) {
+  let note = '';
+  if (warningCount > 0) note += `座標が不完全な行が${warningCount}件あります。`;
+  if (unrecognizedCount > 0) note += `未認識の行が${unrecognizedCount}件あります(壊れている可能性があります)。`;
+  return note;
 }
 
 // --- ツールバー: GameUserSettings.ini ------------------------------------
@@ -522,20 +545,18 @@ async function onIniRead() {
     const handle = await fm.pickIniFile();
     if (!handle) return;
 
+    const result = await loadIniLikeFile(handle, 'ini');
     iniFileHandle = handle;
     await fm.saveLastIniHandle(handle);
-    const list = await loadIniLikeFile(handle, 'ini');
     markRead('ini');
     markClean('ini');
-    setStatus(`GameUserSettings.iniから${list.length}件のWaypointを読み込みました。`);
+    // [ARKASAWaypointManager]セクションの追加はINI保存時に行う。
+    // Readするだけでゲームの設定ファイルを書き換えないため(v0.6.9)
+    const sectionNote = ensureWaypointManagerSection(iniOriginalText).added
+      ? '[ARKASAWaypointManager]セクションはINI保存時に追加されます。'
+      : '';
+    setStatus(`GameUserSettings.iniから${result.list.length}件のWaypointを読み込みました。${loadNoticeText(result)}${sectionNote}`);
     refreshMapSelection();
-
-    const { text: updatedText, added } = ensureWaypointManagerSection(iniOriginalText);
-    if (added) {
-      await fm.writeFile(iniFileHandle, updatedText);
-      iniOriginalText = updatedText;
-      setStatus('[ARKASAWaypointManager]セクションをGameUserSettings.iniへ追加しました。');
-    }
 
     // My Storage(ARKASAWaypointManager_MyStorage.txt)がまだ紐付いていない
     // 場合、My Storageタブを開いて[Read]での新規作成を促す
@@ -590,12 +611,14 @@ async function onIniSave() {
       usedFreshBase = true;
     }
 
-    const newText = rebuildIniText(baseText, controllers.ini.getAll());
+    let newText = rebuildIniText(baseText, controllers.ini.getAll());
+    const ensured = ensureWaypointManagerSection(newText);
+    newText = ensured.text;
     await fm.saveIniBackup(currentText);
     await fm.writeFile(iniFileHandle, newText);
     iniOriginalText = newText;
     markClean('ini');
-    setStatus(`GameUserSettings.iniへ保存しました(${controllers.ini.getAll().length}件)${usedFreshBase ? '。読み込み後の外部変更も保持しました' : ''}。`);
+    setStatus(`GameUserSettings.iniへ保存しました(${controllers.ini.getAll().length}件)${usedFreshBase ? '。読み込み後の外部変更も保持しました' : ''}${ensured.added ? '。[ARKASAWaypointManager]セクションを追加しました' : ''}。`);
   } catch (err) {
     console.error(err);
     setStatus('GameUserSettings.iniの保存中にエラーが発生しました: ' + err.message);
@@ -613,10 +636,10 @@ async function onStorageRead() {
     const handle = await fm.pickOpenTextFile('ARK ASA My Storage (SavedMinimapMarks text)');
     if (!handle) return;
     storageFileHandle = handle;
-    await fm.saveLastJsonHandle(handle);
 
     const text = await fm.readFile(handle);
     const list = parseStorage(text);
+    await fm.saveLastJsonHandle(handle);
     controllers.storage.setAll(list);
     markRead('storage');
     markClean('storage');
@@ -657,10 +680,10 @@ async function onLibraryRead() {
     const handle = await fm.pickOpenJsonFile('Location Library JSON');
     if (!handle) return;
     libraryFileHandle = handle;
-    await fm.saveLastLibraryHandle(handle);
 
     const text = await fm.readFile(handle);
     const list = parseLibrary(text);
+    await fm.saveLastLibraryHandle(handle);
     controllers.library.setAll(list);
     markRead('library');
     markClean('library');
@@ -691,10 +714,10 @@ async function onLogOpen() {
   try {
     const handle = await fm.pickLogFile();
     if (!handle) return;
+    const result = await loadIniLikeFile(handle, 'log');
     logFileHandle = handle;
     await fm.saveLastLogHandle(handle);
-    const list = await loadIniLikeFile(handle, 'log');
-    setStatus(`Waypoint Logから${list.length}件のWaypointを読み込みました。`);
+    setStatus(`Waypoint Logから${result.list.length}件のWaypointを読み込みました。${loadNoticeText(result)}`);
     refreshMapSelection();
   } catch (err) {
     console.error(err);
@@ -769,11 +792,13 @@ async function openAddEditModal(listKey, id) {
     const config = await resolveMapConfig(resolveEffectiveMapName(wp.parsed.map, wp.parsed.z));
     const { lat, lon } = new CoordinateConverter(config).ueToGame(wp.parsed.x, wp.parsed.y);
     fillForm({ ...wp.parsed, lat, lon });
+    editingOriginalForm = { lat: els.formLat.value, lon: els.formLon.value, map: els.formMap.value, x: wp.parsed.x, y: wp.parsed.y };
   } else {
     els.modalTitle.textContent = `Waypoint を追加 (${LABELS[listKey]})`;
     // MapNameの初期値はCurrent Mapの選択中マップ(v0.5.1: All Maps廃止のため、
     // データがあれば常に特定マップが選択されている。Genesis陸/海の別名は保存時に正規化される)
     const defaultMap = viewerMapName;
+    editingOriginalForm = null;
     fillForm({ ...createWaypoint().parsed, lat: 0, lon: 0, map: defaultMap });
   }
   els.editModal.classList.remove('hidden');
@@ -783,6 +808,7 @@ async function openAddEditModal(listKey, id) {
 function closeModal() {
   els.editModal.classList.add('hidden');
   editingRef = null;
+  editingOriginalForm = null;
 }
 
 function fillForm(parsed) {
@@ -906,11 +932,6 @@ function createColorEditor(container, initial, onChange) {
   return { getValue, setValue };
 }
 
-function clamp01(n) {
-  if (!Number.isFinite(n)) return 1;
-  return Math.min(1, Math.max(0, n));
-}
-
 // --- MarkIconピッカー(SVGアイコン付きカスタムドロップダウン) -----------------
 
 function openIconPickerPopover(e) {
@@ -976,6 +997,10 @@ async function onModalSave() {
     alert('Lat / Lon は数値を入力してください。');
     return;
   }
+  if (els.formZ.value.trim() === '' || isNaN(Number(zValue))) {
+    alert('Z は数値を入力してください。');
+    return;
+  }
 
   // Genesis の実効MapName(Genesis1_WP / Genesis1Ocean_WP)が入力された場合は、
   // INI上の正式名 Genesis_WP へ戻し、意図はZ座標で表す。Zが意図と反対側の
@@ -993,15 +1018,24 @@ async function onModalSave() {
   // Lat/Lon(ゲーム内マップ座標)をUE座標へ変換する。
   // 座標計算そのものはCoordinateConverter/MapConfigが担い、ここでは呼び出すのみ。
   // Genesis_WP の場合はZで振り分けた実効MapNameの config を使う。
-  const config = await resolveMapConfig(resolveEffectiveMapName(map, Number(zValue)));
-  const { x, y } = new CoordinateConverter(config).gameToUe(lat, lon);
+  let x, y;
+  if (editingRef.id && editingOriginalForm
+    && els.formLat.value === editingOriginalForm.lat
+    && els.formLon.value === editingOriginalForm.lon
+    && els.formMap.value === editingOriginalForm.map) {
+    // Lat/Lon/MapNameが未編集なら、丸め誤差を避けて元のUE座標を保持する(中9)
+    ({ x, y } = editingOriginalForm);
+  } else {
+    const config = await resolveMapConfig(resolveEffectiveMapName(map, Number(zValue)));
+    ({ x, y } = new CoordinateConverter(config).gameToUe(lat, lon));
+  }
   const markIconDef = findMarkIconById(selectedMarkIconId);
 
   const parsed = {
     name: els.formName.value.trim(),
     map,
     x, y,
-    z: zValue,
+    z: Number(zValue),
     customTag: els.formTag.value.trim(),
     // Categoryは Location Library専用の管理情報。GameUserSettings.ini /
     // My Storageのデータには保持しない(要件2への対応)。
@@ -1566,12 +1600,6 @@ function renderCalibrationValidateResult(mapConfig, saveResult) {
 // --- ユーティリティ -------------------------------------------------------
 
 function setStatus(message) { els.statusText.textContent = message; }
-function formatNum(n) { return Number.isFinite(n) ? String(n) : '0'; }
-function escapeHtml(str) {
-  const div = document.createElement('div');
-  div.textContent = String(str ?? '');
-  return div.innerHTML;
-}
 
 // --- スマートフォンアクセス警告(起動前ゲート) --------------------------------
 //

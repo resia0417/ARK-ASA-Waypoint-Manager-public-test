@@ -34,6 +34,8 @@
 // Icon列も同様に、実際の描画は app.js が注入する getIconMarkup(wp)
 // コールバック(内部でwaypoint_icon.jsのWaypointIconを利用する)に委譲する
 // (要件12「アイコン描画処理はWaypointIconへ集約してください」への対応)。
+import { escapeHtml as esc, formatNum } from './util.js';
+
 const CONFIGURABLE_COLUMNS = [
   { key: 'lat', label: 'Lat', numeric: true },
   { key: 'lon', label: 'Lon', numeric: true },
@@ -518,16 +520,6 @@ export class WaypointListController {
     this._closePopover();
     this.render();
   }
-}
-
-function esc(str) {
-  const div = document.createElement('div');
-  div.textContent = String(str ?? '');
-  return div.innerHTML;
-}
-
-function formatNum(n) {
-  return Number.isFinite(n) ? String(n) : '0';
 }
 
 function round2(n) {

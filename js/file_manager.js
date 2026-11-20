@@ -248,28 +248,6 @@ export async function pickOpenTextFile(description = 'Text file') {
 }
 
 /**
- * 任意のテキスト(.txt)ファイルを、任意の場所へ保存するためのファイルピッカー。
- * @param {string} suggestedName
- * @param {string} description
- * @returns {Promise<FileSystemFileHandle|null>}
- */
-export async function pickSaveTextFile(suggestedName, description = 'Text file') {
-  if (!isFileSystemAccessSupported()) {
-    throw new Error('このブラウザはFile System Access APIに対応していません(Chrome/Edge推奨)。');
-  }
-  try {
-    const handle = await window.showSaveFilePicker({
-      suggestedName,
-      types: [{ description, accept: { 'text/plain': ['.txt'] } }],
-    });
-    return handle;
-  } catch (err) {
-    if (err.name === 'AbortError') return null;
-    throw err;
-  }
-}
-
-/**
  * ファイルハンドルの読み取り/書き込み権限を確認し、必要であれば
  * ユーザーへ許可ダイアログを表示する。
  * @param {FileSystemFileHandle} handle
@@ -362,6 +340,18 @@ export async function loadLastMapsRootHandle() {
   return await idbGet(KEY_MAPS_ROOT_HANDLE);
 }
 /** 記憶されたmaps/ルートフォルダのハンドルを破棄する(自己修復リトライ用)。 */
+export async function clearLastIniHandle() {
+  await idbDelete(KEY_INI_HANDLE);
+}
+export async function clearLastJsonHandle() {
+  await idbDelete(KEY_JSON_HANDLE);
+}
+export async function clearLastLogHandle() {
+  await idbDelete(KEY_LOG_HANDLE);
+}
+export async function clearLastLibraryHandle() {
+  await idbDelete(KEY_LIBRARY_HANDLE);
+}
 export async function clearLastMapsRootHandle() {
   await idbDelete(KEY_MAPS_ROOT_HANDLE);
 }

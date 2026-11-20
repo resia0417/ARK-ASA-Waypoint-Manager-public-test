@@ -1,75 +1,44 @@
-# ARK ASA Waypoint Manager Web (v0.3.6)
+# ARK ASA Waypoint Manager Web (v0.6.9)
 
-ARK: Survival Ascended の `GameUserSettings.ini` に保存されている `SavedMinimapMarks` を読み込み、
-Waypoint(拠点マーカー)を一覧管理・追加・編集・削除できるローカル動作型のWebツールです。
+ARK: Survival Ascended の `GameUserSettings.ini` に保存されている `SavedMinimapMarks`(ゲーム内Waypoint)を、ブラウザだけで読み込み・一覧管理・追加・編集・削除できるWebツールです。
 
-サーバー不要・インストール不要で、ブラウザだけで動作します。GitHub Pagesでの公開も可能です。
+サーバー不要・インストール不要。ファイルの読み書きには Chrome / Edge の File System Access API を使い、あなたのPC上のファイルを直接編集します(ファイルが外部へ送信されることはありません)。
 
-## v0.3.6での変更点(v0.3.5からの差分)
+**▶ 使ってみる: https://resia0417.github.io/ARK-ASA-Waypoint-Manager-public-test/**
 
-### 1. Map Calibration保存処理の不具合修正
+## 使い方
 
-`Save MapConfig`実行時、`maps/<MapName>/`フォルダ・空の`config.json`は
-作成されるものの、**config.jsonの内容自体が保存されていない**場合がある
-不具合を修正しました。保存処理を、書き込み後に**ファイルを再読み込みして
-内容を検証**するよう変更し、画面上の情報だけで成功とみなさないようにしました。
-再読み込みした内容が一致しない場合は失敗として扱い、成功メッセージは
-表示しません。
+1. このページを開く(GitHub Pages、またはローカルの `index.html`)
+2. 左カラム「GameUserSettings.ini」の Read から、ARKの `GameUserSettings.ini` を選ぶ
+   - 場所の目安: `ShooterGame/Saved/Config/Windows/GameUserSettings.ini`
+3. 一覧と地図にWaypointが表示される。行右端のペンで編集、ゴミ箱で削除、一覧末尾の行から追加
+4. 編集したら、左カラム見出し右端の Save でINIへ書き戻す(確認ダイアログ付き)
+5. My Storage / Location Library / Waypoint Log は右カラムのタブで切り替える
 
-### 2. Categoryの扱いをLocation Library専用に変更
+## 主な機能
 
-Categoryはゲーム内のWaypointデータには存在しない、あくまで管理用の情報で
-あるため、以下の通り扱いを整理しました。
+- 公式11マップ分の地図を画面上部に2枚並べて常時表示(左=INI、右=選択中タブ)。パン・ズーム連動、マーカー表示、座標グリッド、ダブルクリックで全体表示。地図を隠すと全Waypoint表示に切り替わる
+- Genesis Part 1 はZ座標で陸(Genesis1)/海(Genesis1Ocean)を自動判別(保存されるMapNameは `Genesis_WP` のまま)
+- Waypointアイコンはゲーム実物準拠(資源4種はゲーム内スクリーンショット由来の画像)
+- 4つのリスト: GameUserSettings.ini / My Storage(.txt)/ Location Library(.json、Category管理)/ Waypoint Log(読み取り専用)
+- リスト間のドラッグ&ドロップ、検索、CustomTag重複確認
+- 前回開いたファイルの自動復元(権限の再許可が必要な場合は「前回のファイルを再接続」ボタンから)
+- Map Calibration(マップごとの座標校正)とMapConfig保存(保存後にファイルを再読込して内容を検証)
 
-- **GameUserSettings.ini / My Storage**: Categoryを使用しません
-  (Add/Editダイアログのフィールド自体を非表示にしました。一覧の
-  Categoryフィルターも表示しません)
-- **Location Library**: 従来通り、Categoryの保持・編集・フィルターに
-  対応しています
+## データの安全性
 
-### 3. My Storageの保存形式変更
+- INI保存時は、保存直前にファイルを読み直し、読み込み後にゲーム側で変わった内容を保持します。Waypoint行自体が変わっていた場合は追加で確認します
+- 上書き直前の内容はブラウザ内(IndexedDB)にバックアップします
+- 編集は最上位フィールド単位で行い、触っていない項目・壊れた行・Waypoint以外の行は原文のまま保持します
+- 名前だけの編集では座標を書き換えません(表示の丸め誤差で座標がずれない設計)
+- Read操作でファイルを変更することはありません
 
-保存ファイル名を `ARKASAWaypoints.json`(JSON)から
-**`ARKASAWaypointManager_MyStorage.txt`**(UTF-8プレーンテキスト)へ
-変更しました。
+## My Storageについて
 
-```text
-SavedMinimapMarks=(Name="Metal",CustomTag="Waypoint",Location=(...),...)
-SavedMinimapMarks=(Name="Crystal",CustomTag="Waypoint",Location=(...),...)
-```
-
-- 1行につき1Waypoint(`SavedMinimapMarks=`で始まる行)
-- 空行・それ以外の行は無視されます
-- GameUserSettings.iniと全く同じParserを再利用しているため、
-  GameUserSettings.iniとの間でテキストをそのままコピー&ペーストできます
-- メモ帳などのテキストエディタだけでも編集・バックアップ可能です
-
-JSON形式の読み書き処理は完全に廃止しました。
-
-既存機能(GameUserSettings.ini / My Storage / Location Library / Waypoint Logの
-4リスト、検索・ソート・列設定・Splitter・Current Map・ドラッグ&ドロップ・
-詳細ペイン・自動保存、Lat/Lon表示・入力、Debug Mode、Map Calibration/
-MapConfig Manager、WaypointIcon共通描画、Read✓表示・Save有効/無効化、
-CustomTag重複確認、スマートフォン警告など)はすべて維持しています。
-
-## My Storageのファイルについて
-
-- ファイル名: `ARKASAWaypointManager_MyStorage.txt`
-- 保存場所: 従来通り、任意の場所を選べます(File System Access APIの
-  仕様上、「GameUserSettings.iniと自動的に同じフォルダへ」保存することは
-  技術的にできないため、`[Read]`/`[Save]`のファイル選択ダイアログで
-  GameUserSettings.iniと同じフォルダを選んでください)
-- `[Read]`: 既存の`.txt`ファイルを開きます(ネイティブのOpenダイアログ)
-- `[Save]`: まだファイルに紐付いていない場合は新規保存ダイアログを表示し、
-  以降は同じファイルへ上書き保存します
-
-## Map Calibration保存の検証について
-
-`Save MapConfig`は、`config.json`への書き込み後、同じファイルを
-再読み込みして、保存しようとした内容と実際にディスクへ書き込まれた
-内容が一致するかを確認します。一致しない場合(書き込み失敗・ハンドルの
-不整合など)は保存失敗として扱い、`MapConfig saved.`という成功表示は
-行いません。
+- ファイル名: `ARKASAWaypointManager_MyStorage.txt`(UTF-8プレーンテキスト)
+- 1行につき1Waypoint(`SavedMinimapMarks=` で始まる行)で、GameUserSettings.iniと全く同じ形式・同じParserを使うため、相互にコピー&ペーストできます
+- Read: 既存の `.txt` ファイルを開きます(新規作成は空の `.txt` を用意してReadしてください)
+- Save: Readしたのと同じファイルへ上書き保存します
 
 ## 対応ブラウザ
 
@@ -78,8 +47,7 @@ CustomTag重複確認、スマートフォン警告など)はすべて維持し�
 - Google Chrome (最新版)
 - Microsoft Edge (最新版)
 
-Firefox / Safari は File System Access API 未対応のため、現時点では動作しません。
-また、スマートフォンでのアクセスは動作対象外です(確認ダイアログが表示されます)。
+Firefox / Safari は File System Access API 未対応のため動作しません。また、スマートフォンでのアクセスは動作対象外です(確認ダイアログが表示されます)。
 
 ## GitHub Pages公開方法
 
@@ -87,7 +55,6 @@ Firefox / Safari は File System Access API 未対応のため、現時点では
 2. リポジトリの `Settings > Pages` を開く
 3. `Source` を `Deploy from a branch` に設定し、対象ブランチとルートディレクトリ(`/`)を選択する
 4. 数分後、`https://<ユーザー名>.github.io/<リポジトリ名>/` でアクセス可能になります
-5. `index.html` 内の `#githubLink` のリンク先を、実際のリポジトリURLに更新してください
 
 ※ File System Access APIはHTTPS環境(GitHub Pagesを含む)または `localhost` でのみ動作します。
 
@@ -98,36 +65,36 @@ ARK-ASA-Waypoint-Manager-Web/
 ├─ index.html
 ├─ README.md
 ├─ LICENSE
-├─ .gitignore
 ├─ css/
 │  └─ style.css
 ├─ js/
 │  ├─ app.js                  … メインコントローラー
-│  ├─ waypoint_list.js         … 4リスト共通のWaypoint一覧コンポーネント
-│  ├─ ini_parser.js
+│  ├─ waypoint_list.js         … リスト共通のWaypoint一覧コンポーネント
+│  ├─ map_viewer.js            … 地図2枚の表示・マーカー・連動ズーム
+│  ├─ ini_parser.js            … SavedMinimapMarksの解析と書き戻し
 │  ├─ waypoint.js
 │  ├─ storage.js               … My Storage(プレーンテキスト形式)の読み書き
 │  ├─ location_library.js      … Location Library(JSON、Category保持)の読み書き
-│  ├─ mark_icon.js
-│  ├─ waypoint_icon.js
-│  ├─ coordinate_converter.js
-│  ├─ map_config.js            … MapConfigクラス・保存/読込/検証(再読込検証対応)
-│  ├─ map_calibration.js
-│  ├─ settings_store.js
-│  └─ file_manager.js          … File System Access API(テキスト用ピッカーを追加)
+│  ├─ mark_icon.js             … MarkIcon定義
+│  ├─ waypoint_icon.js         … アイコン描画(共通)
+│  ├─ icon_images.js           … 資源アイコン画像(データURI)
+│  ├─ coordinate_converter.js  … Lat/Lon ⇔ UE座標の変換
+│  ├─ map_config.js            … MapConfigクラス・保存/読込/検証
+│  ├─ map_calibration.js       … 座標キャリブレーション
+│  ├─ settings_store.js        … 設定の保存(localStorage)
+│  ├─ file_manager.js          … File System Access API・ハンドル管理
+│  └─ util.js                  … 共通の小物関数
 ├─ assets/
 │  └─ waypoint-icons/
-├─ maps/
+├─ maps/                       … マップごとの地図画像(.webp)とconfig.json
 ├─ data/
-│  ├─ ARKASAWaypointManager_MyStorage.txt   … My Storageのサンプル(プレーンテキスト)
-│  └─ LocationLibrary/waypoints.json
 └─ docs/
    └─ specification.md
 ```
 
-## 今後追加予定の機能(Phase 2以降)
+## 今後の予定
 
-- Map Viewer本体(Leaflet / Marker Layer / Route / Distance Measure / Grid)
+- ルート表示と距離測定
 - Community Library
 - Settingsパネルの拡充
 

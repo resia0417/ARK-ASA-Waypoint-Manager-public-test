@@ -79,7 +79,10 @@ export function parseLibrary(jsonText) {
 
     const parsed = convertToWaypointData(parsedEntries[0]);
     if (typeof entry === 'object') {
-      if (entry.map) parsed.map = String(entry.map);
+      // entry.map は rawText に MapName が無い場合の予備としてのみ使う。
+      // rawText 側を上書きすると、コピー時に rawText の MapName と
+      // 食い違ってしまうため(v0.6.9)
+      if (entry.map && (!parsed.map || parsed.map.trim() === '')) parsed.map = String(entry.map);
       parsed.category = String(entry.category ?? '').trim();
     } else {
       parsed.category = '';

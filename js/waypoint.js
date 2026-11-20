@@ -96,6 +96,9 @@ export function validateWaypoint(parsed) {
   if (!parsed.name || String(parsed.name).trim() === '') {
     errors.push('Name は必須です。');
   }
+  if (!parsed.map || String(parsed.map).trim() === '') {
+    errors.push('MapName は必須です。');
+  }
   if (parsed.x === '' || isNaN(Number(parsed.x))) errors.push('X は数値である必要があります。');
   if (parsed.y === '' || isNaN(Number(parsed.y))) errors.push('Y は数値である必要があります。');
   if (parsed.z === '' || isNaN(Number(parsed.z))) errors.push('Z は数値である必要があります。');

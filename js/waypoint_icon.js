@@ -24,6 +24,7 @@
 
 import { MARK_ICON_DEFINITIONS, findMarkIconById, findMarkIconByRawText, DEFAULT_MARK_ICON_ID } from './mark_icon.js';
 import { ICON_IMAGES } from './icon_images.js';
+import { escapeHtml, clamp01 } from './util.js';
 
 const ICON_ASSET_DIR = 'assets/waypoint-icons/';
 const BASE_ICON_ID = 'BaseIcon';
@@ -83,12 +84,6 @@ function toCssColor(color) {
   return `rgba(${r}, ${g}, ${b}, ${a})`;
 }
 
-function clamp01(n) {
-  const v = Number(n);
-  if (!Number.isFinite(v)) return 1;
-  return Math.min(1, Math.max(0, v));
-}
-
 /**
  * WaypointIconのHTML文字列を生成する。一覧のセルなど、innerHTMLへ
  * そのまま挿入できる文字列が必要な場面で使用する。
@@ -136,20 +131,6 @@ export function mountWaypointIcon(container, props) {
   container.innerHTML = html;
 }
 
-/**
- * Add/Editのドロップダウンなど、全MarkIcon候補を一覧表示したい場面向けに、
- * 各定義について現在の描画状況を返す(まだ読み込み中のものはnull)。
- * @param {(() => void)} onLoaded
- * @returns {Array<{def: object, svg: string|null}>}
- */
-export function getAllIconPreviewStates(onLoaded) {
-  return MARK_ICON_DEFINITIONS.map((def) => ({ def, svg: getCachedSvg(def.svg, onLoaded) }));
-}
 
 export { findMarkIconById, findMarkIconByRawText, DEFAULT_MARK_ICON_ID, MARK_ICON_DEFINITIONS };
 
-function escapeHtml(str) {
-  const div = document.createElement('div');
-  div.textContent = String(str ?? '');
-  return div.innerHTML;
-}

@@ -188,7 +188,11 @@ export class MapConfig {
    */
   toJSON() {
     return {
-      mapName: this.mapName,
+      // Genesis は陸/海どちらの config.json でも mapName を Genesis_WP に
+      // 統一する(保存されるWaypointのMapNameは常に Genesis_WP のため。v0.6.9)
+      mapName: (this.mapName === GENESIS_LAND_MAP_NAME || this.mapName === GENESIS_OCEAN_MAP_NAME)
+        ? GENESIS_MAP_NAME
+        : this.mapName,
       displayName: this.displayName,
       latitudeScale: this.latitudeScale,
       longitudeScale: this.longitudeScale,
@@ -327,6 +331,13 @@ export async function saveMapConfigToProject(mapConfig) {
   try {
     return await writeMapConfigFiles(rootHandle, mapConfig);
   } catch (err) {
+    // 自己修復(ハンドル破棄＋フォルダ再選択)は、ハンドル失効・権限系の
+    // エラーに限る。それ以外のエラーで再選択を促すと、ユーザー操作の
+    // 有効期限が切れて再選択自体が失敗するため(v0.6.9)
+    const handleLikeError = ['NotFoundError', 'NotAllowedError', 'SecurityError'].includes(err?.name);
+    if (!handleLikeError) {
+      return { success: false, error: `保存に失敗しました(${err.message})。` };
+    }
     // 記憶されていたmaps/フォルダのハンドルが無効になっている可能性がある
     // (フォルダの移動・削除、ブラウザ側でのハンドル失効など)。
     // 「例外で終了しないようにしてください」という要件のため、ここで

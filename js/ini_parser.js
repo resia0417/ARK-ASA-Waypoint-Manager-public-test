@@ -20,6 +20,22 @@
  * @param {string} iniText - GameUserSettings.ini の内容
  * @returns {Array<{rawText: string, parsed: object}>} 生の解析結果(キー名はゲーム内表記のまま)
  */
+/**
+ * "SavedMinimapMarks=" で始まらないのに MinimapMarks= を含む行
+ * (先頭のSが欠けた壊れた行など)の件数を返す。一覧には出ないが
+ * 書き戻しでは保持されるため、存在だけを知らせる用途(v0.6.9)。
+ * @param {string} iniText
+ * @returns {number}
+ */
+export function countUnrecognizedMarkLines(iniText) {
+  let count = 0;
+  for (const line of iniText.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed.startsWith('SavedMinimapMarks=') && /^[A-Za-z]*MinimapMarks=/.test(trimmed)) count++;
+  }
+  return count;
+}
+
 export function parseSavedMinimapMarks(iniText) {
   const lines = iniText.split(/\r?\n/);
   const results = [];
@@ -33,7 +49,14 @@ export function parseSavedMinimapMarks(iniText) {
 
     try {
       const parsed = parseParenObject(valuePart);
-      results.push({ rawText, parsed });
+      const entry = { rawText, parsed };
+      // LocationブロックやX/Y/Zが欠けている行は、黙って座標0にせず
+      // 警告フラグを付ける(呼び出し側で件数を知らせる。v0.6.9)
+      const loc = parsed.Location ?? parsed.Position ?? parsed.Pos;
+      const incomplete = !loc || typeof loc !== 'object'
+        || ['X', 'Y', 'Z'].some((k) => loc[k] === undefined || loc[k] === '' || isNaN(Number(loc[k])));
+      if (incomplete) entry.warning = true;
+      results.push(entry);
     } catch (err) {
       // 1行の解析に失敗しても他の行の処理は続行する
       console.error('SavedMinimapMarks行の解析に失敗しました:', line, err);
@@ -61,9 +84,12 @@ function parseParenObject(str) {
   const pairs = [];
   let depth = 0;
   let inQuotes = false;
+  let escaped = false;
   let current = '';
   for (let i = 0; i < str.length; i++) {
     const ch = str[i];
+    if (escaped) { current += ch; escaped = false; continue; }
+    if (inQuotes && ch === '\\') { current += ch; escaped = true; continue; }
     if (ch === '"') inQuotes = !inQuotes;
     if (!inQuotes) {
       if (ch === '(') depth++;
@@ -89,7 +115,7 @@ function parseParenObject(str) {
     if (value.startsWith('(') && value.endsWith(')')) {
       value = parseParenObject(value);
     } else if (value.startsWith('"') && value.endsWith('"')) {
-      value = value.substring(1, value.length - 1);
+      value = value.substring(1, value.length - 1).replace(/\\(.)/g, '$1');
     } else if (value !== '' && !isNaN(Number(value))) {
       value = Number(value);
     }
@@ -286,7 +312,7 @@ export function buildRawText(originalRawText, parsed) {
  *
  * 元のINIテキストから既存の "SavedMinimapMarks=" 行をすべて取り除き、
  * その最初の出現位置に、現在のWaypoint一覧のrawTextを差し込む。
- * SavedMinimapMarksが元々存在しなかった場合は、ファイル末尾に追加する。
+ * SavedMinimapMarksが元々存在しなかった場合は、ゲームが読むセクション内へ追加する。
  * SavedMinimapMarks以外の行(他の設定項目)はすべてそのまま保持される。
  *
  * @param {string} originalIniText
@@ -294,6 +320,8 @@ export function buildRawText(originalRawText, parsed) {
  * @returns {string}
  */
 export function rebuildIniText(originalIniText, waypoints) {
+  // 元ファイルの改行コード(CRLF/LF)をそのまま使う(v0.6.9)
+  const newline = originalIniText.includes('\r\n') ? '\r\n' : '\n';
   const lines = originalIniText.split(/\r?\n/);
   const keptLines = [];
   let insertIndex = -1;
@@ -310,11 +338,25 @@ export function rebuildIniText(originalIniText, waypoints) {
   const newMarkLines = waypoints.map((wp) => wp.rawText);
 
   if (insertIndex === -1) {
-    return keptLines.concat(newMarkLines).join('\n');
+    // SavedMinimapMarksが元々無いINIでは、ファイル末尾ではなく
+    // ゲームが読む [/Script/ShooterGame.ShooterGameUserSettings] セクション内へ
+    // 入れる(末尾だと [ARKASAWaypointManager] 等の別セクションに属して
+    // ゲームに読まれない恐れがある。v0.6.9)
+    const sectionIdx = keptLines.findIndex((l) => l.trim() === '[/Script/ShooterGame.ShooterGameUserSettings]');
+    if (sectionIdx !== -1) {
+      insertIndex = sectionIdx + 1;
+    } else {
+      const mgrIdx = keptLines.findIndex((l) => l.trim() === '[ARKASAWaypointManager]');
+      if (mgrIdx !== -1) insertIndex = mgrIdx;
+    }
+  }
+
+  if (insertIndex === -1) {
+    return keptLines.concat(newMarkLines).join(newline);
   }
 
   keptLines.splice(insertIndex, 0, ...newMarkLines);
-  return keptLines.join('\n');
+  return keptLines.join(newline);
 }
 
 /**
@@ -329,10 +371,11 @@ export function ensureWaypointManagerSection(iniText) {
     return { text: iniText, added: false };
   }
 
+  const newline = iniText.includes('\r\n') ? '\r\n' : '\n';
   const needsNewline = iniText.length > 0 && !iniText.endsWith('\n');
   // v0.3.6より My Storage は ARKASAWaypointManager_MyStorage.txt
   // (プレーンテキスト形式)で保存するため、DatabaseFileの参照先もそれに合わせる。
-  const section = `${needsNewline ? '\n' : ''}\n[ARKASAWaypointManager]\nDatabaseFile=ARKASAWaypointManager_MyStorage.txt\n`;
+  const section = `${needsNewline ? newline : ''}${newline}[ARKASAWaypointManager]${newline}DatabaseFile=ARKASAWaypointManager_MyStorage.txt${newline}`;
 
   return { text: iniText + section, added: true };
 }
