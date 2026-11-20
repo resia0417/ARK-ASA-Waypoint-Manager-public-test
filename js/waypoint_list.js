@@ -54,12 +54,11 @@ export class WaypointListController {
    * @param {HTMLElement} config.emptyStateEl
    * @param {HTMLElement} config.countEl
    * @param {HTMLElement} config.searchInputEl
-   * @param {HTMLElement} config.columnSettingsBtn - 列設定ポップオーバーを開くボタン
    * @param {import('./settings_store.js').SettingsStore} config.settingsStore
    * @param {(waypoint: object|null, listKey: string) => void} [config.onSelect]
    */
   constructor({
-    listKey, theadRow, tbody, emptyStateEl, countEl, searchInputEl, columnSettingsBtn,
+    listKey, theadRow, tbody, emptyStateEl, countEl, searchInputEl,
     categoryFilterEl, settingsStore, onSelect, getLatLon, getIconMarkup,
     rowActions, onEditRequest, onDeleteRequest, getMapKey,
   }) {
@@ -69,7 +68,6 @@ export class WaypointListController {
     this.emptyStateEl = emptyStateEl;
     this.countEl = countEl;
     this.searchInputEl = searchInputEl;
-    this.columnSettingsBtn = columnSettingsBtn;
     this.categoryFilterEl = categoryFilterEl;
     this.settingsStore = settingsStore;
     this.onSelect = onSelect || (() => {});
@@ -118,9 +116,6 @@ export class WaypointListController {
       this.settingsStore.set(this._settingsKey('search'), this.searchText);
       this.render();
     });
-    if (this.columnSettingsBtn) {
-      this.columnSettingsBtn.addEventListener('click', (e) => this._toggleColumnPopover(e));
-    }
     if (this.categoryFilterEl) {
       this.categoryFilterEl.addEventListener('change', () => {
         this.categoryFilter = this.categoryFilterEl.value || '__all__';
@@ -433,93 +428,12 @@ export class WaypointListController {
     const onUp = () => {
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseup', onUp);
-      this.settingsStore.set(this._settingsKey('columns'), this.columnConfig);
+      this.settingsStore.set(this._settingsKey('columns'), { widths: this.columnConfig.widths });
     };
     document.addEventListener('mousemove', onMove);
     document.addEventListener('mouseup', onUp);
   }
 
-  // --- 列設定ポップオーバー(表示列・列順) ---------------------------------
-
-  _toggleColumnPopover(e) {
-    if (this._popoverEl) {
-      this._closePopover();
-      return;
-    }
-    const popover = document.createElement('div');
-    popover.className = 'col-settings-popover';
-    popover.innerHTML = this._popoverHtml();
-    document.body.appendChild(popover);
-
-    const rect = e.target.getBoundingClientRect();
-    popover.style.top = `${rect.bottom + 4}px`;
-    popover.style.left = `${Math.max(8, rect.right - popover.offsetWidth - 220)}px`;
-
-    this._popoverEl = popover;
-    this._wirePopover(popover);
-
-    // 外側クリックで閉じる
-    setTimeout(() => {
-      this._outsideClickHandler = (evt) => {
-        if (!popover.contains(evt.target) && evt.target !== this.columnSettingsBtn) this._closePopover();
-      };
-      document.addEventListener('click', this._outsideClickHandler);
-    }, 0);
-  }
-
-  _closePopover() {
-    if (this._popoverEl) {
-      this._popoverEl.remove();
-      this._popoverEl = null;
-    }
-    if (this._outsideClickHandler) {
-      document.removeEventListener('click', this._outsideClickHandler);
-      this._outsideClickHandler = null;
-    }
-  }
-
-  _popoverHtml() {
-    const rows = this.columnConfig.order.map((key, idx) => {
-      const def = CONFIGURABLE_COLUMNS.find((c) => c.key === key);
-      const visible = this.columnConfig.visible[key] !== false;
-      return `
-        <div class="col-row" data-key="${key}">
-          <label><input type="checkbox" class="col-visible" data-key="${key}" ${visible ? 'checked' : ''}/> ${esc(def.label)}</label>
-          <span class="col-order-btns">
-            <button class="col-up" data-key="${key}" ${idx === 0 ? 'disabled' : ''}>↑</button>
-            <button class="col-down" data-key="${key}" ${idx === this.columnConfig.order.length - 1 ? 'disabled' : ''}>↓</button>
-          </span>
-        </div>`;
-    }).join('');
-    return `<div class="col-popover-title">表示列 / 列順</div>${rows}`;
-  }
-
-  _wirePopover(popover) {
-    popover.querySelectorAll('.col-visible').forEach((cb) => {
-      cb.addEventListener('change', () => {
-        this.columnConfig.visible[cb.dataset.key] = cb.checked;
-        this.settingsStore.set(this._settingsKey('columns'), this.columnConfig);
-        this.render();
-      });
-    });
-    popover.querySelectorAll('.col-up').forEach((btn) => {
-      btn.addEventListener('click', () => this._moveColumn(btn.dataset.key, -1));
-    });
-    popover.querySelectorAll('.col-down').forEach((btn) => {
-      btn.addEventListener('click', () => this._moveColumn(btn.dataset.key, 1));
-    });
-  }
-
-  _moveColumn(key, delta) {
-    const order = this.columnConfig.order;
-    const idx = order.indexOf(key);
-    const newIdx = idx + delta;
-    if (newIdx < 0 || newIdx >= order.length) return;
-    [order[idx], order[newIdx]] = [order[newIdx], order[idx]];
-    this.settingsStore.set(this._settingsKey('columns'), this.columnConfig);
-    this._closePopover();
-    this.render();
-  }
 }
 
 function round2(n) {

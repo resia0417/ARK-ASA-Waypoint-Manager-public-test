@@ -96,7 +96,7 @@ export function renderWaypointIconHtml({ type, baseColor, iconColor, size = 20, 
   const baseSvg = getCachedSvg(BASE_ICON_ID, onLoaded);
   // 資源系アイコンは実物画像(icon_images.js)で描画し、SVGは取得しない(v0.6.3)
   const imageUri = ICON_IMAGES[def.id] ?? null;
-  const glyphSvg = imageUri ? '' : getCachedSvg(def.svg, onLoaded);
+  const glyphSvg = imageUri || !def.svg ? '' : getCachedSvg(def.svg, onLoaded);
 
   const tooltip = escapeHtml(title ?? def.displayName);
 

@@ -1,4 +1,15 @@
-# ARK ASA Waypoint Manager Web — 仕様書 (v0.6.10)
+# ARK ASA Waypoint Manager Web — 仕様書 (v0.6.11)
+
+## 0.18 v0.6.11での変更点(使われていないものの掃除)
+
+目印セクション(v0.6.10)と同種の「置かれる・書かれるが使われない」ものを監査し、まとめて取り除いた。
+
+- **maps/*/waypoint.json の生成を廃止**: MapConfig保存時に空の waypoint.json を作っていたが、読み込むコードが存在しなかった。saveMapConfigToProject の生成処理・結果フィールド・検証チェックリストの項目を削除した(地図画像のプレースホルダ生成は、新規マップ用に意味があるため残した)。
+- **列設定ポップオーバーを削除**: v0.6.3で⚙ボタンを廃止して以降、呼ばれることのなかった _toggleColumnPopover など一式と、専用CSSを取り除いた。列設定の保存は列幅だけを保存する形に簡素化した。
+- **pickSaveJsonFile を削除**: 呼び出し元のない未使用関数だった。
+- **資源4種のSVGを削除**: Metal / Obsidian / Crystal / Pearl は画像(データURI)で描画するようになって以降、SVGファイルが読み込まれることはなかった。定義側の svg フィールドも外し、描画側は svg の無い定義を安全に扱うようガードを追加した。
+- **data/ のサンプルファイルを削除**: コードからもREADMEからも参照されていなかった2ファイルを、リポジトリからも削除した。
+- リポジトリ内の空プレースホルダ(maps/*/map.png・map.webp、waypoint.json)も併せて削除した。
 
 ## 0.17 v0.6.10での変更点([ARKASAWaypointManager]セクションの廃止)
 

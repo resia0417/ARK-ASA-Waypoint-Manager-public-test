@@ -1,4 +1,4 @@
-# ARK ASA Waypoint Manager Web (v0.6.9)
+# ARK ASA Waypoint Manager Web (v0.6.11)
 
 ARK: Survival Ascended の `GameUserSettings.ini` に保存されている `SavedMinimapMarks`(ゲーム内Waypoint)を、ブラウザだけで読み込み・一覧管理・追加・編集・削除できるWebツールです。
 
@@ -87,7 +87,6 @@ ARK-ASA-Waypoint-Manager-Web/
 ├─ assets/
 │  └─ waypoint-icons/
 ├─ maps/                       … マップごとの地図画像(.webp)とconfig.json
-├─ data/
 └─ docs/
    └─ specification.md
 ```

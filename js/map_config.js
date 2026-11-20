@@ -47,7 +47,6 @@ import * as fm from './file_manager.js';
 export function getMapImageFilename(folder) {
   return `${folder}_map.webp`;
 }
-export const MAP_WAYPOINT_FILENAME = 'waypoint.json';
 export const MAP_CONFIG_FILENAME = 'config.json';
 
 /**
@@ -304,16 +303,16 @@ export async function loadMapConfig(mapName) {
  * - maps/<MapName>/ フォルダが存在しなければ自動作成する。
  * - config.json が存在しなければ新規作成し、存在すれば上書きする
  *   (今回保存する内容を書き込む)。
- * - 地図画像 / waypoint.json が存在しなければ、空ファイルとして
- *   新規作成する(既に存在する場合は一切上書きしない。ユーザーが
- *   既に配置した実際の地図画像・Waypointデータを保護するため)。
+ * - 地図画像が存在しなければ、空ファイルとして新規作成する
+ *   (既に存在する場合は一切上書きしない。ユーザーが既に配置した
+ *   実際の地図画像を保護するため)。
  *
  * @param {MapConfig} mapConfig
  * @returns {Promise<{
  *   success: boolean, cancelled?: boolean, error?: string,
- *   folder?: string, configPath?: string, mapPngPath?: string, waypointJsonPath?: string,
- *   mapPngExists?: boolean, configJsonExists?: boolean, waypointJsonExists?: boolean,
- *   mapPngCreated?: boolean, waypointJsonCreated?: boolean,
+ *   folder?: string, configPath?: string, mapPngPath?: string,
+ *   mapPngExists?: boolean, configJsonExists?: boolean,
+ *   mapPngCreated?: boolean,
  * }>}
  */
 export async function saveMapConfigToProject(mapConfig) {
@@ -402,9 +401,8 @@ async function writeMapConfigFiles(rootHandle, mapConfig) {
     return { success: false, error: 'config.jsonの保存後の内容が一致しませんでした。再度保存してください。' };
   }
 
-  // 地図画像 / waypoint.json: 既存ファイルは絶対に上書きせず、無い場合のみ空ファイルを作成する
+  // 地図画像: 既存ファイルは絶対に上書きせず、無い場合のみ空ファイルを作成する
   const mapPngResult = await ensurePlaceholderFile(mapDir, getMapImageFilename(folder));
-  const waypointJsonResult = await ensurePlaceholderFile(mapDir, MAP_WAYPOINT_FILENAME);
 
   setCachedMapConfig(mapConfig.mapName, mapConfig);
 
@@ -414,12 +412,9 @@ async function writeMapConfigFiles(rootHandle, mapConfig) {
     folder,
     configPath: `maps/${folder}/${MAP_CONFIG_FILENAME}`,
     mapPngPath: `maps/${folder}/${getMapImageFilename(folder)}`,
-    waypointJsonPath: `maps/${folder}/${MAP_WAYPOINT_FILENAME}`,
     configJsonExists,
     mapPngExists: true, // ensurePlaceholderFileにより、この時点で必ず存在する
-    waypointJsonExists: true,
     mapPngCreated: mapPngResult.created,
-    waypointJsonCreated: waypointJsonResult.created,
   };
 }
 
@@ -463,11 +458,6 @@ export function validateMapConfig(mapConfig, saveResult) {
         : undefined,
     },
     { label: 'config.json存在', ok: !!saveResult?.configJsonExists },
-    {
-      label: 'waypoint.json存在',
-      ok: !!saveResult?.waypointJsonExists,
-      detail: saveResult?.waypointJsonCreated ? `空ファイルとして新規作成しました: ${saveResult?.waypointJsonPath ?? ''}` : undefined,
-    },
     { label: 'latitudeScale', ok: Number.isFinite(mapConfig.latitudeScale) && mapConfig.latitudeScale !== 0 },
     { label: 'longitudeScale', ok: Number.isFinite(mapConfig.longitudeScale) && mapConfig.longitudeScale !== 0 },
     { label: 'latitudeOrigin', ok: Number.isFinite(mapConfig.latitudeOrigin) },

@@ -1577,7 +1577,6 @@ async function onSaveMapConfig() {
 
     const notes = [];
     if (saveResult.mapPngCreated) notes.push(`地図画像を空ファイルとして新規作成しました(${saveResult.mapPngPath})。実際の地図画像に差し替えてください。`);
-    if (saveResult.waypointJsonCreated) notes.push(`waypoint.jsonを空ファイルとして新規作成しました(${saveResult.waypointJsonPath})。`);
 
     setStatus(`MapConfigを ${saveResult.configPath} へ保存しました(保存内容を再読み込みして検証済み)。${notes.join(' ')}`);
   } catch (err) {

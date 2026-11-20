@@ -90,25 +90,21 @@ export const MARK_ICON_DEFINITIONS = [
   {
     id: 'Metal',
     displayName: 'Metal',
-    svg: 'Metal',
     rawText: "/Script/Engine.Texture2D'/Game/PrimalEarth/CoreBlueprints/Resources/Icons/MetalOre_Icon.MetalOre_Icon'",
   },
   {
     id: 'Obsidian',
     displayName: 'Obsidian',
-    svg: 'Obsidian',
     rawText: "/Script/Engine.Texture2D'/Game/PrimalEarth/CoreBlueprints/Resources/Icons/Obsidian_Icon.Obsidian_Icon'",
   },
   {
     id: 'Crystal',
     displayName: 'Crystal',
-    svg: 'Crystal',
     rawText: "/Script/Engine.Texture2D'/Game/PrimalEarth/Test_Craig/Crystal_Icon.Crystal_Icon'",
   },
   {
     id: 'Pearl',
     displayName: 'Pearl',
-    svg: 'Pearl',
     rawText: "/Script/Engine.Texture2D'/Game/PrimalEarth/CoreBlueprints/Resources/Icons/Pearl_Icon.Pearl_Icon'",
   },
 ];

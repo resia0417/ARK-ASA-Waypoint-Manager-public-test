@@ -177,8 +177,8 @@ export async function pickLogFile() {
  * pickSaveJsonFile()(showSaveFilePicker)を再利用していたため、ブラウザの
  * ファイル選択ダイアログが「保存」の見た目で表示されてしまう問題があった。
  * [Read]は既存データの読み込みのみを行うため、本来のOpenダイアログ
- * (showOpenFilePicker)を使うよう分離した。新規ファイルの作成は
- * [Save]実行時のフォールバック(pickSaveJsonFile)側で引き続き担う。
+ * (showOpenFilePicker)を使うよう分離した。新規ファイルの作成は、
+ * 空ファイルを用意して[Read]で開く運用とする。
  * @param {string} description
  * @returns {Promise<FileSystemFileHandle|null>}
  */
@@ -191,30 +191,6 @@ export async function pickOpenJsonFile(description = 'JSON file') {
       types: [{ description, accept: { 'application/json': ['.json'] } }],
       excludeAcceptAllOption: false,
       multiple: false,
-    });
-    return handle;
-  } catch (err) {
-    if (err.name === 'AbortError') return null;
-    throw err;
-  }
-}
-
-/**
- * 任意のJSONファイルを、任意の場所へ保存するためのファイルピッカー。
- * MapConfigのExport(config.json)など、複数の用途で使い回せるよう
- * suggestedName/descriptionを引数化した汎用版。
- * @param {string} suggestedName
- * @param {string} description
- * @returns {Promise<FileSystemFileHandle|null>}
- */
-export async function pickSaveJsonFile(suggestedName, description = 'JSON file') {
-  if (!isFileSystemAccessSupported()) {
-    throw new Error('このブラウザはFile System Access APIに対応していません(Chrome/Edge推奨)。');
-  }
-  try {
-    const handle = await window.showSaveFilePicker({
-      suggestedName,
-      types: [{ description, accept: { 'application/json': ['.json'] } }],
     });
     return handle;
   } catch (err) {
