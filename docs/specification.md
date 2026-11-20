@@ -1,4 +1,11 @@
-# ARK ASA Waypoint Manager Web — 仕様書 (v0.6.11)
+# ARK ASA Waypoint Manager Web — 仕様書 (v0.6.12)
+
+## 0.19 v0.6.12での変更点(READMEの書き直し)
+
+- **READMEをARKプレイヤー向けに全面書き直した**。技術的な解説(File System Access APIの詳細、データ安全性の内部仕様、My Storageのファイル形式、Map Calibration等)を削り、「使い方」「できること」「注意」に絞った平易な内容にした。
+- 削除した節: GitHub Pages公開方法(運用者向け)、フォルダ構成、Genesis のZ座標による陸海判別の説明。
+- ローカルでの利用方法は、cloneできる読者には自明としてREADMEでは解説しない方針とした。
+- 併せて、map_config.js 先頭コメントに残っていた waypoint.json の役割分担の記述(v0.6.11で生成を廃止したもの)を現在の構成に合わせて修正した。
 
 ## 0.18 v0.6.11での変更点(使われていないものの掃除)
 
