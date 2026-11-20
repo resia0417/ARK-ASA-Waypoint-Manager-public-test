@@ -47,9 +47,8 @@ import * as fm from './file_manager.js';
 import { WaypointListController } from './waypoint_list.js';
 import { settingsStore } from './settings_store.js';
 import { CoordinateConverter } from './coordinate_converter.js';
-import { getCachedMapConfig, resolveMapConfig, setCachedMapConfig, saveMapConfigToProject, validateMapConfig, KNOWN_MAP_FOLDERS, GENESIS_MAP_NAME, GENESIS_LAND_MAP_NAME, GENESIS_OCEAN_MAP_NAME, GENESIS_OCEAN_Z_THRESHOLD, GENESIS_OCEAN_DEFAULT_Z, GENESIS_LAND_DEFAULT_Z, resolveEffectiveMapName } from './map_config.js';
+import { getCachedMapConfig, resolveMapConfig, KNOWN_MAP_FOLDERS, GENESIS_MAP_NAME, GENESIS_LAND_MAP_NAME, GENESIS_OCEAN_MAP_NAME, GENESIS_OCEAN_Z_THRESHOLD, GENESIS_OCEAN_DEFAULT_Z, GENESIS_LAND_DEFAULT_Z, resolveEffectiveMapName } from './map_config.js';
 import { createMapViewer } from './map_viewer.js';
-import { CALIBRATION_POINTS, autoDetectCalibrationPoints, calculateMapConfig } from './map_calibration.js';
 import { MARK_ICON_DEFINITIONS, findMarkIconById, findMarkIconByRawText, DEFAULT_MARK_ICON_ID, renderWaypointIconHtml, mountWaypointIcon } from './waypoint_icon.js';
 import { escapeHtml, formatNum, clamp01 } from './util.js';
 
@@ -78,7 +77,6 @@ let iniOriginalText = '';
 let storageFileHandle = null;
 let logFileHandle = null;
 let libraryFileHandle = null;
-let lastCalibrationResult = null; // { config, axisReport, residualError, warnings } | null
 let mapViewerIni = null; // 地図ビューア: GameUserSettings.ini 専用(v0.4.0で2台構成に)
 let mapViewerLib = null; // 地図ビューア: My Storage / Location Library 専用
 let viewerMapName = ''; // 選択中のマップ(実効名)。v0.6.0からリスト絞り込みと地図の唯一の正
@@ -90,7 +88,7 @@ const els = {};
 
 function cacheElements() {
   const ids = [
-    'statusText', 'settingsBtn', 'settingsModal', 'settingsCloseBtn', 'settingsResetBtn', 'debugModeCheckbox', 'mapsToggleBtn', 'libMapChip',
+    'statusText', 'settingsBtn', 'settingsModal', 'settingsCloseBtn', 'settingsResetBtn', 'mapsToggleBtn', 'libMapChip',
     // GameUserSettings.ini
     'iniReadBtn', 'iniAddBtn', 'iniSaveBtn',
     'iniSearchInput', 'iniCount', 'iniTheadRow', 'iniTableBody', 'iniEmptyState', 'iniDropZone',
@@ -103,11 +101,6 @@ function cacheElements() {
     // Waypoint Log
     'logOpenBtn',
     'logSearchInput', 'logCount', 'logTheadRow', 'logTableBody', 'logEmptyState', 'logDropZone',
-    // Map Calibration (Debug Mode専用)
-    'calibrationTabBtn', 'calibrationTargetMapLabel', 'calibrationNoMapNotice',
-    'calibrationAutoDetectBtn', 'calibrationCalculateBtn', 'calibrationSaveBtn',
-    'calibrationTableBody', 'calibrationDetectSummary', 'calibrationResult', 'calibrationResultText',
-    'calibrationValidateResult', 'calibrationValidateList', 'calibrationSaveMessage',
     // 詳細ペイン
     'detailBar', 'detailPlaceholder', 'detailContent',
     'detailName', 'detailMap', 'detailX', 'detailY', 'detailZ', 'detailTag', 'detailIcon', 'detailRawText', 'copyRawTextBtn',
@@ -141,8 +134,6 @@ function init() {
   bindSplitter();
   bindMapsSplitter();
   bindMapsToggle();
-  bindDebugMode();
-  bindCalibrationEvents();
   initMapViewers();
   restoreLayoutSettings();
   refreshMapViewers();
@@ -367,7 +358,6 @@ function applyCurrentMapFilter(persist) {
     controllers[key].setMapFilter(value === '' ? '__all__' : value, showMapColumn);
   }
   if (persist) settingsStore.set('currentMap', value);
-  syncCalibrationToCurrentMap();
   refreshMapViewers();
 }
 
@@ -1387,9 +1377,8 @@ function restoreLayoutSettings() {
   const savedWidth = settingsStore.get('layout.iniColumnWidth', null);
   if (savedWidth) els.colIni.style.flex = `0 0 ${savedWidth}px`;
 
-  const debugMode = settingsStore.get('debugMode', false);
   let savedTab = settingsStore.get('activeLibraryTab', 'storage');
-  if (savedTab === 'calibration' && !debugMode) savedTab = 'storage'; // Debug Mode OFF時は復元しない
+  if (savedTab === 'calibration') savedTab = 'storage'; // v0.9.0でMap Calibrationタブは廃止
   if (savedTab === 'mapviewer') savedTab = 'storage'; // v0.4.0でMap Viewerタブは廃止(地図は常時表示)
   switchLibraryTab(savedTab);
 
@@ -1399,253 +1388,23 @@ function restoreLayoutSettings() {
   if (settingsStore.get('layout.mapsCollapsed', false)) applyMapsCollapsed(true, false);
 }
 
-// --- ヘッダー(Settings: Debug Modeトグルを含む) -----------------------------------
+// --- ヘッダー(Settings) -----------------------------------
 
 function bindHeaderEvents() {
   els.settingsBtn.addEventListener('click', () => els.settingsModal.classList.remove('hidden'));
   els.settingsCloseBtn.addEventListener('click', () => els.settingsModal.classList.add('hidden'));
   els.settingsResetBtn.addEventListener('click', async () => {
-    if (!window.confirm('保存されている設定(レイアウト・選択中のMap・タブ・列幅・検索文字・ソート・Debug Mode)と、前回のセッション情報(前回開いたファイルの記憶)をすべて初期状態に戻しますか？')) return;
+    if (!window.confirm('保存されている設定(レイアウト・選択中のMap・タブ・列幅・検索文字・ソート)と、前回のセッション情報(前回開いたファイルの記憶)をすべて初期状態に戻しますか？')) return;
     settingsStore.clearAll();
     // 前回のセッション情報(IndexedDB内のファイルハンドルとINIバックアップ)も消す(v0.8.3)
     try {
       await Promise.all([
         fm.clearLastIniHandle(), fm.clearLastJsonHandle(), fm.clearLastLogHandle(),
-        fm.clearLastLibraryHandle(), fm.clearLastMapsRootHandle(), fm.clearIniBackup(),
+        fm.clearLastLibraryHandle(), fm.clearIniBackup(),
       ]);
     } catch (err) { console.info('セッション情報の消去に失敗しました:', err.message); }
     window.location.reload();
   });
-}
-
-// --- Debug Mode ------------------------------------------------------------
-
-function bindDebugMode() {
-  const enabled = settingsStore.get('debugMode', false);
-  els.debugModeCheckbox.checked = enabled;
-  applyDebugMode(enabled, false);
-
-  els.debugModeCheckbox.addEventListener('change', () => {
-    applyDebugMode(els.debugModeCheckbox.checked, true);
-  });
-}
-
-/**
- * Debug Modeの有効/無効をUIへ反映する。
- * OFFの間はMap Calibrationタブ自体を非表示にし(要件6「デバッグ機能は
- * 一切表示しないでください」)、ONになった瞬間にCurrent Mapとの同期を行う。
- * @param {boolean} enabled
- * @param {boolean} persist - trueならsettingsStoreへ保存する(初期復元時はfalse)
- */
-function applyDebugMode(enabled, persist) {
-  els.calibrationTabBtn.classList.toggle('hidden', !enabled);
-  document.getElementById('tabpanel-calibration').classList.toggle('hidden', !enabled);
-  if (persist) settingsStore.set('debugMode', enabled);
-
-  if (!enabled) {
-    const activePanel = document.querySelector('.library-tab-panel.active');
-    if (activePanel && activePanel.dataset.listKey === 'calibration') switchLibraryTab('storage');
-  } else {
-    syncCalibrationToCurrentMap();
-  }
-}
-
-// --- Map Calibration / MapConfig Manager(Debug Mode専用) --------------------
-//
-// このセクションはUI配線のみを行う。実際の計算は map_calibration.js
-// (calculateMapConfig/autoDetectCalibrationPoints)に、MapConfigの
-// 読み書き・検証は map_config.js(saveMapConfigToProject/validateMapConfig)に、
-// 座標変換は coordinate_converter.js にそれぞれ分離してあり、ここには
-// 計算式やファイルパスの組み立てルールを一切書かない。
-//
-// v0.3.2でMap選択欄は廃止し、画面上部のCurrent Mapをそのまま対象として使う
-// (syncCalibrationToCurrentMapがapplyCurrentMapFilter()から呼ばれる)。
-
-function bindCalibrationEvents() {
-  els.calibrationAutoDetectBtn.addEventListener('click', onAutoDetect);
-  els.calibrationCalculateBtn.addEventListener('click', onCalculate);
-  els.calibrationSaveBtn.addEventListener('click', onSaveMapConfig);
-}
-
-/**
- * Current Mapの変更をMap Calibrationパネルへ反映する。
- * Current Mapが「All Maps」の場合は対象マップが定まらないため、
- * 通知を表示し、Auto Detect/Calculateを無効化する。
- */
-function syncCalibrationToCurrentMap() {
-  const mapName = viewerMapName;
-  const hasTarget = !!mapName;
-
-  els.calibrationTargetMapLabel.textContent = hasTarget ? mapName : '-';
-  els.calibrationNoMapNotice.classList.toggle('hidden', hasTarget);
-  els.calibrationAutoDetectBtn.disabled = !hasTarget;
-  els.calibrationSaveBtn.disabled = true;
-
-  lastCalibrationResult = null;
-  els.calibrationResult.classList.add('hidden');
-  els.calibrationValidateResult.classList.add('hidden');
-  els.calibrationSaveMessage.classList.add('hidden');
-
-  renderCalibrationTable();
-}
-
-/** 5つの固定キャリブレーションポイントの入力行を描画する */
-function renderCalibrationTable() {
-  els.calibrationTableBody.innerHTML = CALIBRATION_POINTS.map((p) => `
-    <tr data-point-id="${p.id}">
-      <td>${escapeHtml(p.name)} (Lat ${p.lat}, Lon ${p.lon})</td>
-      <td class="num"><input type="number" step="any" class="cal-x" data-point-id="${p.id}" /></td>
-      <td class="num"><input type="number" step="any" class="cal-y" data-point-id="${p.id}" /></td>
-      <td class="cal-detect" data-point-id="${p.id}"></td>
-    </tr>
-  `).join('');
-
-  els.calibrationTableBody.querySelectorAll('input').forEach((input) => {
-    input.addEventListener('input', () => {
-      lastCalibrationResult = null;
-      els.calibrationSaveBtn.disabled = true;
-      els.calibrationResult.classList.add('hidden');
-      els.calibrationValidateResult.classList.add('hidden');
-      els.calibrationSaveMessage.classList.add('hidden');
-      updateCalculateButtonState();
-    });
-  });
-  els.calibrationDetectSummary.textContent = '';
-  updateCalculateButtonState();
-}
-
-function calibrationInput(pointId, axis) {
-  return els.calibrationTableBody.querySelector(`.cal-${axis}[data-point-id="${pointId}"]`);
-}
-
-/**
- * Calculateボタンは、Current Mapが特定のマップを指しており、かつ
- * 5点すべてのUE X/Yが数値として入力されている場合のみ有効化する。
- */
-function updateCalculateButtonState() {
-  const mapName = viewerMapName;
-  const hasTarget = !!mapName;
-  const allValid = hasTarget && CALIBRATION_POINTS.every((p) => {
-    const xInput = calibrationInput(p.id, 'x');
-    const yInput = calibrationInput(p.id, 'y');
-    return xInput?.value !== '' && yInput?.value !== '' && !isNaN(Number(xInput.value)) && !isNaN(Number(yInput.value));
-  });
-  els.calibrationCalculateBtn.disabled = !allValid;
-}
-
-/**
- * GameUserSettings.ini(iniカラム)から、CAL_0_0等のName(CustomTagではない)に
- * 一致するWaypointを検索し、見つかった分だけUE X/Yへ自動入力する。
- */
-function onAutoDetect() {
-  const detected = autoDetectCalibrationPoints(controllers.ini.getAll());
-  let count = 0;
-
-  for (const p of CALIBRATION_POINTS) {
-    const cell = els.calibrationTableBody.querySelector(`.cal-detect[data-point-id="${p.id}"]`);
-    const xInput = calibrationInput(p.id, 'x');
-    const yInput = calibrationInput(p.id, 'y');
-    const found = detected[p.id];
-
-    if (found) {
-      xInput.value = found.x;
-      yInput.value = found.y;
-      cell.textContent = '✔';
-      cell.className = 'cal-detect detect-ok';
-      count += 1;
-    } else {
-      cell.textContent = '✖';
-      cell.className = 'cal-detect detect-fail';
-    }
-  }
-
-  els.calibrationDetectSummary.textContent = `${count} / ${CALIBRATION_POINTS.length} detected`;
-  updateCalculateButtonState();
-  setStatus(`Auto Detect: ${count} / ${CALIBRATION_POINTS.length} 件のキャリブレーションポイントを検出しました。`);
-}
-
-/** 5点のUE座標からMapConfigを算出し(map_calibration.js)、結果を表示する */
-function onCalculate() {
-  const mapName = viewerMapName;
-  if (!mapName) {
-    setStatus('Map Calibration: Current Mapで特定のMapを選択してください。');
-    return;
-  }
-
-  const uePoints = {};
-  for (const p of CALIBRATION_POINTS) {
-    uePoints[p.id] = { x: Number(calibrationInput(p.id, 'x').value), y: Number(calibrationInput(p.id, 'y').value) };
-  }
-
-  const result = calculateMapConfig(mapName, uePoints);
-  lastCalibrationResult = result;
-  setCachedMapConfig(mapName, result.config);
-
-  els.calibrationResultText.textContent = [
-    `MapName: ${mapName}`,
-    `LatitudeScale: ${result.config.latitudeScale}`,
-    `LongitudeScale: ${result.config.longitudeScale}`,
-    `LatitudeOrigin: ${result.config.latitudeOrigin}`,
-    `LongitudeOrigin: ${result.config.longitudeOrigin}`,
-    `Axis: ${result.axisReport}`,
-    `Residual Error: ${result.residualError.toFixed(4)}`,
-    ...(result.warnings.length ? ['', ...result.warnings.map((w) => `⚠ ${w}`)] : []),
-  ].join('\n');
-  els.calibrationResult.classList.remove('hidden');
-  els.calibrationValidateResult.classList.add('hidden'); // 新しい計算をしたら前回のValidate/Save結果は隠す
-  els.calibrationSaveMessage.classList.add('hidden');
-  els.calibrationSaveBtn.disabled = false;
-
-  // 算出したMapConfigを即座に一覧のLat/Lon表示へ反映する
-  for (const key of LIST_KEYS) controllers[key].render();
-  setStatus(`MapConfigを計算しました(Residual Error: ${result.residualError.toFixed(4)})。`);
-}
-
-/**
- * 算出済みのMapConfigを maps/<MapName>/config.json へ保存する
- * (保存先はCurrent Mapから自動決定し、ユーザーへは問い合わせない。
- *  ただしブラウザの制約上、maps/ルートフォルダの選択のみ初回に必要。
- *  詳細は map_config.js のコメントを参照)。
- * 地図画像 / waypoint.json が存在しない場合は空ファイルとして自動生成される。
- * 保存後はValidateチェックリストを表示する。
- */
-async function onSaveMapConfig() {
-  if (!lastCalibrationResult) { setStatus('先に[Calculate]を実行してください。'); return; }
-
-  try {
-    const saveResult = await saveMapConfigToProject(lastCalibrationResult.config);
-
-    if (saveResult.cancelled) {
-      setStatus('MapConfigの保存をキャンセルしました(maps/フォルダが選択されませんでした)。');
-      return;
-    }
-    if (!saveResult.success) {
-      setStatus('MapConfigの保存に失敗しました: ' + (saveResult.error ?? '不明なエラー'));
-      return;
-    }
-
-    renderCalibrationValidateResult(lastCalibrationResult.config, saveResult);
-
-    // 要件通りの確認メッセージ("MapConfig saved.\nmaps/Aberration/config.json")を表示する
-    els.calibrationSaveMessage.textContent = `MapConfig saved.\n${saveResult.configPath}`;
-    els.calibrationSaveMessage.classList.remove('hidden');
-
-    const notes = [];
-    if (saveResult.mapPngCreated) notes.push(`地図画像を空ファイルとして新規作成しました(${saveResult.mapPngPath})。実際の地図画像に差し替えてください。`);
-
-    setStatus(`MapConfigを ${saveResult.configPath} へ保存しました(保存内容を再読み込みして検証済み)。${notes.join(' ')}`);
-  } catch (err) {
-    console.error(err);
-    setStatus('MapConfigの保存中にエラーが発生しました: ' + err.message);
-  }
-}
-
-function renderCalibrationValidateResult(mapConfig, saveResult) {
-  const checks = validateMapConfig(mapConfig, saveResult);
-  els.calibrationValidateList.innerHTML = checks.map((c) => `
-    <li class="${c.ok ? 'ok' : 'fail'}">${c.ok ? '✔' : '✖'} ${escapeHtml(c.label)}${c.detail ? `<span class="calibration-validate-detail">${escapeHtml(c.detail)}</span>` : ''}</li>
-  `).join('');
-  els.calibrationValidateResult.classList.remove('hidden');
 }
 
 // --- ユーティリティ -------------------------------------------------------

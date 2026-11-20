@@ -1,7 +1,7 @@
 // =============================================================
 // map_config.js
 // マップ毎の座標キャリブレーション情報(MapConfig)を保持・
-// 読み込み・保存・検証するモジュール。
+// 読み込みするモジュール。
 //
 // 責務はMapConfigデータの保持と入出力・検証のみであり、座標変換の
 // 計算式は一切持たない(計算は coordinate_converter.js が担う)。
@@ -16,15 +16,6 @@
 // リポジトリのルート(index.htmlと同じ階層)に配置する形へ読み替えている
 // (publicディレクトリを特別扱いするビルドステップが存在しないため)。
 //
-// 保存先(maps/)フォルダについて:
-// 「保存先はユーザーへ問い合わせないでください」という要件があるが、
-// ブラウザのFile System Access APIは、ユーザーの明示的な操作なしに
-// 任意のフォルダへの書き込み許可を取得することができない
-// (セキュリティ上の制約であり、本アプリの設計判断ではない)。
-// そのため、「最初の1回だけ」maps/フォルダの選択をお願いし、以後は
-// そのハンドルを再利用することで、2回目以降の保存では一切
-// ダイアログを表示しない、という形で要件の意図に沿っている。
-//
 // v0.3.3でのフォーマット変更:
 // config.jsonから image / imageWidth / imageHeight を削除した。
 // Map Viewerはファイル名 "<マップフォルダ名>_map.webp" を読み込む前提とし、画像サイズは
@@ -33,12 +24,11 @@
 //
 // maps/<MapFolder>/ フォルダの構成:
 //   <フォルダ名>_map.webp … Map Viewerが読み込む地図画像
-//   config.json  … このモジュールが読み書きするMapConfig
+//   config.json  … このモジュールが読み込むMapConfig
 // (waypoint.json のプレースホルダーは、読み込むコードが無いままだったため
 //  v0.6.11で生成・配置を取りやめた)
 // =============================================================
 
-import * as fm from './file_manager.js';
 
 /** maps/<Map>/ フォルダ内で使用する固定ファイル名 */
 export function getMapImageFilename(folder) {
@@ -289,177 +279,6 @@ export async function loadMapConfig(mapName) {
   if (!res.ok) throw new Error(`${url} が見つかりません(HTTP ${res.status})`);
   const json = await res.json();
   return MapConfig.fromJSON({ ...json, mapName: json.mapName || mapName });
-}
-
-/**
- * MapConfigを、プロジェクトの maps/<MapName>/config.json へ保存する。
- *
- * - 保存先はCurrent Map(mapConfig.mapName)から自動的に決定し、
- *   ユーザーへ都度問い合わせない(初回のみ、maps/ルートフォルダの
- *   選択をお願いする。詳細はファイル先頭のコメント参照)。
- * - maps/<MapName>/ フォルダが存在しなければ自動作成する。
- * - config.json が存在しなければ新規作成し、存在すれば上書きする
- *   (今回保存する内容を書き込む)。
- * - 地図画像が存在しなければ、空ファイルとして新規作成する
- *   (既に存在する場合は一切上書きしない。ユーザーが既に配置した
- *   実際の地図画像を保護するため)。
- *
- * @param {MapConfig} mapConfig
- * @returns {Promise<{
- *   success: boolean, cancelled?: boolean, error?: string,
- *   folder?: string, configPath?: string, mapPngPath?: string,
- *   mapPngExists?: boolean, configJsonExists?: boolean,
- *   mapPngCreated?: boolean,
- * }>}
- */
-export async function saveMapConfigToProject(mapConfig) {
-  let rootHandle = await fm.loadLastMapsRootHandle();
-  let granted = rootHandle ? await fm.verifyPermission(rootHandle, 'readwrite') : false;
-
-  if (!granted) {
-    rootHandle = await fm.pickMapsRootFolder();
-    if (!rootHandle) return { success: false, cancelled: true };
-    await fm.saveLastMapsRootHandle(rootHandle);
-    granted = await fm.verifyPermission(rootHandle, 'readwrite');
-    if (!granted) return { success: false, error: 'maps/フォルダへの書き込み権限が許可されませんでした。' };
-  }
-
-  try {
-    return await writeMapConfigFiles(rootHandle, mapConfig);
-  } catch (err) {
-    // 自己修復(ハンドル破棄＋フォルダ再選択)は、ハンドル失効・権限系の
-    // エラーに限る。それ以外のエラーで再選択を促すと、ユーザー操作の
-    // 有効期限が切れて再選択自体が失敗するため(v0.6.9)
-    const handleLikeError = ['NotFoundError', 'NotAllowedError', 'SecurityError'].includes(err?.name);
-    if (!handleLikeError) {
-      return { success: false, error: `保存に失敗しました(${err.message})。` };
-    }
-    // 記憶されていたmaps/フォルダのハンドルが無効になっている可能性がある
-    // (フォルダの移動・削除、ブラウザ側でのハンドル失効など)。
-    // 「例外で終了しないようにしてください」という要件のため、ここで
-    // 例外を握りつぶして終わらせるのではなく、ハンドルを破棄したうえで
-    // 1回だけフォルダの再選択を促し、自己修復を試みる。
-    console.warn('MapConfigの保存に失敗しました。maps/フォルダの再選択を試みます:', err);
-    await fm.clearLastMapsRootHandle();
-
-    try {
-      const newRoot = await fm.pickMapsRootFolder();
-      if (!newRoot) return { success: false, cancelled: true };
-      await fm.saveLastMapsRootHandle(newRoot);
-      const rewGranted = await fm.verifyPermission(newRoot, 'readwrite');
-      if (!rewGranted) return { success: false, error: 'maps/フォルダへの書き込み権限が許可されませんでした。' };
-      return await writeMapConfigFiles(newRoot, mapConfig);
-    } catch (err2) {
-      return { success: false, error: `保存に失敗しました(${err2.message})。maps/フォルダを選び直して再度お試しください。` };
-    }
-  }
-}
-
-/**
- * 実際のフォルダ・ファイルの作成/書き込みを行う内部処理。
- * saveMapConfigToProject() から、通常時・自己修復リトライ時の両方で呼ばれる。
- *
- * v0.3.6での修正: 書き込み後、画面上の情報だけで成功とみなさず、
- * 実際に config.json をディスクから再読み込みして内容を検証する
- * (「画面上だけ更新されていても完了とはしないこと」「実際にconfig.jsonの
- * 内容が更新されていることを成功条件としてください」という要件への対応)。
- * 再読み込みした内容が保存しようとした内容と一致しない場合は、成功として
- * 扱わずエラーを返す。
- *
- * @param {FileSystemDirectoryHandle} rootHandle
- * @param {MapConfig} mapConfig
- */
-async function writeMapConfigFiles(rootHandle, mapConfig) {
-  const folder = mapNameToFolder(mapConfig.mapName);
-  const mapDir = await fm.getOrCreateSubdirectory(rootHandle, folder);
-
-  // config.json: 常に今回の内容で新規作成/上書きする
-  const configHandle = await fm.getOrCreateFile(mapDir, MAP_CONFIG_FILENAME);
-  const expectedJson = mapConfig.toJSON();
-  await fm.writeFile(configHandle, JSON.stringify(expectedJson, null, 2));
-
-  // 保存後、ディスクから再読み込みして内容を検証する(画面上の情報だけで
-  // 成功とみなさない)。ファイルハンドルから再度 getFile() することで、
-  // メモリ上のキャッシュではなく実際の書き込み結果を確認する。
-  const configJsonExists = await fm.fileExists(mapDir, MAP_CONFIG_FILENAME);
-  if (!configJsonExists) {
-    return { success: false, error: 'config.jsonの保存後の存在確認に失敗しました。' };
-  }
-
-  let verifiedJson;
-  try {
-    const verifyText = await fm.readFile(configHandle);
-    verifiedJson = JSON.parse(verifyText);
-  } catch (err) {
-    return { success: false, error: `config.jsonの保存後の検証読み込みに失敗しました(${err.message})。` };
-  }
-
-  if (!mapConfigJsonEquals(verifiedJson, expectedJson)) {
-    return { success: false, error: 'config.jsonの保存後の内容が一致しませんでした。再度保存してください。' };
-  }
-
-  // 地図画像: 既存ファイルは絶対に上書きせず、無い場合のみ空ファイルを作成する
-  const mapPngResult = await ensurePlaceholderFile(mapDir, getMapImageFilename(folder));
-
-  setCachedMapConfig(mapConfig.mapName, mapConfig);
-
-  return {
-    success: true,
-    verified: true,
-    folder,
-    configPath: `maps/${folder}/${MAP_CONFIG_FILENAME}`,
-    mapPngPath: `maps/${folder}/${getMapImageFilename(folder)}`,
-    configJsonExists,
-    mapPngExists: true, // ensurePlaceholderFileにより、この時点で必ず存在する
-    mapPngCreated: mapPngResult.created,
-  };
-}
-
-/** config.json保存後の検証用: 期待値と実際に読み込んだ内容が一致するかを比較する。 */
-function mapConfigJsonEquals(a, b) {
-  const keys = ['mapName', 'displayName', 'latitudeScale', 'longitudeScale', 'latitudeOrigin', 'longitudeOrigin', 'defaultZoom', 'minZoom', 'maxZoom'];
-  return keys.every((key) => a?.[key] === b?.[key]);
-}
-
-/**
- * 指定したファイルが存在しなければ、空ファイルとして新規作成する。
- * 既に存在する場合は一切手を加えない(内容を保護する)。
- * @param {FileSystemDirectoryHandle} dirHandle
- * @param {string} fileName
- * @returns {Promise<{existedBefore: boolean, created: boolean}>}
- */
-async function ensurePlaceholderFile(dirHandle, fileName) {
-  const existedBefore = await fm.fileExists(dirHandle, fileName);
-  if (existedBefore) return { existedBefore: true, created: false };
-
-  const handle = await fm.getOrCreateFile(dirHandle, fileName);
-  await fm.writeFile(handle, '');
-  return { existedBefore: false, created: true };
-}
-
-/**
- * MapConfigの内容とSave結果を検証し、チェックリストを返す。
- * UIはこの配列をそのまま表示するだけでよい(判定ロジックはここに集約する)。
- * @param {MapConfig} mapConfig
- * @param {Awaited<ReturnType<typeof saveMapConfigToProject>>} saveResult
- * @returns {Array<{label:string, ok:boolean, detail?:string}>}
- */
-export function validateMapConfig(mapConfig, saveResult) {
-  return [
-    { label: 'MapConfig保存成功', ok: !!saveResult?.success },
-    {
-      label: '地図画像ファイル存在',
-      ok: !!saveResult?.mapPngExists,
-      detail: saveResult?.mapPngCreated
-        ? `空ファイルとして新規作成しました: ${saveResult?.mapPngPath ?? ''}(実際の地図画像に差し替えてください。Map Viewerはそれまで動作しません)`
-        : undefined,
-    },
-    { label: 'config.json存在', ok: !!saveResult?.configJsonExists },
-    { label: 'latitudeScale', ok: Number.isFinite(mapConfig.latitudeScale) && mapConfig.latitudeScale !== 0 },
-    { label: 'longitudeScale', ok: Number.isFinite(mapConfig.longitudeScale) && mapConfig.longitudeScale !== 0 },
-    { label: 'latitudeOrigin', ok: Number.isFinite(mapConfig.latitudeOrigin) },
-    { label: 'longitudeOrigin', ok: Number.isFinite(mapConfig.longitudeOrigin) },
-  ];
 }
 
 function numOr(v, fallback) {

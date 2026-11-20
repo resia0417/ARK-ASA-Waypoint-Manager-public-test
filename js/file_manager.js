@@ -17,7 +17,6 @@ const KEY_INI_HANDLE = 'lastIniFileHandle';
 const KEY_JSON_HANDLE = 'lastJsonFileHandle';
 const KEY_LOG_HANDLE = 'lastLogFileHandle';
 const KEY_LIBRARY_HANDLE = 'lastLocationLibraryFileHandle'; // v0.3.4よりファイル単体(waypoints.json)のハンドル
-const KEY_MAPS_ROOT_HANDLE = 'lastMapsRootDirHandle';
 const KEY_INI_BACKUP = 'iniBackupV1'; // INI上書き直前の内容の緊急用バックアップ
 
 /**
@@ -73,65 +72,6 @@ async function idbDelete(key) {
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
   });
-}
-
-/**
- * MapConfig保存先のルートフォルダ(例: リポジトリ内の maps/ フォルダ)を選択する。
- * 一度選択すれば以降はハンドルを再利用し(saveLastMapsRootHandle経由)、
- * 保存の都度ファイルダイアログを表示しないようにする(要件5「保存先は
- * ユーザーへ問い合わせないでください」への対応)。ただし、ブラウザの
- * File System Access APIの仕様上、フォルダへの書き込み許可はユーザーの
- * 明示的な操作なしには一切取得できないため、「最初の1回だけ」フォルダを
- * 選んでもらう必要がある(この制約はREADME/仕様書に明記している)。
- * @returns {Promise<FileSystemDirectoryHandle|null>}
- */
-export async function pickMapsRootFolder() {
-  if (typeof window.showDirectoryPicker !== 'function') {
-    throw new Error('このブラウザはフォルダ選択(showDirectoryPicker)に対応していません(Chrome/Edge推奨)。');
-  }
-  try {
-    return await window.showDirectoryPicker({ mode: 'readwrite' });
-  } catch (err) {
-    if (err.name === 'AbortError') return null;
-    throw err;
-  }
-}
-
-/**
- * 指定した名前のサブディレクトリを取得する。存在しなければ自動作成する。
- * @param {FileSystemDirectoryHandle} dirHandle
- * @param {string} name
- * @returns {Promise<FileSystemDirectoryHandle>}
- */
-export async function getOrCreateSubdirectory(dirHandle, name) {
-  return dirHandle.getDirectoryHandle(name, { create: true });
-}
-
-/**
- * 指定した名前のファイルを取得する。存在しなければ自動作成する。
- * @param {FileSystemDirectoryHandle} dirHandle
- * @param {string} name
- * @returns {Promise<FileSystemFileHandle>}
- */
-export async function getOrCreateFile(dirHandle, name) {
-  return dirHandle.getFileHandle(name, { create: true });
-}
-
-/**
- * 指定した名前のファイルがディレクトリ内に存在するかどうかを確認する
- * (作成は行わない)。地図画像ファイルの存在確認に使用する。
- * @param {FileSystemDirectoryHandle} dirHandle
- * @param {string} name
- * @returns {Promise<boolean>}
- */
-export async function fileExists(dirHandle, name) {
-  try {
-    await dirHandle.getFileHandle(name, { create: false });
-    return true;
-  } catch (err) {
-    if (err.name === 'NotFoundError') return false;
-    throw err;
-  }
 }
 
 /**
@@ -314,12 +254,6 @@ export async function saveLastLibraryHandle(handle) {
 export async function loadLastLibraryHandle() {
   return await idbGet(KEY_LIBRARY_HANDLE);
 }
-export async function saveLastMapsRootHandle(handle) {
-  await idbSet(KEY_MAPS_ROOT_HANDLE, handle);
-}
-export async function loadLastMapsRootHandle() {
-  return await idbGet(KEY_MAPS_ROOT_HANDLE);
-}
 /** 記憶されたmaps/ルートフォルダのハンドルを破棄する(自己修復リトライ用)。 */
 export async function clearLastIniHandle() {
   await idbDelete(KEY_INI_HANDLE);
@@ -332,7 +266,4 @@ export async function clearLastLogHandle() {
 }
 export async function clearLastLibraryHandle() {
   await idbDelete(KEY_LIBRARY_HANDLE);
-}
-export async function clearLastMapsRootHandle() {
-  await idbDelete(KEY_MAPS_ROOT_HANDLE);
 }

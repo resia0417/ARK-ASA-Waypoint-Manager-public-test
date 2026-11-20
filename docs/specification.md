@@ -1,4 +1,11 @@
-# ARK ASA Waypoint Manager Web — 仕様書 (v0.8.8)
+# ARK ASA Waypoint Manager Web — 仕様書 (v0.9.0)
+
+## 0.31 v0.9.0での変更概要(Map Calibration / Debug Mode の廃止)
+
+- MODマップには対応しない方針としたため、その追加手段だった **Map Calibrationタブと Debug Mode を廃止**した。公式マップの校正値は config.json として確定済みであり、通常利用への影響はない。
+- あわせて、保存フローのみが使っていたコードを削除した: `js/map_calibration.js` 本体、`map_config.js` の `saveMapConfigToProject()` / `validateMapConfig()` とその内部処理、`file_manager.js` の maps ルートフォルダ関連(`pickMapsRootFolder`・ハンドル保存/読込/破棄)と `getOrCreateSubdirectory` / `getOrCreateFile` / `fileExists`。
+- Settingsモーダルは「保存される設定」セクションのみとなった。旧バージョンで `activeLibraryTab='calibration'` が保存されている場合は Storage タブへフォールバックする。
+- 本書 §1(Map Calibration保存処理の修正)は廃止された機能の記録であり、現行仕様ではない。
 
 ## 0.30 v0.8.8での変更点(Settingsパネルの整理)
 
