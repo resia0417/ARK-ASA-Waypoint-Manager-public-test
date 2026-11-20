@@ -31,7 +31,7 @@
       <span id="statusText" class="status-text">GameUserSettings.ini を読み込んでください。</span>
 
       <div class="header-right">
-        <span class="header-version">v0.6</span>
+        <span class="header-version">v0.6.1</span>
         <button id="mapsToggleBtn" class="btn-bracket btn-small">[ 地図を隠す ]</button>
         <a id="githubLink" class="header-link" href="https://github.com/resia0417/ARK-ASA-Waypoint-Manager" target="_blank" rel="noopener">GitHub</a>
         <button id="settingsBtn" class="header-link header-link-btn">Settings</button>
@@ -80,12 +80,14 @@
 
       <!-- カラム1: GameUserSettings.ini -->
       <section class="column" id="col-ini" data-list-key="ini">
-        <div class="column-head"><h2>GameUserSettings.ini</h2><button id="iniSaveBtn" class="btn-bracket btn-small btn-accent" disabled>[ Save ]</button></div>
-        <div class="column-search">
-          <input id="iniSearchInput" type="search" placeholder="Search Name / CustomTag / Map" />
-          <button id="iniColumnSettingsBtn" class="btn-bracket btn-small" title="表示列・列順">⚙</button>
+        <div class="column-head"><h2>GameUserSettings.ini</h2>
+          <div class="head-tools">
+            <input id="iniSearchInput" type="search" placeholder="Search Name / CustomTag / Map" />
+            <span id="iniCount" class="meta-item">0 Waypoints</span>
+            <button id="iniColumnSettingsBtn" class="btn-bracket btn-small" title="表示列・列順">⚙</button>
+            <button id="iniSaveBtn" class="btn-bracket btn-small btn-accent" disabled>[ Save ]</button>
+          </div>
         </div>
-        <div class="column-meta"><span id="iniCount" class="meta-item">0 Waypoints</span></div>
         <div class="column-body" id="iniDropZone">
           <table class="wp-table">
             <thead><tr id="iniTheadRow"></tr></thead>
@@ -101,7 +103,27 @@
 
       <!-- カラム2: Library(My Storage / Location Library / Waypoint Log をタブ切替) -->
       <section class="column library-panel" id="col-library">
-        <div class="column-head"><h2>Library</h2></div>
+        <div class="column-head"><h2>Library</h2>
+          <div class="head-tools">
+            <div class="head-tool-group active" data-list-key="storage">
+              <input id="storageSearchInput" type="search" placeholder="Search Name / CustomTag / Map" />
+              <span id="storageCount" class="meta-item">0 Waypoints</span>
+              <button id="storageColumnSettingsBtn" class="btn-bracket btn-small" title="表示列・列順">⚙</button>
+              <button id="storageSaveBtn" class="btn-bracket btn-small btn-accent" disabled>[ Save ]</button>
+            </div>
+            <div class="head-tool-group" data-list-key="library">
+              <input id="librarySearchInput" type="search" placeholder="Search Name / CustomTag / Map" />
+              <select id="libraryCategoryFilter" class="category-filter"><option value="__all__">All Categories</option></select>
+              <span id="libraryCount" class="meta-item">0 Waypoints</span>
+              <button id="libraryColumnSettingsBtn" class="btn-bracket btn-small" title="表示列・列順">⚙</button>
+            </div>
+            <div class="head-tool-group" data-list-key="log">
+              <input id="logSearchInput" type="search" placeholder="Search Name / CustomTag / Map" />
+              <span id="logCount" class="meta-item">0 Waypoints</span>
+              <button id="logColumnSettingsBtn" class="btn-bracket btn-small" title="表示列・列順">⚙</button>
+            </div>
+          </div>
+        </div>
         <div class="library-tabs" id="libraryTabs">
           <button class="library-tab" data-tab="storage">My Storage</button>
           <button class="library-tab" data-tab="library">Location Library</button>
@@ -112,11 +134,6 @@
 
         <!-- タブ1: My Storage -->
         <div class="library-tab-panel" id="tabpanel-storage" data-list-key="storage">
-          <div class="column-search">
-            <input id="storageSearchInput" type="search" placeholder="Search Name / CustomTag / Map" />
-            <button id="storageColumnSettingsBtn" class="btn-bracket btn-small" title="表示列・列順">⚙</button>
-          </div>
-          <div class="column-meta"><span id="storageCount" class="meta-item">0 Waypoints</span><button id="storageSaveBtn" class="btn-bracket btn-small btn-accent" disabled>[ Save ]</button></div>
           <div class="column-body" id="storageDropZone">
             <table class="wp-table">
               <thead><tr id="storageTheadRow"></tr></thead>
@@ -129,12 +146,6 @@
 
         <!-- タブ2: Location Library -->
         <div class="library-tab-panel" id="tabpanel-library" data-list-key="library">
-          <div class="column-search">
-            <input id="librarySearchInput" type="search" placeholder="Search Name / CustomTag / Map" />
-            <select id="libraryCategoryFilter" class="category-filter"><option value="__all__">All Categories</option></select>
-            <button id="libraryColumnSettingsBtn" class="btn-bracket btn-small" title="表示列・列順">⚙</button>
-          </div>
-          <div class="column-meta"><span id="libraryCount" class="meta-item">0 Waypoints</span></div>
           <div class="column-body" id="libraryDropZone">
             <table class="wp-table">
               <thead><tr id="libraryTheadRow"></tr></thead>
@@ -147,11 +158,6 @@
 
         <!-- タブ3: Waypoint Log -->
         <div class="library-tab-panel" id="tabpanel-log" data-list-key="log">
-          <div class="column-search">
-            <input id="logSearchInput" type="search" placeholder="Search Name / CustomTag / Map" />
-            <button id="logColumnSettingsBtn" class="btn-bracket btn-small" title="表示列・列順">⚙</button>
-          </div>
-          <div class="column-meta"><span id="logCount" class="meta-item">0 Waypoints</span></div>
           <div class="column-body" id="logDropZone">
             <table class="wp-table">
               <thead><tr id="logTheadRow"></tr></thead>
@@ -169,8 +175,8 @@
             <button id="calibrationCalculateBtn" class="btn-bracket btn-small btn-accent" disabled>[ Calculate ]</button>
             <button id="calibrationSaveBtn" class="btn-bracket btn-small" disabled>[ Save MapConfig ]</button>
           </div>
-          <p class="calibration-subtitle">Map Calibration(MapConfig Manager) — 画面上部の Current Map を対象に動作します。</p>
-          <p id="calibrationNoMapNotice" class="calibration-notice hidden">Current Mapで特定のMapを選択すると、Map Calibrationを利用できます(現在: All Maps)。</p>
+          <p class="calibration-subtitle">Map Calibration(MapConfig Manager) — 地図のドロップダウンで選択中のMapを対象に動作します。</p>
+          <p id="calibrationNoMapNotice" class="calibration-notice hidden">地図で特定のMapを選択すると、Map Calibrationを利用できます。</p>
           <div class="column-body calibration-body">
             <table class="wp-table calibration-table">
               <thead>

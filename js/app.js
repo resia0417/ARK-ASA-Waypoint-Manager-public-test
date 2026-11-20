@@ -1159,6 +1159,10 @@ function switchLibraryTab(tab) {
   document.querySelectorAll('.library-tab-panel').forEach((panel) => {
     panel.classList.toggle('active', panel.dataset.listKey === tab);
   });
+  // タイトル行右側のツール群(検索・件数・列設定・Save)もタブに追随させる(v0.6.1)
+  document.querySelectorAll('.head-tool-group').forEach((group) => {
+    group.classList.toggle('active', group.dataset.listKey === tab);
+  });
   settingsStore.set('activeLibraryTab', tab);
   refreshMapViewers(); // 右の地図の表示元をタブに追随させる(v0.6.0)
 }

@@ -149,7 +149,7 @@ html, body {
 
 .column-head {
   padding: 10px 14px; border-bottom: 1px solid var(--border); background: var(--panel-alt); flex: 0 0 auto;
-  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; row-gap: 6px;
 }
 .column-head h2 {
   font-family: var(--font-display); font-weight: 600; font-size: 14px; letter-spacing: 0.06em;
@@ -162,17 +162,15 @@ html, body {
   padding: 8px 14px; border-bottom: 1px solid var(--border); flex: 0 0 auto;
 }
 
-.column-search {
-  display: flex; align-items: center; gap: 8px;
-  padding: 7px 14px; border-bottom: 1px solid var(--border); flex: 0 0 auto;
-}
-.column-search input[type="search"] {
-  flex: 1 1 auto; min-width: 0;
+/* v0.6.1: 検索・件数・列設定・Saveはタイトル行(.column-head)右側のhead-toolsへ集約し、専用の行を廃止 */
+.head-tools { display: flex; align-items: center; gap: 8px; flex: 1 1 auto; justify-content: flex-end; min-width: 0; }
+.head-tools input[type="search"] {
+  flex: 0 1 180px; min-width: 50px; width: 100%;
   background: var(--bg); border: 1px solid var(--border); color: var(--text);
-  font-family: var(--font-mono); font-size: 12px; padding: 6px 8px; border-radius: 4px;
+  font-family: var(--font-mono); font-size: 12px; padding: 5px 8px; border-radius: 4px;
 }
-
-.column-meta { padding: 6px 14px; border-bottom: 1px solid var(--border); flex: 0 0 auto; display: flex; justify-content: space-between; align-items: center; }
+.head-tool-group { display: none; align-items: center; gap: 8px; min-width: 0; }
+.head-tool-group.active { display: flex; }
 .meta-item { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); white-space: nowrap; }
 .meta-item.subtle { opacity: 0.7; }
 
