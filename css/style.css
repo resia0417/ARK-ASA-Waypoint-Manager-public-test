@@ -149,12 +149,14 @@ html, body {
 
 .column-head {
   padding: 10px 14px; border-bottom: 1px solid var(--border); background: var(--panel-alt); flex: 0 0 auto;
-  display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; row-gap: 6px;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: nowrap;
+  min-height: 54px; /* 左右カラムでタイトル行の高さを揃え、テーブルの開始位置を一致させる(v0.6.2) */
 }
 .column-head h2 {
   font-family: var(--font-display); font-weight: 600; font-size: 14px; letter-spacing: 0.06em;
   text-transform: uppercase; margin: 0; color: var(--accent); white-space: nowrap;
   text-shadow: 0 0 10px rgba(77,210,255,0.45);
+  flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; /* 狭い幅では折り返さず見出しを省略し、行の高さを保つ */
 }
 
 .column-toolbar {
@@ -179,16 +181,17 @@ html, body {
 
 /* ---------- Libraryタブ ---------- */
 
+/* v0.6.2: タブはLibraryのタイトル行の中に置く(専用のタブ行を廃止し、左右の列位置を揃える) */
 .library-tabs {
-  display: flex; gap: 2px; padding: 8px 14px 0; border-bottom: 1px solid var(--border); flex: 0 0 auto;
+  display: flex; gap: 4px; align-items: center; flex: 0 1 auto; min-width: 0;
 }
 .library-tab {
-  background: transparent; border: 1px solid var(--border); border-bottom: none;
+  background: transparent; border: 1px solid var(--border);
   color: var(--text-muted); font-family: var(--font-mono); font-size: 12px;
-  padding: 7px 14px; border-radius: 5px 5px 0 0; cursor: pointer; margin-bottom: -1px;
+  padding: 6px 12px; border-radius: 5px; cursor: pointer; white-space: nowrap;
 }
 .library-tab:hover { color: var(--text); }
-.library-tab.active { color: var(--accent); background: var(--panel); border-color: var(--border); box-shadow: inset 0 -2px 0 var(--accent), 0 0 10px rgba(77,210,255,0.15); }
+.library-tab.active { color: var(--accent); background: rgba(77,210,255,0.10); border-color: var(--accent-dim); box-shadow: 0 0 10px rgba(77,210,255,0.15); }
 
 .library-tab-panel { display: none; flex-direction: column; min-height: 0; flex: 1 1 auto; }
 .library-tab-panel.active { display: flex; }

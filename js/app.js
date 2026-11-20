@@ -79,6 +79,7 @@ let mapViewerLib = null; // 地図ビューア: My Storage / Location Library �
 let viewerMapName = ''; // 選択中のマップ(実効名)。v0.6.0からリスト絞り込みと地図の唯一の正
 let availableMapNames = []; // データに存在する実効マップ名の一覧(refreshMapSelectionが維持)
 let activeLibraryTab = 'storage'; // 右の地図が追随するLibraryタブ(v0.6.0)
+let mapsCollapsed = false; // 地図エリアを隠しているか(隠している間リストは全表示、v0.6.2)
 
 const els = {};
 
@@ -344,7 +345,7 @@ function refreshMapSelection() {
 }
 
 function applyCurrentMapFilter(persist) {
-  const value = viewerMapName;
+  const value = mapsCollapsed ? '' : viewerMapName; // 地図を隠している間は全表示(v0.6.2)
   const showMapColumn = value === ''; // 特定マップ選択中はMap列が冗長なため隠す
   for (const key of LIST_KEYS) {
     controllers[key].setExternalMapFilter(value === '' ? '__all__' : value);
@@ -1218,11 +1219,13 @@ function bindMapsToggle() {
 }
 
 function applyMapsCollapsed(collapsed, persist) {
+  mapsCollapsed = collapsed;
   els.mapsRow.classList.toggle('hidden', collapsed);
   els.mapsSplitter.classList.toggle('hidden', collapsed);
   els.mapsToggleBtn.textContent = collapsed ? '[ 地図を表示 ]' : '[ 地図を隠す ]';
   if (persist) settingsStore.set('layout.mapsCollapsed', collapsed);
-  if (!collapsed) refreshMapViewers();
+  // 地図を隠している間はマップ選択ができないため、リストは全Waypoint表示にする(v0.6.2)
+  applyCurrentMapFilter(false);
 }
 
 function restoreLayoutSettings() {

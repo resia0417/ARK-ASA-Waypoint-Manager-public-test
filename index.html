@@ -31,7 +31,7 @@
       <span id="statusText" class="status-text">GameUserSettings.ini を読み込んでください。</span>
 
       <div class="header-right">
-        <span class="header-version">v0.6.1</span>
+        <span class="header-version">v0.6.2</span>
         <button id="mapsToggleBtn" class="btn-bracket btn-small">[ 地図を隠す ]</button>
         <a id="githubLink" class="header-link" href="https://github.com/resia0417/ARK-ASA-Waypoint-Manager" target="_blank" rel="noopener">GitHub</a>
         <button id="settingsBtn" class="header-link header-link-btn">Settings</button>
@@ -82,7 +82,7 @@
       <section class="column" id="col-ini" data-list-key="ini">
         <div class="column-head"><h2>GameUserSettings.ini</h2>
           <div class="head-tools">
-            <input id="iniSearchInput" type="search" placeholder="Search Name / CustomTag / Map" />
+            <input id="iniSearchInput" type="search" placeholder="Search" />
             <span id="iniCount" class="meta-item">0 Waypoints</span>
             <button id="iniColumnSettingsBtn" class="btn-bracket btn-small" title="表示列・列順">⚙</button>
             <button id="iniSaveBtn" class="btn-bracket btn-small btn-accent" disabled>[ Save ]</button>
@@ -103,35 +103,33 @@
 
       <!-- カラム2: Library(My Storage / Location Library / Waypoint Log をタブ切替) -->
       <section class="column library-panel" id="col-library">
-        <div class="column-head"><h2>Library</h2>
+        <div class="column-head library-head">
+          <div class="library-tabs" id="libraryTabs">
+            <button class="library-tab" data-tab="storage">My Storage</button>
+            <button class="library-tab" data-tab="library">Location Library</button>
+            <button class="library-tab" data-tab="log">Waypoint Log</button>
+            <button class="library-tab debug-only hidden" data-tab="calibration" id="calibrationTabBtn">Map Calibration</button>
+          </div>
           <div class="head-tools">
             <div class="head-tool-group active" data-list-key="storage">
-              <input id="storageSearchInput" type="search" placeholder="Search Name / CustomTag / Map" />
+              <input id="storageSearchInput" type="search" placeholder="Search" />
               <span id="storageCount" class="meta-item">0 Waypoints</span>
               <button id="storageColumnSettingsBtn" class="btn-bracket btn-small" title="表示列・列順">⚙</button>
               <button id="storageSaveBtn" class="btn-bracket btn-small btn-accent" disabled>[ Save ]</button>
             </div>
             <div class="head-tool-group" data-list-key="library">
-              <input id="librarySearchInput" type="search" placeholder="Search Name / CustomTag / Map" />
+              <input id="librarySearchInput" type="search" placeholder="Search" />
               <select id="libraryCategoryFilter" class="category-filter"><option value="__all__">All Categories</option></select>
               <span id="libraryCount" class="meta-item">0 Waypoints</span>
               <button id="libraryColumnSettingsBtn" class="btn-bracket btn-small" title="表示列・列順">⚙</button>
             </div>
             <div class="head-tool-group" data-list-key="log">
-              <input id="logSearchInput" type="search" placeholder="Search Name / CustomTag / Map" />
+              <input id="logSearchInput" type="search" placeholder="Search" />
               <span id="logCount" class="meta-item">0 Waypoints</span>
               <button id="logColumnSettingsBtn" class="btn-bracket btn-small" title="表示列・列順">⚙</button>
             </div>
           </div>
         </div>
-        <div class="library-tabs" id="libraryTabs">
-          <button class="library-tab" data-tab="storage">My Storage</button>
-          <button class="library-tab" data-tab="library">Location Library</button>
-          <button class="library-tab" data-tab="log">Waypoint Log</button>
-          <button class="library-tab debug-only hidden" data-tab="calibration" id="calibrationTabBtn">Map Calibration</button>
-          <!-- 将来追加: <button class="library-tab" data-tab="community">Community Library</button> -->
-        </div>
-
         <!-- タブ1: My Storage -->
         <div class="library-tab-panel" id="tabpanel-storage" data-list-key="storage">
           <div class="column-body" id="storageDropZone">
