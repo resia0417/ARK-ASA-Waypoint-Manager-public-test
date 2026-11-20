@@ -111,7 +111,7 @@ function cacheElements() {
     'formMap', 'mapCandidates', 'formLat', 'formLon', 'formZ', 'formTag',
     'colorEditor', 'iconColorEditor', 'markIconPickerBtn',
     'waypointPreview', 'waypointPreviewName',
-    'modalSaveBtn', 'modalCancelBtn', 'modalCloseBtn',
+    'modalSaveBtn', 'modalCancelBtn', 'modalCloseBtn', 'modalDeleteBtn',
     // 汎用選択ダイアログ
     'choiceModal', 'choiceTitle', 'choiceMessage', 'choiceButtons',
     // Library タブ・Splitter
@@ -661,10 +661,21 @@ function onDeleteWaypoint(listKey, wp) {
 
 // --- Add/Editモーダル -------------------------------------------------------
 
+// モーダル内の削除ボタン(v0.6.5): 行のゴミ箱と同じ確認・削除フローを使う
+function onModalDelete() {
+  if (!editingRef || !editingRef.id) return;
+  const { listKey, id } = editingRef;
+  const wp = controllers[listKey].find(id);
+  if (!wp) return;
+  closeModal();
+  onDeleteWaypoint(listKey, wp);
+}
+
 function bindModalEvents() {
   els.modalSaveBtn.addEventListener('click', onModalSave);
   els.modalCancelBtn.addEventListener('click', closeModal);
   els.modalCloseBtn.addEventListener('click', closeModal);
+  els.modalDeleteBtn.addEventListener('click', onModalDelete);
   els.formName.addEventListener('input', updateWaypointPreview);
   els.markIconPickerBtn.addEventListener('click', (e) => openIconPickerPopover(e));
 
@@ -679,6 +690,7 @@ async function openAddEditModal(listKey, id) {
   // Category はLocation Library専用の管理情報(GameUserSettings.ini /
   // My Storageのデータには存在しない)ため、Location Library編集時のみ
   // Category欄を表示する。
+  els.modalDeleteBtn.classList.toggle('hidden', !id); // 削除ボタンは編集時のみ(v0.6.5)
   const isLibrary = listKey === 'library';
   els.formCategoryField.classList.toggle('hidden', !isLibrary);
   if (isLibrary) populateCategoryCandidates();
@@ -840,8 +852,7 @@ function openIconPickerPopover(e) {
   popover.className = 'icon-picker-popover';
   popover.innerHTML = MARK_ICON_DEFINITIONS.map((def) => `
     <div class="icon-picker-row ${def.id === selectedMarkIconId ? 'selected' : ''}" data-id="${def.id}">
-      ${renderWaypointIconHtml({ type: def.id, baseColor: defaultColor(), iconColor: { r: 0.28, g: 0.82, b: 0.77, a: 1 }, size: 22, title: def.displayName }, () => openIconPickerPopover(e))}
-      <span>${escapeHtml(def.displayName)}</span>
+      ${renderWaypointIconHtml({ type: def.id, baseColor: defaultColor(), iconColor: { r: 0.28, g: 0.82, b: 0.77, a: 1 }, size: 30, title: '' }, () => openIconPickerPopover(e))}
     </div>
   `).join('');
   document.body.appendChild(popover);
