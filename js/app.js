@@ -82,7 +82,7 @@ const els = {};
 
 function cacheElements() {
   const ids = [
-    'statusText', 'settingsBtn', 'settingsModal', 'settingsCloseBtn', 'currentMapSelect', 'debugModeCheckbox',
+    'statusText', 'settingsBtn', 'settingsModal', 'settingsCloseBtn', 'currentMapSelect', 'debugModeCheckbox', 'mapsToggleBtn',
     // GameUserSettings.ini
     'iniReadBtn', 'iniAddBtn', 'iniEditBtn', 'iniDeleteBtn', 'iniSaveBtn',
     'iniSearchInput', 'iniColumnSettingsBtn', 'iniCount', 'iniTheadRow', 'iniTableBody', 'iniEmptyState', 'iniDropZone',
@@ -132,6 +132,7 @@ function init() {
   bindLibraryTabs();
   bindSplitter();
   bindMapsSplitter();
+  bindMapsToggle();
   bindGlobalMapFilter();
   bindDebugMode();
   bindCalibrationEvents();
@@ -1258,6 +1259,21 @@ function bindMapsSplitter() {
   });
 }
 
+/** 地図エリアの表示/非表示トグル(v0.4.1)。リストを広く使いたいとき用 */
+function bindMapsToggle() {
+  els.mapsToggleBtn.addEventListener('click', () => {
+    applyMapsCollapsed(!els.mapsRow.classList.contains('hidden'), true);
+  });
+}
+
+function applyMapsCollapsed(collapsed, persist) {
+  els.mapsRow.classList.toggle('hidden', collapsed);
+  els.mapsSplitter.classList.toggle('hidden', collapsed);
+  els.mapsToggleBtn.textContent = collapsed ? '[ 地図を表示 ]' : '[ 地図を隠す ]';
+  if (persist) settingsStore.set('layout.mapsCollapsed', collapsed);
+  if (!collapsed) refreshMapViewers();
+}
+
 function restoreLayoutSettings() {
   const savedWidth = settingsStore.get('layout.iniColumnWidth', null);
   if (savedWidth) els.colIni.style.flex = `0 0 ${savedWidth}px`;
@@ -1270,6 +1286,8 @@ function restoreLayoutSettings() {
 
   const savedMapsHeight = settingsStore.get('layout.mapsRowHeight', null);
   if (savedMapsHeight) els.mapsRow.style.height = `${savedMapsHeight}px`;
+
+  if (settingsStore.get('layout.mapsCollapsed', false)) applyMapsCollapsed(true, false);
 }
 
 // --- ヘッダー(Settings: Debug Modeトグルを含む) -----------------------------------

@@ -85,6 +85,10 @@ html, body {
   padding: 8px 24px;
   border-bottom: 1px solid var(--border);
   background: var(--panel-alt);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 .current-map-label {
   font-family: var(--font-mono); font-size: 12px; color: var(--text-muted);
@@ -542,7 +546,7 @@ td.icon-cell { text-align: center; }
 
 .maps-row {
   flex: 0 0 auto;
-  height: 320px;
+  height: 260px;
   display: flex;
   gap: 14px;
   padding: 14px 24px 0;
@@ -577,7 +581,7 @@ td.icon-cell { text-align: center; }
 .splitter-h:hover::after { background: var(--accent); }
 
 @media (max-width: 1100px), (max-height: 720px) {
-  .maps-row { height: 240px; }
+  .maps-row { height: 200px; }
 }
 
 /* --- Map Viewer --- */
