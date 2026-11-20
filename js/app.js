@@ -84,16 +84,16 @@ function cacheElements() {
   const ids = [
     'statusText', 'settingsBtn', 'settingsModal', 'settingsCloseBtn', 'currentMapSelect', 'debugModeCheckbox', 'mapsToggleBtn',
     // GameUserSettings.ini
-    'iniReadBtn', 'iniAddBtn', 'iniEditBtn', 'iniDeleteBtn', 'iniSaveBtn',
+    'iniReadBtn', 'iniAddBtn', 'iniSaveBtn',
     'iniSearchInput', 'iniColumnSettingsBtn', 'iniCount', 'iniTheadRow', 'iniTableBody', 'iniEmptyState', 'iniDropZone',
     // My Storage
-    'storageReadBtn', 'storageAddBtn', 'storageEditBtn', 'storageDeleteBtn', 'storageSaveBtn',
+    'storageReadBtn', 'storageAddBtn',
     'storageSearchInput', 'storageColumnSettingsBtn', 'storageCount', 'storageTheadRow', 'storageTableBody', 'storageEmptyState', 'storageDropZone',
     // Location Library
-    'libraryReadBtn', 'libraryAddBtn', 'libraryEditBtn', 'libraryDeleteBtn', 'librarySaveBtn',
+    'libraryReadBtn', 'libraryAddBtn',
     'librarySearchInput', 'libraryCategoryFilter', 'libraryColumnSettingsBtn', 'libraryCount', 'libraryTheadRow', 'libraryTableBody', 'libraryEmptyState', 'libraryDropZone',
     // Waypoint Log
-    'logOpenBtn', 'logReloadBtn',
+    'logOpenBtn',
     'logSearchInput', 'logColumnSettingsBtn', 'logCount', 'logTheadRow', 'logTableBody', 'logEmptyState', 'logDropZone',
     // Map Calibration (Debug Mode専用)
     'calibrationTabBtn', 'calibrationTargetMapLabel', 'calibrationNoMapNotice',
@@ -153,29 +153,40 @@ function init() {
 // --- 4つのWaypointListコントローラーを生成 ------------------------------
 
 function createControllers() {
+  // Current Mapフィルターは実効マップ名(Genesis陸/海分割)で比較する(v0.5.1)
+  const getMapKey = (wp) => resolveEffectiveMapName(wp.parsed.map, wp.parsed.z);
+  // 行内アクション(編集/削除アイコン)の共通コールバック(v0.5.0)
+  const rowActionHandlers = (key) => ({
+    rowActions: true,
+    onEditRequest: (wp) => openAddEditModal(key, wp.id),
+    onDeleteRequest: (wp) => onDeleteWaypoint(key, wp),
+  });
   controllers.ini = new WaypointListController({
     listKey: 'ini', theadRow: els.iniTheadRow, tbody: els.iniTableBody,
     emptyStateEl: els.iniEmptyState, countEl: els.iniCount, searchInputEl: els.iniSearchInput,
     columnSettingsBtn: els.iniColumnSettingsBtn,
-    settingsStore, onSelect: handleSelect, getLatLon, getIconMarkup,
+    settingsStore, onSelect: handleSelect, getLatLon, getIconMarkup, getMapKey,
+    ...rowActionHandlers('ini'),
   });
   controllers.storage = new WaypointListController({
     listKey: 'storage', theadRow: els.storageTheadRow, tbody: els.storageTableBody,
     emptyStateEl: els.storageEmptyState, countEl: els.storageCount, searchInputEl: els.storageSearchInput,
     columnSettingsBtn: els.storageColumnSettingsBtn,
-    settingsStore, onSelect: handleSelect, getLatLon, getIconMarkup,
+    settingsStore, onSelect: handleSelect, getLatLon, getIconMarkup, getMapKey,
+    ...rowActionHandlers('storage'),
   });
   controllers.library = new WaypointListController({
     listKey: 'library', theadRow: els.libraryTheadRow, tbody: els.libraryTableBody,
     emptyStateEl: els.libraryEmptyState, countEl: els.libraryCount, searchInputEl: els.librarySearchInput,
     categoryFilterEl: els.libraryCategoryFilter, columnSettingsBtn: els.libraryColumnSettingsBtn,
-    settingsStore, onSelect: handleSelect, getLatLon, getIconMarkup,
+    settingsStore, onSelect: handleSelect, getLatLon, getIconMarkup, getMapKey,
+    ...rowActionHandlers('library'),
   });
   controllers.log = new WaypointListController({
     listKey: 'log', theadRow: els.logTheadRow, tbody: els.logTableBody,
     emptyStateEl: els.logEmptyState, countEl: els.logCount, searchInputEl: els.logSearchInput,
     columnSettingsBtn: els.logColumnSettingsBtn,
-    settingsStore, onSelect: handleSelect, getLatLon, getIconMarkup,
+    settingsStore, onSelect: handleSelect, getLatLon, getIconMarkup, getMapKey,
   });
 }
 
@@ -319,28 +330,29 @@ function bindGlobalMapFilter() {
 }
 
 function refreshGlobalMapOptions() {
+  // v0.5.1: 「All Maps」を廃止し、実効マップ名(Genesisは陸/海に分割)で選択肢を作る
   const maps = new Set();
   for (const key of LIST_KEYS) {
     for (const wp of controllers[key].getAll()) {
       const m = (wp.parsed.map || '').trim();
-      if (m) maps.add(m);
+      if (m) maps.add(resolveEffectiveMapName(m, wp.parsed.z));
     }
   }
   const sorted = Array.from(maps).sort((a, b) => a.localeCompare(b, 'ja'));
-  const current = els.currentMapSelect.value || '__all__';
+  const current = els.currentMapSelect.value || '';
 
-  els.currentMapSelect.innerHTML = '<option value="__all__">All Maps</option>' +
+  els.currentMapSelect.innerHTML =
     sorted.map((m) => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join('');
-  els.currentMapSelect.value = sorted.includes(current) ? current : '__all__';
+  els.currentMapSelect.value = sorted.includes(current) ? current : (sorted[0] || '');
 
   applyCurrentMapFilter(false);
 }
 
 function applyCurrentMapFilter(persist) {
-  const value = els.currentMapSelect.value || '__all__';
-  const showMapColumn = value === '__all__';
+  const value = els.currentMapSelect.value || '';
+  const showMapColumn = value === ''; // 特定マップ選択中はMap列が冗長なため隠す
   for (const key of LIST_KEYS) {
-    controllers[key].setExternalMapFilter(value);
+    controllers[key].setExternalMapFilter(value === '' ? '__all__' : value);
     controllers[key].setMapColumnVisible(showMapColumn);
   }
   if (persist) settingsStore.set('currentMap', value);
@@ -392,7 +404,7 @@ async function tryRestoreLastSession() {
   } catch (err) { console.info('前回のLocation Library情報はありません:', err.message); }
 
   refreshGlobalMapOptions();
-  const savedMap = settingsStore.get('currentMap', '__all__');
+  const savedMap = settingsStore.get('currentMap', '');
   if ([...els.currentMapSelect.options].some((o) => o.value === savedMap)) {
     els.currentMapSelect.value = savedMap;
     applyCurrentMapFilter(false);
@@ -419,41 +431,31 @@ async function loadIniLikeFile(handle, listKey) {
 
 // --- ツールバー: GameUserSettings.ini ------------------------------------
 
-// Read状態(✓表示)とSaveボタンの有効/無効(dirty/clean)を管理する
-// ボタン要素のマップ。createControllers() の後、bindToolbarEvents() で
-// 初期化する(要件2「Read済み表示」・実装方針「Saveボタンは未編集状態では
-// 無効化」への対応)。
+// Read状態(✓表示)を管理するボタン要素のマップ。v0.5.0でツールバーは廃止され、
+// Readボタンは各リストの空状態の中、Addボタンはリスト末尾の行に移った。
+// Edit/Deleteは行内アイコン、SaveはStorage/Libraryでは自動保存に置き換わった。
+// 例外としてGameUserSettings.iniはゲーム本体のファイルのため自動保存せず、
+// v0.5.1でカラム見出し右端のSaveボタン+確認ダイアログによる手動保存に戻した。
 const READ_BTN_EL = {};
-const SAVE_BTN_EL = {};
+const SAVE_BTN_EL = {}; // ini のみ
 
 function bindToolbarEvents() {
   READ_BTN_EL.ini = els.iniReadBtn;
   READ_BTN_EL.storage = els.storageReadBtn;
   READ_BTN_EL.library = els.libraryReadBtn;
   SAVE_BTN_EL.ini = els.iniSaveBtn;
-  SAVE_BTN_EL.storage = els.storageSaveBtn;
-  SAVE_BTN_EL.library = els.librarySaveBtn;
 
   els.iniReadBtn.addEventListener('click', onIniRead);
   els.iniAddBtn.addEventListener('click', () => openAddEditModal('ini', null));
-  els.iniEditBtn.addEventListener('click', () => onEditClick('ini'));
-  els.iniDeleteBtn.addEventListener('click', () => onDeleteClick('ini'));
   els.iniSaveBtn.addEventListener('click', onIniSave);
 
   els.storageReadBtn.addEventListener('click', onStorageRead);
   els.storageAddBtn.addEventListener('click', () => openAddEditModal('storage', null));
-  els.storageEditBtn.addEventListener('click', () => onEditClick('storage'));
-  els.storageDeleteBtn.addEventListener('click', () => onDeleteClick('storage'));
-  els.storageSaveBtn.addEventListener('click', onStorageSave);
 
   els.libraryReadBtn.addEventListener('click', onLibraryRead);
   els.libraryAddBtn.addEventListener('click', () => openAddEditModal('library', null));
-  els.libraryEditBtn.addEventListener('click', () => onEditClick('library'));
-  els.libraryDeleteBtn.addEventListener('click', () => onDeleteClick('library'));
-  els.librarySaveBtn.addEventListener('click', onLibrarySave);
 
   els.logOpenBtn.addEventListener('click', onLogOpen);
-  els.logReloadBtn.addEventListener('click', onLogReload);
 
   els.copyRawTextBtn.addEventListener('click', onCopyRawText);
 }
@@ -466,13 +468,13 @@ function markRead(listKey) {
   btn.classList.add('is-read');
 }
 
-/** そのリストに未保存の変更がある状態にする(Saveボタンを有効化する)。 */
+/** 未保存の変更がある状態にする(iniのSaveボタンを有効化。対象ボタンが無いリストでは何もしない)。 */
 function markDirty(listKey) {
   const btn = SAVE_BTN_EL[listKey];
   if (btn) btn.disabled = false;
 }
 
-/** そのリストが保存済み(未編集)の状態にする(Saveボタンを無効化する)。 */
+/** 保存済み(未編集)の状態にする(iniのSaveボタンを無効化)。 */
 function markClean(listKey) {
   const btn = SAVE_BTN_EL[listKey];
   if (btn) btn.disabled = true;
@@ -512,6 +514,9 @@ async function onIniRead() {
   }
 }
 
+/** GameUserSettings.iniへの手動保存(v0.5.1で復活。カラム見出し右端のSaveボタン)。
+ * ゲーム本体の設定ファイルを書き換えるため、毎回確認ダイアログを挟む。
+ * 自動保存はしない(変更は markDirty でSaveボタンを有効化するだけ)。 */
 async function onIniSave() {
   if (!iniFileHandle) { setStatus('先に[Read]でGameUserSettings.iniを読み込んでください。'); return; }
   const choice = await showChoiceDialog(
@@ -561,27 +566,6 @@ async function onStorageRead() {
   }
 }
 
-async function onStorageSave() {
-  try {
-    if (!storageFileHandle) {
-      const handle = await fm.pickSaveTextFile(STORAGE_FILE_NAME, 'ARK ASA My Storage (SavedMinimapMarks text)');
-      if (!handle) return;
-      storageFileHandle = handle;
-      await fm.saveLastJsonHandle(handle);
-    }
-    const granted = await fm.verifyPermission(storageFileHandle, 'readwrite');
-    if (!granted) { setStatus('My Storageへの書き込み権限が許可されませんでした。'); return; }
-
-    const text = serializeStorage(controllers.storage.getAll());
-    await fm.writeFile(storageFileHandle, text);
-    markClean('storage');
-    setStatus(`${STORAGE_FILE_NAME} へ保存しました(${controllers.storage.getAll().length}件)。`);
-  } catch (err) {
-    console.error(err);
-    setStatus('My Storageの保存中にエラーが発生しました: ' + err.message);
-  }
-}
-
 /** My Storageへの変更があるたびに自動保存する(「終了時自動保存」の実務的な近似実装)。
  *  ブラウザは真の意味での「終了時フック」で非同期ファイル書き込みを保証できないため、
  *  変更の都度即座に保存することで、実質的に同等の安全性を提供する。 */
@@ -620,27 +604,6 @@ async function onLibraryRead() {
   }
 }
 
-async function onLibrarySave() {
-  try {
-    if (!libraryFileHandle) {
-      const handle = await fm.pickSaveJsonFile('waypoints.json', 'Location Library JSON');
-      if (!handle) return;
-      libraryFileHandle = handle;
-      await fm.saveLastLibraryHandle(handle);
-    }
-    const granted = await fm.verifyPermission(libraryFileHandle, 'readwrite');
-    if (!granted) { setStatus('Location Libraryへの書き込み権限が許可されませんでした。'); return; }
-
-    const json = serializeLibrary(controllers.library.getAll());
-    await fm.writeFile(libraryFileHandle, json);
-    markClean('library');
-    setStatus(`waypoints.jsonへ保存しました(${controllers.library.getAll().length}件)。`);
-  } catch (err) {
-    console.error(err);
-    setStatus('Location Libraryの保存中にエラーが発生しました: ' + err.message);
-  }
-}
-
 /** Location Libraryへの変更があるたびに自動保存する(My Storageと同じ方針。詳細はautoSaveStorage参照)。 */
 async function autoSaveLibrary() {
   if (!libraryFileHandle) return;
@@ -671,20 +634,6 @@ async function onLogOpen() {
   }
 }
 
-async function onLogReload() {
-  if (!logFileHandle) { setStatus('先に[Open Log]でファイルを開いてください。'); return; }
-  try {
-    const granted = await fm.verifyPermission(logFileHandle, 'read');
-    if (!granted) { setStatus('Waypoint Logの読み取り権限が許可されませんでした。'); return; }
-    const list = await loadIniLikeFile(logFileHandle, 'log');
-    setStatus(`Waypoint Logを再読込しました(${list.length}件)。`);
-    refreshGlobalMapOptions();
-  } catch (err) {
-    console.error(err);
-    setStatus('Waypoint Logの再読込中にエラーが発生しました: ' + err.message);
-  }
-}
-
 async function onCopyRawText() {
   const text = els.detailRawText.value;
   if (!text) return;
@@ -697,24 +646,17 @@ async function onCopyRawText() {
   }
 }
 
-// --- 共通のEdit/Delete処理(ini/storageのみ。library/logにはボタン自体が無い) ---
+// --- 行内Delete処理(v0.5.0: 行のゴミ箱アイコンから呼ばれる。確認ダイアログは維持) ---
 
-function onEditClick(listKey) {
-  const sel = controllers[listKey].getSelected();
-  if (!sel) { setStatus(`編集するWaypointを${LABELS[listKey]}の一覧から選択してください。`); return; }
-  openAddEditModal(listKey, sel.id);
-}
-
-function onDeleteClick(listKey) {
-  const sel = controllers[listKey].getSelected();
-  if (!sel) { setStatus(`削除するWaypointを${LABELS[listKey]}の一覧から選択してください。`); return; }
-  const confirmed = window.confirm(`Waypoint「${sel.parsed.name}」を${LABELS[listKey]}から削除しますか?`);
+function onDeleteWaypoint(listKey, wp) {
+  const confirmed = window.confirm(`Waypoint「${wp.parsed.name}」を${LABELS[listKey]}から削除しますか?`);
   if (!confirmed) return;
 
-  controllers[listKey].remove(sel.id);
-  setStatus(`Waypoint「${sel.parsed.name}」を${LABELS[listKey]}から削除しました。`);
+  controllers[listKey].remove(wp.id);
+  setStatus(`Waypoint「${wp.parsed.name}」を${LABELS[listKey]}から削除しました。`);
   markDirty(listKey);
   AUTO_SAVE_HANDLERS[listKey]?.();
+  refreshGlobalMapOptions(); // 削除でマップが消えた場合にCurrent Mapの選択肢と絞り込みを追随させる
 }
 
 // --- Add/Editモーダル -------------------------------------------------------
@@ -748,9 +690,9 @@ async function openAddEditModal(listKey, id) {
     fillForm({ ...wp.parsed, lat, lon });
   } else {
     els.modalTitle.textContent = `Waypoint を追加 (${LABELS[listKey]})`;
-    // MapNameは要件通り、Current Mapが特定のMapを指している場合のみそれを初期値にする
-    // (「ALL選択時は未設定」とするため、Current Mapが「All Maps」の場合は空欄のまま)
-    const defaultMap = els.currentMapSelect.value !== '__all__' ? els.currentMapSelect.value : '';
+    // MapNameの初期値はCurrent Mapの選択中マップ(v0.5.1: All Maps廃止のため、
+    // データがあれば常に特定マップが選択されている。Genesis陸/海の別名は保存時に正規化される)
+    const defaultMap = els.currentMapSelect.value || '';
     fillForm({ ...createWaypoint().parsed, lat: 0, lon: 0, map: defaultMap });
   }
   els.editModal.classList.remove('hidden');

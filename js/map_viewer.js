@@ -55,11 +55,9 @@ const GRID_STEP = 10; // グリッド線・ラベルの間隔(Lat/Lon)
 export function createMapViewer(handlers, root) {
   const q = (sel) => root.querySelector(sel);
   const els = {
-    mapSelect: q('.mv-map-select'),
-    fitBtn: q('.mv-fit-btn'),
-    zoomOutBtn: q('.mv-zoom-out-btn'),
-    zoomInBtn: q('.mv-zoom-in-btn'),
-    gridToggle: q('.mv-grid-toggle'),
+    // v0.5.0: ツールバー廃止。ドロップダウンは左ペインのみ(共有・オーバーレイ表示)、
+    // Fit/±ボタンとGridトグルは廃止(Fitはダブルクリック、Gridは常時表示)。
+    mapSelect: q('.mv-map-select'), // 右ペインでは null
     readout: q('.mv-readout'),
     info: q('.mv-info'),
     viewport: q('.mv-viewport'),
@@ -248,7 +246,7 @@ export function createMapViewer(handlers, root) {
   }
 
   function renderLabels() {
-    const show = els.gridToggle.checked && state.imgW > 0;
+    const show = state.imgW > 0; // Grid常時表示(v0.5.0)
     els.grid.style.display = show ? 'block' : 'none';
     els.labels.innerHTML = '';
     if (!show) return;
@@ -367,6 +365,7 @@ export function createMapViewer(handlers, root) {
   // --- 公開API ------------------------------------------------------------
 
   function refreshMapOptions() {
+    if (!els.mapSelect) return; // 右ペインにはドロップダウンが無い
     const maps = handlers.getAvailableMaps();
     const current = els.mapSelect.value;
     els.mapSelect.innerHTML = maps
@@ -388,13 +387,13 @@ export function createMapViewer(handlers, root) {
     } else if (sharedMap && maps.includes(sharedMap)) {
       target = sharedMap;
     } else {
-      target = els.mapSelect.value || maps[0] || '';
+      target = (els.mapSelect ? els.mapSelect.value : '') || maps[0] || '';
     }
     if (!target) {
       setNotice('表示できるマップがありません。');
       return;
     }
-    if (els.mapSelect.value !== target) els.mapSelect.value = target;
+    if (els.mapSelect && els.mapSelect.value !== target) els.mapSelect.value = target;
     if (target !== state.mapName) {
       loadMap(target);
     } else {
@@ -403,16 +402,13 @@ export function createMapViewer(handlers, root) {
     }
   }
 
-  els.mapSelect.addEventListener('change', () => {
-    handlers.onMapChange?.(els.mapSelect.value);
-    loadMap(els.mapSelect.value);
-  });
-  els.fitBtn.addEventListener('click', fit);
-  els.zoomInBtn.addEventListener('click', () =>
-    zoomAt(els.viewport.clientWidth / 2, els.viewport.clientHeight / 2, 1.3));
-  els.zoomOutBtn.addEventListener('click', () =>
-    zoomAt(els.viewport.clientWidth / 2, els.viewport.clientHeight / 2, 1 / 1.3));
-  els.gridToggle.addEventListener('change', render);
+  if (els.mapSelect) {
+    els.mapSelect.addEventListener('change', () => {
+      handlers.onMapChange?.(els.mapSelect.value);
+      loadMap(els.mapSelect.value);
+    });
+  }
+  els.viewport.addEventListener('dblclick', fit); // Fitボタン廃止の代替(v0.5.0)
   window.addEventListener('waypoint:selected', (e) => {
     state.selected = e.detail ?? null;
     render();

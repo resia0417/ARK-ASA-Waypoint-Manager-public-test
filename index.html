@@ -31,7 +31,7 @@
       <span id="statusText" class="status-text">GameUserSettings.ini を読み込んでください。</span>
 
       <div class="header-right">
-        <span class="header-version">v0.4.1</span>
+        <span class="header-version">v0.5.1</span>
         <a id="githubLink" class="header-link" href="https://github.com/resia0417/ARK-ASA-Waypoint-Manager" target="_blank" rel="noopener">GitHub</a>
         <button id="settingsBtn" class="header-link header-link-btn">Settings</button>
       </div>
@@ -48,16 +48,6 @@
     <!-- 地図エリア(v0.4.0: 2枚並べて常時表示。左=INI / 右=Storage・Library、パン・ズーム連動) -->
     <section class="maps-row" id="mapsRow">
       <div class="map-pane" id="mapPaneIni">
-        <div class="column-head"><h2>Map — GameUserSettings.ini</h2></div>
-        <div class="column-toolbar">
-          <select class="mv-map-select" title="表示するマップ"></select>
-          <button class="mv-fit-btn btn-bracket btn-small">[ Fit ]</button>
-          <button class="mv-zoom-out-btn btn-bracket btn-small">[ − ]</button>
-          <button class="mv-zoom-in-btn btn-bracket btn-small">[ + ]</button>
-          <label class="meta-item"><input type="checkbox" class="mv-grid-toggle" checked /> Grid</label>
-          <span class="mv-readout meta-item"></span>
-        </div>
-        <div class="column-meta"><span class="mv-info meta-item">0 Waypoints を表示中</span></div>
         <div class="mv-viewport">
           <div class="mv-stage">
             <img class="mv-image" alt="Map" />
@@ -65,21 +55,15 @@
           </div>
           <div class="mv-markers"></div>
           <div class="mv-labels"></div>
+          <select class="mv-map-select mv-overlay-select" title="表示するマップ"></select>
+          <span class="mv-chip">INI</span>
+          <span class="mv-readout mv-overlay-bc"></span>
+          <span class="mv-info mv-overlay-br">0 Waypoints を表示中</span>
           <p class="mv-notice hidden"></p>
         </div>
       </div>
 
       <div class="map-pane" id="mapPaneLib">
-        <div class="column-head"><h2>Map — My Storage / Location Library</h2></div>
-        <div class="column-toolbar">
-          <select class="mv-map-select" title="表示するマップ"></select>
-          <button class="mv-fit-btn btn-bracket btn-small">[ Fit ]</button>
-          <button class="mv-zoom-out-btn btn-bracket btn-small">[ − ]</button>
-          <button class="mv-zoom-in-btn btn-bracket btn-small">[ + ]</button>
-          <label class="meta-item"><input type="checkbox" class="mv-grid-toggle" checked /> Grid</label>
-          <span class="mv-readout meta-item"></span>
-        </div>
-        <div class="column-meta"><span class="mv-info meta-item">0 Waypoints を表示中</span></div>
         <div class="mv-viewport">
           <div class="mv-stage">
             <img class="mv-image" alt="Map" />
@@ -87,6 +71,9 @@
           </div>
           <div class="mv-markers"></div>
           <div class="mv-labels"></div>
+          <span class="mv-chip">Storage ・ Library</span>
+          <span class="mv-readout mv-overlay-bc"></span>
+          <span class="mv-info mv-overlay-br">0 Waypoints を表示中</span>
           <p class="mv-notice hidden"></p>
         </div>
       </div>
@@ -100,14 +87,7 @@
 
       <!-- カラム1: GameUserSettings.ini -->
       <section class="column" id="col-ini" data-list-key="ini">
-        <div class="column-head"><h2>GameUserSettings.ini</h2></div>
-        <div class="column-toolbar">
-          <button id="iniReadBtn" class="btn-bracket btn-small">[ Read ]</button>
-          <button id="iniAddBtn" class="btn-bracket btn-small">[ Add ]</button>
-          <button id="iniEditBtn" class="btn-bracket btn-small">[ Edit ]</button>
-          <button id="iniDeleteBtn" class="btn-bracket btn-small btn-danger">[ Delete ]</button>
-          <button id="iniSaveBtn" class="btn-bracket btn-small btn-accent" disabled>[ Save ]</button>
-        </div>
+        <div class="column-head"><h2>GameUserSettings.ini</h2><button id="iniSaveBtn" class="btn-bracket btn-small btn-accent" disabled>[ Save ]</button></div>
         <div class="column-search">
           <input id="iniSearchInput" type="search" placeholder="Search Name / CustomTag / Map" />
           <button id="iniColumnSettingsBtn" class="btn-bracket btn-small" title="表示列・列順">⚙</button>
@@ -117,8 +97,9 @@
           <table class="wp-table">
             <thead><tr id="iniTheadRow"></tr></thead>
             <tbody id="iniTableBody"></tbody>
+            <tfoot><tr><td class="add-row-cell" colspan="99"><button id="iniAddBtn" class="add-row-btn">＋ Add Waypoint</button></td></tr></tfoot>
           </table>
-          <p class="empty-state" id="iniEmptyState">GameUserSettings.iniを読み込んでください。</p>
+          <p class="empty-state" id="iniEmptyState">GameUserSettings.iniを読み込んでください。<br /><button id="iniReadBtn" class="btn-bracket btn-small empty-action">[ Read ]</button></p>
         </div>
       </section>
 
@@ -138,13 +119,6 @@
 
         <!-- タブ1: My Storage -->
         <div class="library-tab-panel" id="tabpanel-storage" data-list-key="storage">
-          <div class="column-toolbar">
-            <button id="storageReadBtn" class="btn-bracket btn-small">[ Read ]</button>
-            <button id="storageAddBtn" class="btn-bracket btn-small">[ Add ]</button>
-            <button id="storageEditBtn" class="btn-bracket btn-small">[ Edit ]</button>
-            <button id="storageDeleteBtn" class="btn-bracket btn-small btn-danger">[ Delete ]</button>
-            <button id="storageSaveBtn" class="btn-bracket btn-small btn-accent" disabled>[ Save ]</button>
-          </div>
           <div class="column-search">
             <input id="storageSearchInput" type="search" placeholder="Search Name / CustomTag / Map" />
             <button id="storageColumnSettingsBtn" class="btn-bracket btn-small" title="表示列・列順">⚙</button>
@@ -154,20 +128,14 @@
             <table class="wp-table">
               <thead><tr id="storageTheadRow"></tr></thead>
               <tbody id="storageTableBody"></tbody>
+              <tfoot><tr><td class="add-row-cell" colspan="99"><button id="storageAddBtn" class="add-row-btn">＋ Add Waypoint</button></td></tr></tfoot>
             </table>
-            <p class="empty-state" id="storageEmptyState">Waypointがまだありません。「Add」で追加するか、他のリストからドラッグしてください。</p>
+            <p class="empty-state" id="storageEmptyState">Waypointがまだありません。下の「Add」で追加するか、他のリストからドラッグしてください。<br /><button id="storageReadBtn" class="btn-bracket btn-small empty-action">[ Read ]</button></p>
           </div>
         </div>
 
         <!-- タブ2: Location Library -->
         <div class="library-tab-panel" id="tabpanel-library" data-list-key="library">
-          <div class="column-toolbar">
-            <button id="libraryReadBtn" class="btn-bracket btn-small">[ Read ]</button>
-            <button id="libraryAddBtn" class="btn-bracket btn-small">[ Add ]</button>
-            <button id="libraryEditBtn" class="btn-bracket btn-small">[ Edit ]</button>
-            <button id="libraryDeleteBtn" class="btn-bracket btn-small btn-danger">[ Delete ]</button>
-            <button id="librarySaveBtn" class="btn-bracket btn-small btn-accent" disabled>[ Save ]</button>
-          </div>
           <div class="column-search">
             <input id="librarySearchInput" type="search" placeholder="Search Name / CustomTag / Map" />
             <select id="libraryCategoryFilter" class="category-filter"><option value="__all__">All Categories</option></select>
@@ -178,17 +146,14 @@
             <table class="wp-table">
               <thead><tr id="libraryTheadRow"></tr></thead>
               <tbody id="libraryTableBody"></tbody>
+              <tfoot><tr><td class="add-row-cell" colspan="99"><button id="libraryAddBtn" class="add-row-btn">＋ Add Waypoint</button></td></tr></tfoot>
             </table>
-            <p class="empty-state" id="libraryEmptyState">「Open」から waypoints.json を新規作成・読み込みしてください。</p>
+            <p class="empty-state" id="libraryEmptyState">waypoints.json を新規作成・読み込みしてください。<br /><button id="libraryReadBtn" class="btn-bracket btn-small empty-action">[ Read ]</button></p>
           </div>
         </div>
 
         <!-- タブ3: Waypoint Log -->
         <div class="library-tab-panel" id="tabpanel-log" data-list-key="log">
-          <div class="column-toolbar">
-            <button id="logOpenBtn" class="btn-bracket btn-small">[ Open Log ]</button>
-            <button id="logReloadBtn" class="btn-bracket btn-small">[ Reload ]</button>
-          </div>
           <div class="column-search">
             <input id="logSearchInput" type="search" placeholder="Search Name / CustomTag / Map" />
             <button id="logColumnSettingsBtn" class="btn-bracket btn-small" title="表示列・列順">⚙</button>
@@ -199,7 +164,7 @@
               <thead><tr id="logTheadRow"></tr></thead>
               <tbody id="logTableBody"></tbody>
             </table>
-            <p class="empty-state" id="logEmptyState">「Open Log」からPython版WaypointLoggerの出力ファイルを開いてください。</p>
+            <p class="empty-state" id="logEmptyState">Python版WaypointLoggerの出力ファイルを開いてください。<br /><button id="logOpenBtn" class="btn-bracket btn-small empty-action">[ Open Log ]</button></p>
           </div>
         </div>
 

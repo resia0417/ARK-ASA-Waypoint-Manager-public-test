@@ -59,6 +59,7 @@ export class WaypointListController {
   constructor({
     listKey, theadRow, tbody, emptyStateEl, countEl, searchInputEl, columnSettingsBtn,
     categoryFilterEl, settingsStore, onSelect, getLatLon, getIconMarkup,
+    rowActions, onEditRequest, onDeleteRequest, getMapKey,
   }) {
     this.listKey = listKey;
     this.theadRow = theadRow;
@@ -76,6 +77,12 @@ export class WaypointListController {
     // MarkIconのアイコン表示(HTML文字列)を算出する外部コールバック。
     // (wp) => string を返す(waypoint_icon.jsのrenderWaypointIconHtmlを利用する)。
     this.getIconMarkup = getIconMarkup || (() => '');
+    // Current Mapフィルター用のキー算出(v0.5.1: Genesis陸/海など実効名で比較する)。
+    this.getMapKey = getMapKey || ((wp) => wp.parsed.map);
+    // 行内アクション(編集/削除アイコンボタン、v0.5.0)。logなど読み取り専用リストでは無効。
+    this.rowActions = !!rowActions;
+    this.onEditRequest = onEditRequest || (() => {});
+    this.onDeleteRequest = onDeleteRequest || (() => {});
 
     this.items = [];
     this.selectedId = null;
@@ -184,6 +191,16 @@ export class WaypointListController {
   _handleRowClick(e) {
     const tr = e.target.closest('tr');
     if (!tr) return;
+    // 行内アクション(編集/削除)は選択トグルではなく、そのWaypointへの操作として扱う
+    const actionBtn = e.target.closest('[data-row-action]');
+    if (actionBtn) {
+      const wp = this.items.find((w) => w.id === tr.dataset.id);
+      if (wp) {
+        if (actionBtn.dataset.rowAction === 'edit') this.onEditRequest(wp);
+        else if (actionBtn.dataset.rowAction === 'delete') this.onDeleteRequest(wp);
+      }
+      return;
+    }
     const id = tr.dataset.id;
 
     this.selectedId = this.selectedId === id ? null : id;
@@ -193,6 +210,7 @@ export class WaypointListController {
 
   bindDragEvents(onDragStart) {
     this.tbody.addEventListener('dragstart', (e) => {
+      if (e.target.closest('[data-row-action]')) { e.preventDefault(); return; } // アイコン操作をドラッグにしない
       const tr = e.target.closest('tr');
       if (!tr) return;
       tr.classList.add('dragging');
@@ -212,7 +230,7 @@ export class WaypointListController {
     let list = this.items;
 
     if (this.externalMapFilter && this.externalMapFilter !== '__all__') {
-      list = list.filter((w) => w.parsed.map === this.externalMapFilter);
+      list = list.filter((w) => this.getMapKey(w) === this.externalMapFilter);
     }
 
     if (this.categoryFilter && this.categoryFilter !== '__all__') {
@@ -284,7 +302,8 @@ export class WaypointListController {
       if (this.selectedId === wp.id) tr.classList.add('selected');
       if (this.highlightMatcher && this.highlightMatcher(wp)) tr.classList.add('sync-highlight');
 
-      tr.innerHTML = columns.map((col) => this._renderCell(col, wp)).join('');
+      tr.innerHTML = columns.map((col) => this._renderCell(col, wp)).join('') +
+        (this.rowActions ? this._renderActionsCell() : '');
       this.tbody.appendChild(tr);
     }
   }
@@ -349,6 +368,13 @@ export class WaypointListController {
     return `<td class="${col.numeric ? 'num' : ''}"${style}>${esc(value)}</td>`;
   }
 
+  /** 行内アクション(編集=ペン / 削除=ゴミ箱)のセル。ARK本編のWaypoint一覧と同じ並び */
+  _renderActionsCell() {
+    const pencil = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>';
+    const trash = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>';
+    return `<td class="row-actions"><button type="button" class="row-action" data-row-action="edit" title="編集" draggable="false">${pencil}</button><button type="button" class="row-action row-action-danger" data-row-action="delete" title="削除" draggable="false">${trash}</button></td>`;
+  }
+
   _renderHeader() {
     const columns = this._activeColumns();
     this.theadRow.innerHTML = columns.map((col) => {
@@ -357,7 +383,7 @@ export class WaypointListController {
       const sortable = col.key !== 'icon';
       const sortIndicator = sortable && this.sortState.field === col.key ? (this.sortState.dir === 'asc' ? ' ▲' : ' ▼') : '';
       return `<th class="${col.numeric ? 'num' : ''} ${sortable ? 'sortable' : ''}" data-col="${col.key}"${style}>${esc(col.label)}${sortIndicator}<span class="col-resizer" data-col="${col.key}"></span></th>`;
-    }).join('');
+    }).join('') + (this.rowActions ? '<th class="row-actions-th"></th>' : '');
 
     // ソートクリック(Icon列は対象外)
     this.theadRow.querySelectorAll('th.sortable').forEach((th) => {
