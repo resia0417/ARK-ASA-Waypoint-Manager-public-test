@@ -174,22 +174,19 @@ export function createMapViewer(handlers, root) {
     state.markerItems = [];
 
     let shown = 0;
-    let clamped = 0;
     for (const { waypoint, listKey } of handlers.getWaypoints()) {
       // Genesis_WP はZ座標で陸・海へ振り分けた実効MapNameで照合する
       if (resolveEffectiveMapName(waypoint.parsed.map, waypoint.parsed.z) !== state.mapName) continue;
       const latLon = handlers.getLatLon(waypoint);
       if (!latLon || !isFinite(latLon.lat) || !isFinite(latLon.lon)) continue;
-      // 範囲外(0〜100を超える)座標は、地図画像の外側に相対位置のまま表示する
-      // (v0.8.4。ゲーム内でもマップ外に存在するWaypointがあるため)。
-      // パン/ズームで視界に入れば見える。データ自体は元の座標のまま。
-      const outOfRange = latLon.lat < 0 || latLon.lat > 100 || latLon.lon < 0 || latLon.lon > 100;
-      if (outOfRange) clamped++;
+      // 範囲外(0〜100を超える)座標も、地図画像の外側に相対位置のまま
+      // 通常のマーカーとして表示する(ゲーム内でもマップ外に存在する
+      // Waypointがあるため、特別な強調はしない。v0.8.5)。
       const dispLat = latLon.lat;
       const dispLon = latLon.lon;
       const el = document.createElement('div');
-      el.className = 'mv-marker' + (outOfRange ? ' out-of-range' : '');
-      el.title = (waypoint.parsed.name || '(無名)') + (outOfRange ? '(範囲外: 地図画像の外に表示中)' : '');
+      el.className = 'mv-marker';
+      el.title = waypoint.parsed.name || '(無名)';
       el.innerHTML = handlers.getIconMarkup(waypoint);
       el.addEventListener('pointerdown', (e) => e.stopPropagation());
       el.addEventListener('click', (e) => {
@@ -200,9 +197,7 @@ export function createMapViewer(handlers, root) {
       state.markerItems.push({ el, lat: dispLat, lon: dispLon, waypoint });
       shown++;
     }
-    els.info.textContent = clamped > 0
-      ? `${shown} Waypoints を表示中(範囲外 ${clamped} 件は地図画像の外に表示)`
-      : `${shown} Waypoints を表示中`;
+    els.info.textContent = `${shown} Waypoints を表示中`;
     render();
   }
 
