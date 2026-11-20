@@ -1,4 +1,14 @@
-# ARK ASA Waypoint Manager Web — 仕様書 (v0.7.0)
+# ARK ASA Waypoint Manager Web — 仕様書 (v0.7.1)
+
+## 0.21 v0.7.1での変更点(同梱データのZ座標を実データ化)
+
+v0.7.0の同梱データは出典がLat/Lonのみだったため全件Z=0だったが、Explorer Noteについては実UE座標(X/Y/Z)を持つ原データ(ASA_Note_Marker_Maker、公式WikiのASA版Explorer Mapデータ由来)から取り直した。
+
+- **The Island(228件)・Scorched Earth(148件)・Aberration(167件)のExplorer Noteを、原データのX/Y/Zそのままで再収録**。Z範囲はマップにより約-216,000〜+82,000。
+- AberrationのExplorer Noteは、v0.7.0ではASAで検証できる出典が無く1件のみだったが、この原データで167件を収録できた。
+- The Islandは、Wiki表で座標が壊れていた Carcharodontosaurus / Rhyniognatha のDossierと、欠落していた Nerva Note #28 も原データでは正常で、3件追加された。
+- 合計は695件→**864件**。
+- Explorer Note以外(Obelisk / Artifact / Cave / Loot Crate / OSD / Boss / Mission)と Lost Colony のExplorer Noteは、出典がLat/LonのみのためZ=0のまま(アプリの地図表示はLat/Lonで描くため影響なし。ゲーム内マーカーの高さは地形と合わない場合がある)。
 
 ## 0.20 v0.7.0での変更点(Location Library収録データの同梱)
 
