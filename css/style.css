@@ -577,9 +577,7 @@ td.icon-cell { text-align: center; }
 .splitter-h:hover::after { background: var(--accent); }
 
 @media (max-width: 1100px), (max-height: 720px) {
-  .maps-row { flex-direction: column; height: auto; }
-  .map-pane { flex: 0 0 320px; }
-  .splitter-h { display: none; }
+  .maps-row { height: 240px; }
 }
 
 /* --- Map Viewer --- */
