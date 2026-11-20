@@ -53,9 +53,9 @@ html, body {
 
 .topbar {
   display: flex; align-items: center; gap: 20px;
-  padding: 12px 24px; border-bottom: 1px solid var(--accent-dim); flex: 0 0 auto;
-  background: linear-gradient(180deg, rgba(77,210,255,0.07), rgba(77,210,255,0.01));
-  box-shadow: 0 1px 12px rgba(77,210,255,0.12);
+  padding: 12px 24px; border-bottom: 1px solid rgba(120,225,255,0.65); flex: 0 0 auto;
+  background: linear-gradient(180deg, #1b5b8f 0%, #124a78 55%, #0d3a61 100%);
+  box-shadow: 0 1px 16px rgba(77,210,255,0.35);
 }
 .brand { display: flex; align-items: center; gap: 10px; }
 .brand-text h1 {
@@ -127,12 +127,16 @@ html, body {
 
 .column {
   min-width: 0; min-height: 0; display: flex; flex-direction: column;
-  background: var(--panel); overflow: hidden;
-  /* ARK本編のパネル風: 角カット + 内側リング + 弱い発光 (v0.5.0) */
+  overflow: hidden;
+  /* ARK本編のパネル風: 角カット + 発光グラデーション枠 (v0.6.4) */
   clip-path: polygon(16px 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%, 0 16px);
-  box-shadow: inset 0 0 0 1px rgba(77,210,255,0.22), 0 0 22px rgba(77,210,255,0.05);
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--panel), var(--panel)) padding-box,
+    linear-gradient(160deg, rgba(140,230,255,0.95) 0%, rgba(77,210,255,0.38) 28%, rgba(26,95,138,0.50) 55%, rgba(77,210,255,0.80) 100%) border-box;
+  box-shadow: inset 0 0 0 1px rgba(77,210,255,0.10), inset 0 0 26px rgba(77,210,255,0.06);
 }
-#col-ini { flex: 0 0 420px; }
+#col-ini { flex: 0 0 50%; } /* デフォルトは左右半々(v0.6.4)。ドラッグ/保存時はpx指定が優先 */
 .library-panel { flex: 1 1 auto; }
 
 .splitter {
@@ -157,6 +161,8 @@ html, body {
   text-transform: uppercase; margin: 0; color: var(--accent); white-space: nowrap;
   text-shadow: 0 0 10px rgba(77,210,255,0.45);
   flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; /* 狭い幅では折り返さず見出しを省略し、行の高さを保つ */
+  border-bottom: 4px solid var(--accent); padding-bottom: 3px;
+  box-shadow: 0 5px 7px -5px rgba(77,210,255,0.75); /* ゲーム内UI風の太いアンダーバー(v0.6.4) */
 }
 
 .column-toolbar {
@@ -182,16 +188,22 @@ html, body {
 /* ---------- Libraryタブ ---------- */
 
 /* v0.6.2: タブはLibraryのタイトル行の中に置く(専用のタブ行を廃止し、左右の列位置を揃える) */
+/* v0.6.4: ゲーム内UI風に、枠線なし+選択中は太いアンダーバー */
 .library-tabs {
   display: flex; gap: 4px; align-items: center; flex: 0 1 auto; min-width: 0;
 }
 .library-tab {
-  background: transparent; border: 1px solid var(--border);
+  background: transparent; border: none;
   color: var(--text-muted); font-family: var(--font-mono); font-size: 12px;
-  padding: 6px 12px; border-radius: 5px; cursor: pointer; white-space: nowrap;
+  padding: 7px 12px 9px; cursor: pointer; white-space: nowrap;
+  box-shadow: inset 0 -3px 0 rgba(77,210,255,0.18);
 }
 .library-tab:hover { color: var(--text); }
-.library-tab.active { color: var(--accent); background: rgba(77,210,255,0.10); border-color: var(--accent-dim); box-shadow: 0 0 10px rgba(77,210,255,0.15); }
+.library-tab.active {
+  color: var(--accent); background: rgba(77,210,255,0.07);
+  box-shadow: inset 0 -4px 0 var(--accent), 0 6px 10px -6px rgba(77,210,255,0.55);
+  text-shadow: 0 0 8px rgba(77,210,255,0.6);
+}
 
 .library-tab-panel { display: none; flex-direction: column; min-height: 0; flex: 1 1 auto; }
 .library-tab-panel.active { display: flex; }
@@ -288,8 +300,25 @@ html, body {
 }
 .modal-overlay.hidden { display: none; }
 .modal {
-  background: var(--panel); border: 1px solid var(--border); border-radius: 6px;
   padding: 24px; width: 380px; max-width: 90vw; max-height: 85vh; overflow-y: auto;
+  position: relative;
+  clip-path: polygon(16px 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%, 0 16px);
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--panel), var(--panel)) padding-box,
+    linear-gradient(160deg, rgba(140,230,255,0.95) 0%, rgba(77,210,255,0.38) 28%, rgba(26,95,138,0.50) 55%, rgba(77,210,255,0.80) 100%) border-box;
+  box-shadow: inset 0 0 0 1px rgba(77,210,255,0.10), inset 0 0 26px rgba(77,210,255,0.06);
+}
+.modal-close-btn {
+  position: absolute; top: 10px; right: 10px; z-index: 5;
+  width: 30px; height: 30px; padding: 0;
+  background: rgba(77,210,255,0.08); border: none; color: var(--accent);
+  box-shadow: inset 0 0 0 1px rgba(77,210,255,0.55), 0 0 10px rgba(77,210,255,0.25);
+  clip-path: polygon(7px 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%, 0 7px);
+  font-size: 15px; line-height: 1; cursor: pointer;
+}
+.modal-close-btn:hover { background: rgba(77,210,255,0.22); color: #fff; }
+#editModal .modal-actions .btn-bracket { flex: 1 1 0; padding: 11px 14px; text-align: center; }
 }
 .modal h3 {
   font-family: var(--font-display); text-transform: uppercase; letter-spacing: 0.05em;
@@ -372,7 +401,19 @@ html, body {
   margin: 0; font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);
 }
 .color-channel input[type="range"] {
-  width: 100%; accent-color: var(--accent); margin: 0;
+  width: 100%; margin: 0; -webkit-appearance: none; appearance: none;
+  height: 4px; border-radius: 2px; outline: none;
+  background: linear-gradient(90deg, var(--accent-dim), var(--accent));
+  box-shadow: 0 0 6px rgba(77,210,255,0.35);
+}
+.color-channel input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 11px; height: 20px; background: #bfefff; border: 1px solid var(--accent);
+  box-shadow: 0 0 9px rgba(77,210,255,0.85); cursor: pointer;
+}
+.color-channel input[type="range"]::-moz-range-thumb {
+  width: 11px; height: 20px; border-radius: 0; background: #bfefff; border: 1px solid var(--accent);
+  box-shadow: 0 0 9px rgba(77,210,255,0.85); cursor: pointer;
 }
 .color-channel input[type="number"] {
   margin: 0; padding: 3px 5px; font-size: 11px;
@@ -411,8 +452,8 @@ html, body {
 }
 .waypoint-icon-layer { position: absolute; inset: 0; display: block; }
 .waypoint-icon-layer svg { width: 100%; height: 100%; display: block; }
-.waypoint-icon-glyph svg { transform: scale(0.56); transform-origin: center; }
-.waypoint-icon-img { position: absolute; inset: 0; margin: auto; width: 84%; height: 84%; object-fit: contain; }
+.waypoint-icon-glyph svg { transform: scale(1.02); transform-origin: center; }
+.waypoint-icon-img { position: absolute; inset: 0; margin: auto; width: 88%; height: 88%; object-fit: contain; }
 .waypoint-icon-loading {
   display: inline-block; border: 1px dashed var(--border); border-radius: 3px; opacity: 0.5;
 }
@@ -569,10 +610,13 @@ td.icon-cell { text-align: center; }
   min-width: 0;
   display: flex;
   flex-direction: column;
-  background: var(--panel);
   overflow: hidden;
   clip-path: polygon(16px 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%, 0 16px);
-  box-shadow: inset 0 0 0 1px rgba(77,210,255,0.22), 0 0 22px rgba(77,210,255,0.05);
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--panel), var(--panel)) padding-box,
+    linear-gradient(160deg, rgba(140,230,255,0.95) 0%, rgba(77,210,255,0.38) 28%, rgba(26,95,138,0.50) 55%, rgba(77,210,255,0.80) 100%) border-box;
+  box-shadow: inset 0 0 0 1px rgba(77,210,255,0.10), inset 0 0 26px rgba(77,210,255,0.06);
 }
 .splitter-h {
   flex: 0 0 10px;

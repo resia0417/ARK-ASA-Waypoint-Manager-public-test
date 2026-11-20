@@ -111,7 +111,7 @@ function cacheElements() {
     'formMap', 'mapCandidates', 'formLat', 'formLon', 'formZ', 'formTag',
     'colorEditor', 'iconColorEditor', 'markIconPickerBtn',
     'waypointPreview', 'waypointPreviewName',
-    'modalSaveBtn', 'modalCancelBtn',
+    'modalSaveBtn', 'modalCancelBtn', 'modalCloseBtn',
     // 汎用選択ダイアログ
     'choiceModal', 'choiceTitle', 'choiceMessage', 'choiceButtons',
     // Library タブ・Splitter
@@ -664,6 +664,7 @@ function onDeleteWaypoint(listKey, wp) {
 function bindModalEvents() {
   els.modalSaveBtn.addEventListener('click', onModalSave);
   els.modalCancelBtn.addEventListener('click', closeModal);
+  els.modalCloseBtn.addEventListener('click', closeModal);
   els.formName.addEventListener('input', updateWaypointPreview);
   els.markIconPickerBtn.addEventListener('click', (e) => openIconPickerPopover(e));
 
