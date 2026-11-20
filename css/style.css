@@ -102,6 +102,7 @@ html, body {
 
 /* ---------- ボタン共通 ---------- */
 
+#reconnectBtn[hidden] { display: none; }
 .btn-bracket {
   /* ARK本編のチップ風: 角カット + 内側リング + 半透明 (v0.5.0) */
   background: rgba(77,210,255,0.05); border: none; color: var(--text);

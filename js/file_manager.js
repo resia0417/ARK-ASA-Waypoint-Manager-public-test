@@ -18,6 +18,7 @@ const KEY_JSON_HANDLE = 'lastJsonFileHandle';
 const KEY_LOG_HANDLE = 'lastLogFileHandle';
 const KEY_LIBRARY_HANDLE = 'lastLocationLibraryFileHandle'; // v0.3.4よりファイル単体(waypoints.json)のハンドル
 const KEY_MAPS_ROOT_HANDLE = 'lastMapsRootDirHandle';
+const KEY_INI_BACKUP = 'iniBackupV1'; // INI上書き直前の内容の緊急用バックアップ
 
 /**
  * File System Access APIがブラウザでサポートされているか確認する。
@@ -275,6 +276,22 @@ export async function pickSaveTextFile(suggestedName, description = 'Text file')
  * @param {'read'|'readwrite'} mode
  * @returns {Promise<boolean>} 権限が得られたか
  */
+/**
+ * 権限の状態だけを確認する(許可ダイアログは出さない)。
+ * 起動時のセッション復元など、ユーザー操作の無い場面で使う。
+ * @param {FileSystemFileHandle} handle
+ * @param {'read'|'readwrite'} mode
+ * @returns {Promise<'granted'|'prompt'|'denied'>}
+ */
+export async function queryPermissionState(handle, mode = 'read') {
+  if (!handle) return 'denied';
+  try {
+    return await handle.queryPermission({ mode });
+  } catch {
+    return 'denied';
+  }
+}
+
 export async function verifyPermission(handle, mode = 'read') {
   if (!handle) return false;
   const options = { mode };
@@ -311,6 +328,15 @@ export async function saveLastIniHandle(handle) {
 export async function loadLastIniHandle() {
   return await idbGet(KEY_INI_HANDLE);
 }
+/** INI上書き直前の内容を、緊急用バックアップとしてIndexedDBへ保持する。 */
+export async function saveIniBackup(text) {
+  try {
+    await idbSet(KEY_INI_BACKUP, { text, savedAt: Date.now() });
+  } catch (err) {
+    console.info('INIバックアップの保存に失敗しました:', err.message);
+  }
+}
+
 export async function saveLastJsonHandle(handle) {
   await idbSet(KEY_JSON_HANDLE, handle);
 }

@@ -176,57 +176,76 @@ function extractColor(colorBlock) {
 }
 
 /**
- * 引用符付き文字列フィールド(例: Name="...")を、指定した行テキスト内で
- * 更新(存在すれば置換、存在しなければ挿入)する。
- * 正規表現によるブロック単位の置換のみを行い、それ以外の部分
- * (Color, ID, bIsShowing 等の未知のフィールド)は一切変更しない。
- * @param {string} text - 1件分のSavedMinimapMarks行(またはその値部分)
- * @param {string} key - フィールド名 (Name, CustomTag, MapName, MarkIcon)
- * @param {string} value - 新しい値
- * @returns {string}
+ * "(...)" の中身を、最上位のカンマだけで分割する。
+ * ネストした括弧と引用符(バックスラッシュエスケープ含む)を考慮する。
+ * @param {string} inner - 外側の括弧を除いた中身
+ * @returns {string[]} フィールド文字列の配列(各要素は "Key=Value" 形式)
  */
-function upsertQuotedField(text, key, value) {
-  const re = new RegExp(`${key}="[^"]*"`);
-  const escaped = String(value ?? '').replace(/"/g, '\\"');
-  const replacement = `${key}="${escaped}"`;
-
-  if (re.test(text)) {
-    return text.replace(re, replacement);
+function splitTopLevelFields(inner) {
+  const fields = [];
+  let depth = 0;
+  let inQuotes = false;
+  let escaped = false;
+  let current = '';
+  for (const ch of inner) {
+    if (escaped) { current += ch; escaped = false; continue; }
+    if (inQuotes && ch === '\\') { current += ch; escaped = true; continue; }
+    if (ch === '"') inQuotes = !inQuotes;
+    if (!inQuotes) {
+      if (ch === '(') depth++;
+      else if (ch === ')') depth--;
+    }
+    if (ch === ',' && depth === 0 && !inQuotes) {
+      fields.push(current);
+      current = '';
+    } else {
+      current += ch;
+    }
   }
-  // 既存フィールドがない場合は、開始の "(" の直後に挿入する
-  return text.replace('(', `(${replacement},`);
+  if (current !== '') fields.push(current);
+  return fields;
 }
 
 /**
- * Location=(X=...,Y=...,Z=...) ブロックを更新(存在すれば置換、なければ挿入)する。
- * @param {string} text
- * @param {number} x
- * @param {number} y
- * @param {number} z
+ * SavedMinimapMarks行の最上位フィールドを、キー名の完全一致で
+ * 更新(存在すれば置換、存在しなければ先頭へ挿入)する。
+ *
+ * v0.6.8で正規表現による置換から置き換えた。従来方式は
+ * Name が MapName の、Color が IconColor の内側に先にマッチし、
+ * フィールドの並び順によっては編集が保存されない不具合があった。
+ * また置換文字列中の $ パターン展開による破損も起きない。
+ * 対象外のフィールド(ID・bIsShowing等の未知フィールド)は
+ * 元の文字列のまま保持される。
+ * @param {string} text - 1件分のSavedMinimapMarks行
+ * @param {string} key - フィールド名 (Name, Color 等)
+ * @param {string} valueText - 新しい値の文字列表現(引用符や括弧を含む)
  * @returns {string}
  */
-function upsertLocationField(text, x, y, z) {
-  const re = /Location=\([^)]*\)/;
-  const replacement = `Location=(X=${x},Y=${y},Z=${z})`;
+function setTopLevelField(text, key, valueText) {
+  const open = text.indexOf('(');
+  const close = text.lastIndexOf(')');
+  if (open === -1 || close <= open) return text;
 
-  if (re.test(text)) return text.replace(re, replacement);
-  return text.replace('(', `(${replacement},`);
+  const fields = splitTopLevelFields(text.slice(open + 1, close));
+  const entry = `${key}=${valueText}`;
+  const idx = fields.findIndex((f) => {
+    const eq = f.indexOf('=');
+    return eq !== -1 && f.slice(0, eq).trim() === key;
+  });
+  if (idx >= 0) fields[idx] = entry;
+  else fields.unshift(entry);
+
+  return text.slice(0, open + 1) + fields.join(',') + text.slice(close);
 }
 
-/**
- * Color=(R=...,G=...,B=...,A=...) / IconColor=(...) ブロックを
- * 更新(存在すれば置換、なければ挿入)する。
- * @param {string} text
- * @param {string} key - 'Color' または 'IconColor'
- * @param {{r:number,g:number,b:number,a:number}} color
- * @returns {string}
- */
-function upsertColorField(text, key, color) {
-  const re = new RegExp(`${key}=\\([^)]*\\)`);
-  const replacement = `${key}=(R=${color.r},G=${color.g},B=${color.b},A=${color.a})`;
+/** 引用符付き文字列値の文字列表現を作る。 */
+function quotedValue(value) {
+  return `"${String(value ?? '').replace(/"/g, '\\"')}"`;
+}
 
-  if (re.test(text)) return text.replace(re, replacement);
-  return text.replace('(', `(${replacement},`);
+/** Color=(R=...,G=...,B=...,A=...) の文字列表現を作る。 */
+function colorValue(color) {
+  return `(R=${color.r},G=${color.g},B=${color.b},A=${color.a})`;
 }
 
 /**
@@ -234,7 +253,7 @@ function upsertColorField(text, key, color) {
  *
  * 既存のrawTextがある場合(INI/Waypoint Logから読み込んだ、または
  * 過去に一度書き出したWaypoint)は、Name/CustomTag/Location/MapName/MarkIcon/
- * Color/IconColorのみを正規表現でピンポイント置換し、ID・bIsShowing等の
+ * Color/IconColorのみを最上位フィールド単位で置換し、ID・bIsShowing等の
  * 未知フィールドはそのまま保持する(RawTextを正としたデータ保持方針)。
  *
  * rawTextが空(手動追加された新規Waypoint)の場合は、
@@ -250,16 +269,13 @@ export function buildRawText(originalRawText, parsed) {
     ? originalRawText
     : 'SavedMinimapMarks=()';
 
-  text = upsertQuotedField(text, 'Name', parsed.name);
-  text = upsertQuotedField(text, 'CustomTag', parsed.customTag);
-  text = upsertQuotedField(text, 'MapName', parsed.map);
-  text = upsertQuotedField(text, 'MarkIcon', parsed.markIcon);
-  text = upsertLocationField(text, parsed.x, parsed.y, parsed.z);
-  if (parsed.color) text = upsertColorField(text, 'Color', parsed.color);
-  if (parsed.iconColor) text = upsertColorField(text, 'IconColor', parsed.iconColor);
-
-  // 挿入処理により生じる可能性のある不要なカンマ(",)"など)を整理する
-  text = text.replace(/,\s*\)/g, ')').replace(/\(\s*,/g, '(');
+  text = setTopLevelField(text, 'Name', quotedValue(parsed.name));
+  text = setTopLevelField(text, 'CustomTag', quotedValue(parsed.customTag));
+  text = setTopLevelField(text, 'MapName', quotedValue(parsed.map));
+  text = setTopLevelField(text, 'MarkIcon', quotedValue(parsed.markIcon));
+  text = setTopLevelField(text, 'Location', `(X=${parsed.x},Y=${parsed.y},Z=${parsed.z})`);
+  if (parsed.color) text = setTopLevelField(text, 'Color', colorValue(parsed.color));
+  if (parsed.iconColor) text = setTopLevelField(text, 'IconColor', colorValue(parsed.iconColor));
 
   return text;
 }

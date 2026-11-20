@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'" />
 <title>ARK ASA Waypoint Manager</title>
 <link rel="stylesheet" href="css/style.css" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -29,9 +30,10 @@
       </div>
 
       <span id="statusText" class="status-text">GameUserSettings.ini を読み込んでください。</span>
+      <button id="reconnectBtn" class="btn-bracket btn-small" hidden>[ 前回のファイルを再接続 ]</button>
 
       <div class="header-right">
-        <span class="header-version">v0.6.7</span>
+        <span class="header-version">v0.6.8</span>
         <button id="mapsToggleBtn" class="btn-bracket btn-small">[ 全Waypoint表示 ]</button>
         <a id="githubLink" class="header-link" href="https://github.com/resia0417/ARK-ASA-Waypoint-Manager" target="_blank" rel="noopener">GitHub</a>
         <button id="settingsBtn" class="header-link header-link-btn">Settings</button>

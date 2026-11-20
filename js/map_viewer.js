@@ -366,9 +366,15 @@ export function createMapViewer(handlers, root) {
     if (!els.mapSelect) return; // 右ペインにはドロップダウンが無い
     const maps = handlers.getAvailableMaps();
     const current = els.mapSelect.value;
-    els.mapSelect.innerHTML = maps
-      .map((m) => `<option value="${m}">${m}</option>`)
-      .join('');
+    // MapNameはファイル由来の文字列のため、innerHTMLではなく
+    // DOM生成でoptionを作る(未エスケープによるXSS防止。v0.6.8)
+    const options = maps.map((m) => {
+      const opt = document.createElement('option');
+      opt.value = m;
+      opt.textContent = m;
+      return opt;
+    });
+    els.mapSelect.replaceChildren(...options);
     if (maps.includes(current)) els.mapSelect.value = current;
   }
 

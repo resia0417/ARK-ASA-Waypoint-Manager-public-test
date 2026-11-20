@@ -117,7 +117,7 @@ function cacheElements() {
     // Library タブ・Splitter
     'libraryTabs', 'mainSplitter',
     // 地図エリア(v0.4.0)
-    'mapsRow', 'mapsSplitter',
+    'mapsRow', 'mapsSplitter', 'reconnectBtn',
   ];
   for (const id of ids) els[id] = document.getElementById(id);
   els.colIni = document.getElementById('col-ini');
@@ -354,55 +354,97 @@ function applyCurrentMapFilter(persist) {
 
 // --- 前回セッションの復元 ------------------------------------------
 
+// 権限が prompt 状態で自動復元できなかったファイルの保留リスト。
+// 起動時に requestPermission は呼べない(ユーザー操作が必要)ため、
+// 再接続ボタンのクリックの中で許可を取り直して読み込む(v0.6.8)。
+const pendingReconnect = [];
+
 async function tryRestoreLastSession() {
-  try {
-    const savedIni = await fm.loadLastIniHandle();
-    if (savedIni && (await fm.verifyPermission(savedIni, 'readwrite'))) {
-      iniFileHandle = savedIni;
-      await loadIniLikeFile(savedIni, 'ini');
-      markRead('ini');
-      markClean('ini');
-    }
-  } catch (err) { console.info('前回のGameUserSettings.ini情報はありません:', err.message); }
+  const restored = [];
 
-  try {
-    const savedStorage = await fm.loadLastJsonHandle();
-    if (savedStorage && (await fm.verifyPermission(savedStorage, 'readwrite'))) {
-      storageFileHandle = savedStorage;
-      const text = await fm.readFile(storageFileHandle);
-      controllers.storage.setAll(parseStorage(text));
-      markRead('storage');
-      markClean('storage');
-    }
-  } catch (err) { console.info('前回のMy Storage情報はありません:', err.message); }
+  const attempt = async (label, mode, loadHandle, doLoad) => {
+    try {
+      const handle = await loadHandle();
+      if (!handle) return;
+      const state = await fm.queryPermissionState(handle, mode);
+      if (state === 'granted') {
+        await doLoad(handle);
+        restored.push(label);
+      } else if (state === 'prompt') {
+        pendingReconnect.push({ label, mode, handle, doLoad });
+      }
+    } catch (err) { console.info(`前回の${label}情報はありません:`, err.message); }
+  };
 
-  try {
-    const savedLog = await fm.loadLastLogHandle();
-    if (savedLog && (await fm.verifyPermission(savedLog, 'read'))) {
-      logFileHandle = savedLog;
-      await loadIniLikeFile(savedLog, 'log');
-    }
-  } catch (err) { console.info('前回のWaypoint Log情報はありません:', err.message); }
+  await attempt('GameUserSettings.ini', 'readwrite', () => fm.loadLastIniHandle(), async (handle) => {
+    iniFileHandle = handle;
+    await loadIniLikeFile(handle, 'ini');
+    markRead('ini');
+    markClean('ini');
+  });
 
-  try {
-    const savedLibrary = await fm.loadLastLibraryHandle();
-    if (savedLibrary && (await fm.verifyPermission(savedLibrary, 'readwrite'))) {
-      libraryFileHandle = savedLibrary;
-      const text = await fm.readFile(libraryFileHandle);
-      controllers.library.setAll(parseLibrary(text));
-      markRead('library');
-      markClean('library');
-    }
-  } catch (err) { console.info('前回のLocation Library情報はありません:', err.message); }
+  await attempt('My Storage', 'readwrite', () => fm.loadLastJsonHandle(), async (handle) => {
+    storageFileHandle = handle;
+    const text = await fm.readFile(storageFileHandle);
+    controllers.storage.setAll(parseStorage(text));
+    markRead('storage');
+    markClean('storage');
+  });
 
+  await attempt('Waypoint Log', 'read', () => fm.loadLastLogHandle(), async (handle) => {
+    logFileHandle = handle;
+    await loadIniLikeFile(handle, 'log');
+  });
+
+  await attempt('Location Library', 'readwrite', () => fm.loadLastLibraryHandle(), async (handle) => {
+    libraryFileHandle = handle;
+    const text = await fm.readFile(libraryFileHandle);
+    controllers.library.setAll(parseLibrary(text));
+    markRead('library');
+    markClean('library');
+  });
+
+  applySavedMapSelection();
+
+  if (pendingReconnect.length > 0 && els.reconnectBtn) els.reconnectBtn.hidden = false;
+  if (restored.length > 0 && pendingReconnect.length > 0) {
+    setStatus(`前回のセッション情報を復元しました(${restored.join('・')})。一部のファイルは再接続が必要です。`);
+  } else if (restored.length > 0) {
+    setStatus(`前回のセッション情報を復元しました(${restored.join('・')})。`);
+  } else if (pendingReconnect.length > 0) {
+    setStatus('前回のファイルへのアクセス許可が必要です。[ 前回のファイルを再接続 ]を押してください。');
+  }
+}
+
+/** 復元後に、保存済みの選択マップを再適用する。 */
+function applySavedMapSelection() {
   refreshMapSelection();
   const savedMap = settingsStore.get('currentMap', '');
   if (availableMapNames.includes(savedMap)) {
     viewerMapName = savedMap;
     applyCurrentMapFilter(false);
   }
+}
 
-  setStatus('前回のセッション情報を復元しました(利用可能なファイルのみ)。');
+/** 再接続ボタン: ユーザー操作の中で権限を取り直し、保留中のファイルを読み込む。 */
+async function onReconnectFiles() {
+  const restored = [];
+  for (const item of pendingReconnect) {
+    try {
+      if (await fm.verifyPermission(item.handle, item.mode)) {
+        await item.doLoad(item.handle);
+        restored.push(item.label);
+      }
+    } catch (err) { console.info('再接続に失敗しました:', item.label, err.message); }
+  }
+  pendingReconnect.length = 0;
+  if (els.reconnectBtn) els.reconnectBtn.hidden = true;
+  if (restored.length > 0) {
+    applySavedMapSelection();
+    setStatus(`再接続しました(${restored.join('・')})。`);
+  } else {
+    setStatus('再接続が許可されませんでした。利用するファイルは[Read]から読み込み直してください。');
+  }
 }
 
 /**
@@ -439,6 +481,7 @@ function bindToolbarEvents() {
   SAVE_BTN_EL.storage = els.storageSaveBtn;
 
   els.iniReadBtn.addEventListener('click', onIniRead);
+  els.reconnectBtn.addEventListener('click', onReconnectFiles);
   els.iniAddBtn.addEventListener('click', () => openAddEditModal('ini', null));
   els.iniSaveBtn.addEventListener('click', onIniSave);
 
@@ -510,7 +553,13 @@ async function onIniRead() {
 
 /** GameUserSettings.iniへの手動保存(v0.5.1で復活。カラム見出し右端のSaveボタン)。
  * ゲーム本体の設定ファイルを書き換えるため、毎回確認ダイアログを挟む。
- * 自動保存はしない(変更は markDirty でSaveボタンを有効化するだけ)。 */
+ * 自動保存はしない(変更は markDirty でSaveボタンを有効化するだけ)。
+ *
+ * v0.6.8: 保存直前に現在のファイル内容を読み直す。読み込み後に
+ * ゲーム側で書き換えられていた場合、Waypoint以外の変更は最新の
+ * 内容を土台にして保持し、Waypoint行自体が変わっていた場合は
+ * 追加の確認ダイアログを出す。上書き前の内容は緊急用バックアップ
+ * としてIndexedDBへ保持する。 */
 async function onIniSave() {
   if (!iniFileHandle) { setStatus('先に[Read]でGameUserSettings.iniを読み込んでください。'); return; }
   const choice = await showChoiceDialog(
@@ -523,11 +572,30 @@ async function onIniSave() {
   try {
     const granted = await fm.verifyPermission(iniFileHandle, 'readwrite');
     if (!granted) { setStatus('GameUserSettings.iniへの書き込み権限が許可されませんでした。'); return; }
-    const newText = rebuildIniText(iniOriginalText, controllers.ini.getAll());
+
+    const currentText = await fm.readFile(iniFileHandle);
+    let baseText = iniOriginalText;
+    let usedFreshBase = false;
+    if (currentText !== iniOriginalText) {
+      const markLinesOf = (t) => t.split(/\r?\n/).filter((l) => l.trim().startsWith('SavedMinimapMarks=')).join('\n');
+      if (markLinesOf(currentText) !== markLinesOf(iniOriginalText)) {
+        const c2 = await showChoiceDialog(
+          'ファイルが変更されています',
+          '読み込み後にGameUserSettings.iniのWaypoint行が変更されています(ゲーム側で追加・削除された可能性があります)。\nアプリ側の一覧で上書きしますか?',
+          [{ key: 'overwrite', label: 'アプリの一覧で保存' }, { key: 'cancel', label: 'キャンセル' }]
+        );
+        if (c2 !== 'overwrite') { setStatus('保存を中止しました。最新の状態で作業するには[Read]で読み込み直してください。'); return; }
+      }
+      baseText = currentText;
+      usedFreshBase = true;
+    }
+
+    const newText = rebuildIniText(baseText, controllers.ini.getAll());
+    await fm.saveIniBackup(currentText);
     await fm.writeFile(iniFileHandle, newText);
     iniOriginalText = newText;
     markClean('ini');
-    setStatus(`GameUserSettings.iniへ保存しました(${controllers.ini.getAll().length}件)。`);
+    setStatus(`GameUserSettings.iniへ保存しました(${controllers.ini.getAll().length}件)${usedFreshBase ? '。読み込み後の外部変更も保持しました' : ''}。`);
   } catch (err) {
     console.error(err);
     setStatus('GameUserSettings.iniの保存中にエラーが発生しました: ' + err.message);
