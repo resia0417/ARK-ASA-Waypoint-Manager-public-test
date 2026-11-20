@@ -95,6 +95,24 @@ export class SettingsStore {
       console.warn(`設定「${key}」の削除に失敗しました。`, err);
     }
   }
+
+  /** このアプリの設定をすべて削除する(Settingsのリセット用、v0.6.3)。 */
+  clearAll() {
+    try {
+      if (typeof this.backend.key === 'function' && typeof this.backend.length === 'number') {
+        const keys = [];
+        for (let i = 0; i < this.backend.length; i++) {
+          const k = this.backend.key(i);
+          if (k && k.startsWith(STORAGE_KEY_PREFIX)) keys.push(k);
+        }
+        keys.forEach((k) => this.backend.removeItem(k));
+      } else if (this.backend._map instanceof Map) {
+        this.backend._map.clear();
+      }
+    } catch (err) {
+      console.warn('設定のリセットに失敗しました。', err);
+    }
+  }
 }
 
 // アプリ全体で1つのインスタンスを共有する(シングルトン)。

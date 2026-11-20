@@ -412,6 +412,7 @@ html, body {
 .waypoint-icon-layer { position: absolute; inset: 0; display: block; }
 .waypoint-icon-layer svg { width: 100%; height: 100%; display: block; }
 .waypoint-icon-glyph svg { transform: scale(0.56); transform-origin: center; }
+.waypoint-icon-img { position: absolute; inset: 0; margin: auto; width: 84%; height: 84%; object-fit: contain; }
 .waypoint-icon-loading {
   display: inline-block; border: 1px dashed var(--border); border-radius: 3px; opacity: 0.5;
 }

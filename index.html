@@ -31,8 +31,8 @@
       <span id="statusText" class="status-text">GameUserSettings.ini を読み込んでください。</span>
 
       <div class="header-right">
-        <span class="header-version">v0.6.2</span>
-        <button id="mapsToggleBtn" class="btn-bracket btn-small">[ 地図を隠す ]</button>
+        <span class="header-version">v0.6.3</span>
+        <button id="mapsToggleBtn" class="btn-bracket btn-small">[ 全Waypoint表示 ]</button>
         <a id="githubLink" class="header-link" href="https://github.com/resia0417/ARK-ASA-Waypoint-Manager" target="_blank" rel="noopener">GitHub</a>
         <button id="settingsBtn" class="header-link header-link-btn">Settings</button>
       </div>
@@ -84,7 +84,6 @@
           <div class="head-tools">
             <input id="iniSearchInput" type="search" placeholder="Search" />
             <span id="iniCount" class="meta-item">0 Waypoints</span>
-            <button id="iniColumnSettingsBtn" class="btn-bracket btn-small" title="表示列・列順">⚙</button>
             <button id="iniSaveBtn" class="btn-bracket btn-small btn-accent" disabled>[ Save ]</button>
           </div>
         </div>
@@ -114,19 +113,16 @@
             <div class="head-tool-group active" data-list-key="storage">
               <input id="storageSearchInput" type="search" placeholder="Search" />
               <span id="storageCount" class="meta-item">0 Waypoints</span>
-              <button id="storageColumnSettingsBtn" class="btn-bracket btn-small" title="表示列・列順">⚙</button>
               <button id="storageSaveBtn" class="btn-bracket btn-small btn-accent" disabled>[ Save ]</button>
             </div>
             <div class="head-tool-group" data-list-key="library">
               <input id="librarySearchInput" type="search" placeholder="Search" />
               <select id="libraryCategoryFilter" class="category-filter"><option value="__all__">All Categories</option></select>
               <span id="libraryCount" class="meta-item">0 Waypoints</span>
-              <button id="libraryColumnSettingsBtn" class="btn-bracket btn-small" title="表示列・列順">⚙</button>
             </div>
             <div class="head-tool-group" data-list-key="log">
               <input id="logSearchInput" type="search" placeholder="Search" />
               <span id="logCount" class="meta-item">0 Waypoints</span>
-              <button id="logColumnSettingsBtn" class="btn-bracket btn-small" title="表示列・列順">⚙</button>
             </div>
           </div>
         </div>
@@ -297,12 +293,13 @@
   <div id="settingsModal" class="modal-overlay hidden">
     <div class="modal">
       <h3>Settings</h3>
-      <p class="choice-message">Splitter位置・Current Map・Libraryタブ・列幅・列順・表示列・検索文字・ソート状態は自動的に保存されます。</p>
+      <p class="choice-message">Splitter位置・選択中のMap・Libraryタブ・列幅・検索文字・ソート状態は自動的に保存されます。</p>
       <label class="settings-checkbox-row">
         <input type="checkbox" id="debugModeCheckbox" />
         Debug Mode(Map Calibrationタブを表示する)
       </label>
       <div class="modal-actions">
+        <button id="settingsResetBtn" class="btn-bracket">[ 設定をリセット ]</button>
         <button id="settingsCloseBtn" class="btn-bracket btn-accent">[ Close ]</button>
       </div>
     </div>

@@ -93,11 +93,14 @@ export class WaypointListController {
 
     this.searchText = this.settingsStore.get(this._settingsKey('search'), '');
     this.sortState = this.settingsStore.get(this._settingsKey('sort'), { field: null, dir: 'asc' });
-    this.columnConfig = this.settingsStore.get(this._settingsKey('columns'), {
+    // v0.6.3: 表示列・列順の設定UIを廃止。列順・表示列は常にデフォルトとし、
+    // 保存済みの設定からは列幅だけを引き継ぐ(過去に列を隠した設定が残っていても全列表示に戻る)。
+    const storedColumns = this.settingsStore.get(this._settingsKey('columns'), null);
+    this.columnConfig = {
       order: ['lat', 'lon', 'customTag'],
       visible: { lat: true, lon: true, customTag: true },
-      widths: {},
-    });
+      widths: (storedColumns && storedColumns.widths) || {},
+    };
     // Icon列は固定列のため表示列設定(order/visible)には含めないが、
     // 列幅だけは他の列と同じ仕組み(columnConfig.widths + ドラッグリサイズ)で
     // 管理する。初回はここで既定幅(40〜48px)を補完する。

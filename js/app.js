@@ -85,19 +85,19 @@ const els = {};
 
 function cacheElements() {
   const ids = [
-    'statusText', 'settingsBtn', 'settingsModal', 'settingsCloseBtn', 'debugModeCheckbox', 'mapsToggleBtn', 'libMapChip',
+    'statusText', 'settingsBtn', 'settingsModal', 'settingsCloseBtn', 'settingsResetBtn', 'debugModeCheckbox', 'mapsToggleBtn', 'libMapChip',
     // GameUserSettings.ini
     'iniReadBtn', 'iniAddBtn', 'iniSaveBtn',
-    'iniSearchInput', 'iniColumnSettingsBtn', 'iniCount', 'iniTheadRow', 'iniTableBody', 'iniEmptyState', 'iniDropZone',
+    'iniSearchInput', 'iniCount', 'iniTheadRow', 'iniTableBody', 'iniEmptyState', 'iniDropZone',
     // My Storage
     'storageReadBtn', 'storageAddBtn', 'storageSaveBtn',
-    'storageSearchInput', 'storageColumnSettingsBtn', 'storageCount', 'storageTheadRow', 'storageTableBody', 'storageEmptyState', 'storageDropZone',
+    'storageSearchInput', 'storageCount', 'storageTheadRow', 'storageTableBody', 'storageEmptyState', 'storageDropZone',
     // Location Library
     'libraryReadBtn', 'libraryAddBtn',
-    'librarySearchInput', 'libraryCategoryFilter', 'libraryColumnSettingsBtn', 'libraryCount', 'libraryTheadRow', 'libraryTableBody', 'libraryEmptyState', 'libraryDropZone',
+    'librarySearchInput', 'libraryCategoryFilter', 'libraryCount', 'libraryTheadRow', 'libraryTableBody', 'libraryEmptyState', 'libraryDropZone',
     // Waypoint Log
     'logOpenBtn',
-    'logSearchInput', 'logColumnSettingsBtn', 'logCount', 'logTheadRow', 'logTableBody', 'logEmptyState', 'logDropZone',
+    'logSearchInput', 'logCount', 'logTheadRow', 'logTableBody', 'logEmptyState', 'logDropZone',
     // Map Calibration (Debug Mode専用)
     'calibrationTabBtn', 'calibrationTargetMapLabel', 'calibrationNoMapNotice',
     'calibrationAutoDetectBtn', 'calibrationCalculateBtn', 'calibrationSaveBtn',
@@ -165,28 +165,24 @@ function createControllers() {
   controllers.ini = new WaypointListController({
     listKey: 'ini', theadRow: els.iniTheadRow, tbody: els.iniTableBody,
     emptyStateEl: els.iniEmptyState, countEl: els.iniCount, searchInputEl: els.iniSearchInput,
-    columnSettingsBtn: els.iniColumnSettingsBtn,
     settingsStore, onSelect: handleSelect, getLatLon, getIconMarkup, getMapKey,
     ...rowActionHandlers('ini'),
   });
   controllers.storage = new WaypointListController({
     listKey: 'storage', theadRow: els.storageTheadRow, tbody: els.storageTableBody,
     emptyStateEl: els.storageEmptyState, countEl: els.storageCount, searchInputEl: els.storageSearchInput,
-    columnSettingsBtn: els.storageColumnSettingsBtn,
     settingsStore, onSelect: handleSelect, getLatLon, getIconMarkup, getMapKey,
     ...rowActionHandlers('storage'),
   });
   controllers.library = new WaypointListController({
     listKey: 'library', theadRow: els.libraryTheadRow, tbody: els.libraryTableBody,
     emptyStateEl: els.libraryEmptyState, countEl: els.libraryCount, searchInputEl: els.librarySearchInput,
-    categoryFilterEl: els.libraryCategoryFilter, columnSettingsBtn: els.libraryColumnSettingsBtn,
-    settingsStore, onSelect: handleSelect, getLatLon, getIconMarkup, getMapKey,
+    categoryFilterEl: els.libraryCategoryFilter, settingsStore, onSelect: handleSelect, getLatLon, getIconMarkup, getMapKey,
     ...rowActionHandlers('library'),
   });
   controllers.log = new WaypointListController({
     listKey: 'log', theadRow: els.logTheadRow, tbody: els.logTableBody,
     emptyStateEl: els.logEmptyState, countEl: els.logCount, searchInputEl: els.logSearchInput,
-    columnSettingsBtn: els.logColumnSettingsBtn,
     settingsStore, onSelect: handleSelect, getLatLon, getIconMarkup, getMapKey,
   });
 }
@@ -1222,7 +1218,7 @@ function applyMapsCollapsed(collapsed, persist) {
   mapsCollapsed = collapsed;
   els.mapsRow.classList.toggle('hidden', collapsed);
   els.mapsSplitter.classList.toggle('hidden', collapsed);
-  els.mapsToggleBtn.textContent = collapsed ? '[ 地図を表示 ]' : '[ 地図を隠す ]';
+  els.mapsToggleBtn.textContent = collapsed ? '[ マップ別表示に戻す ]' : '[ 全Waypoint表示 ]';
   if (persist) settingsStore.set('layout.mapsCollapsed', collapsed);
   // 地図を隠している間はマップ選択ができないため、リストは全Waypoint表示にする(v0.6.2)
   applyCurrentMapFilter(false);
@@ -1249,6 +1245,11 @@ function restoreLayoutSettings() {
 function bindHeaderEvents() {
   els.settingsBtn.addEventListener('click', () => els.settingsModal.classList.remove('hidden'));
   els.settingsCloseBtn.addEventListener('click', () => els.settingsModal.classList.add('hidden'));
+  els.settingsResetBtn.addEventListener('click', () => {
+    if (!window.confirm('保存されている設定(レイアウト・選択中のMap・タブ・列幅・検索文字・ソート・Debug Mode)をすべて初期状態に戻しますか？')) return;
+    settingsStore.clearAll();
+    window.location.reload();
+  });
 }
 
 // --- Debug Mode ------------------------------------------------------------

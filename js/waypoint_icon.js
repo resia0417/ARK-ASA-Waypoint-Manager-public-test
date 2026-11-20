@@ -23,6 +23,7 @@
 // =============================================================
 
 import { MARK_ICON_DEFINITIONS, findMarkIconById, findMarkIconByRawText, DEFAULT_MARK_ICON_ID } from './mark_icon.js';
+import { ICON_IMAGES } from './icon_images.js';
 
 const ICON_ASSET_DIR = 'assets/waypoint-icons/';
 const BASE_ICON_ID = 'BaseIcon';
@@ -98,7 +99,9 @@ function clamp01(n) {
 export function renderWaypointIconHtml({ type, baseColor, iconColor, size = 20, title }, onLoaded) {
   const def = findMarkIconById(type) ?? findMarkIconById(DEFAULT_MARK_ICON_ID);
   const baseSvg = getCachedSvg(BASE_ICON_ID, onLoaded);
-  const glyphSvg = getCachedSvg(def.svg, onLoaded);
+  // 資源系アイコンは実物画像(icon_images.js)で描画し、SVGは取得しない(v0.6.3)
+  const imageUri = ICON_IMAGES[def.id] ?? null;
+  const glyphSvg = imageUri ? '' : getCachedSvg(def.svg, onLoaded);
 
   const tooltip = escapeHtml(title ?? def.displayName);
 
@@ -110,10 +113,14 @@ export function renderWaypointIconHtml({ type, baseColor, iconColor, size = 20, 
   const baseColorCss = toCssColor(baseColor);
   const iconColorCss = toCssColor(iconColor);
 
+  const glyphHtml = imageUri
+    ? `<img class="waypoint-icon-img" src="${imageUri}" alt="">`
+    : glyphSvg;
+
   return `
     <span class="waypoint-icon" style="width:${size}px;height:${size}px;" title="${tooltip}">
       <span class="waypoint-icon-layer waypoint-icon-base" style="color:${baseColorCss}">${baseSvg}</span>
-      <span class="waypoint-icon-layer waypoint-icon-glyph" style="color:${iconColorCss}">${glyphSvg}</span>
+      <span class="waypoint-icon-layer waypoint-icon-glyph" style="color:${iconColorCss}">${glyphHtml}</span>
     </span>`;
 }
 
