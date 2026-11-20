@@ -376,7 +376,7 @@ export class WaypointListController {
   _renderActionsCell() {
     const pencil = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>';
     const trash = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>';
-    return `<td class="row-actions"><button type="button" class="row-action" data-row-action="edit" title="編集" draggable="false">${pencil}</button><button type="button" class="row-action row-action-danger" data-row-action="delete" title="削除" draggable="false">${trash}</button></td>`;
+    return `<td class="row-actions"><span class="row-actions-wrap"><button type="button" class="row-action" data-row-action="edit" title="編集" draggable="false">${pencil}</button><button type="button" class="row-action row-action-danger" data-row-action="delete" title="削除" draggable="false">${trash}</button></span></td>`;
   }
 
   _renderHeader() {

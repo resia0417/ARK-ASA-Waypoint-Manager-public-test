@@ -657,8 +657,9 @@ td.icon-cell { text-align: center; }
 
 /* ---------- v0.5.0: 行内アクション / 末尾Add / 空状態ボタン ---------- */
 
-.wp-table th.row-actions-th { width: 76px; }
-.wp-table td.row-actions { white-space: nowrap; text-align: right; padding: 4px 8px; }
+.wp-table th.row-actions-th { width: 84px; }
+.wp-table td.row-actions { white-space: nowrap; text-align: right; padding: 4px 8px; text-overflow: clip; }
+.row-actions-wrap { display: flex; justify-content: flex-end; align-items: center; gap: 6px; }
 .row-action {
   width: 28px; height: 28px; margin-left: 6px; padding: 0;
   display: inline-flex; align-items: center; justify-content: center;
