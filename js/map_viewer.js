@@ -1,6 +1,13 @@
 // =============================================================
 // map_viewer.js
-// Map Viewer本体(地図描画)。Libraryパネルの「Map Viewer」タブの中身。
+// Map Viewer本体(地図描画)。v0.4.0 からはタブではなく、画面上部の
+// 地図エリアに2台並べて常時表示する構成になった:
+//
+//   左: GameUserSettings.ini の Waypoint を表示するビューア
+//   右: My Storage / Location Library の Waypoint を表示するビューア
+//
+// 2台は「同じマップを表示し、パン/ズームが連動する」ことで、
+// INI側と保存側のWaypointを見比べられるようにしている。
 //
 // 実装方針:
 // - 外部ライブラリ(Leaflet等)は使わず、DOM + CSS transform で
@@ -16,14 +23,19 @@
 //   行わない」への対応)。
 // - アイコン描画もここでは行わず、app.js の getIconMarkup
 //   (= waypoint_icon.js のラッパー)が返すHTMLをそのまま使う。
+// - 複数インスタンス対応: 要素は document 全体ではなく、生成時に
+//   渡された root 要素の中からクラスで引く(idは使わない)。
 //
 // app.js との連携:
 // - 生成時に handlers を受け取る(依存の注入)。
-//   getWaypoints(): 全リストの { waypoint, listKey } 配列
+//   getWaypoints(): このビューアが表示すべき { waypoint, listKey } 配列
 //   getCurrentMap(): Current Map の値('__all__' または MapName)
+//   getMapName(): 2台で共有している表示マップ名(未定なら '')
 //   getAvailableMaps(): 表示候補の MapName 配列
 //   getLatLon(wp) / getIconMarkup(wp): app.js の既存コールバック
 //   onSelect(wp, listKey): マーカークリック時の選択通知
+//   onMapChange(name): このビューアで表示マップが変更された通知
+//   onViewChange(view): パン/ズームが変わった通知(相手側へ連動させる)
 // - リスト側で選択が変わると app.js が window へ
 //   'waypoint:selected' イベントを発火するので、それを購読して
 //   該当マーカーをハイライトする(既存の拡張ポイントを利用)。
@@ -40,22 +52,23 @@ import {
 
 const GRID_STEP = 10; // グリッド線・ラベルの間隔(Lat/Lon)
 
-export function createMapViewer(handlers) {
+export function createMapViewer(handlers, root) {
+  const q = (sel) => root.querySelector(sel);
   const els = {
-    mapSelect: document.getElementById('mvMapSelect'),
-    fitBtn: document.getElementById('mvFitBtn'),
-    zoomOutBtn: document.getElementById('mvZoomOutBtn'),
-    zoomInBtn: document.getElementById('mvZoomInBtn'),
-    gridToggle: document.getElementById('mvGridToggle'),
-    readout: document.getElementById('mvReadout'),
-    info: document.getElementById('mvInfo'),
-    viewport: document.getElementById('mvViewport'),
-    stage: document.getElementById('mvStage'),
-    image: document.getElementById('mvImage'),
-    grid: document.getElementById('mvGrid'),
-    markers: document.getElementById('mvMarkers'),
-    labels: document.getElementById('mvLabels'),
-    notice: document.getElementById('mvNotice'),
+    mapSelect: q('.mv-map-select'),
+    fitBtn: q('.mv-fit-btn'),
+    zoomOutBtn: q('.mv-zoom-out-btn'),
+    zoomInBtn: q('.mv-zoom-in-btn'),
+    gridToggle: q('.mv-grid-toggle'),
+    readout: q('.mv-readout'),
+    info: q('.mv-info'),
+    viewport: q('.mv-viewport'),
+    stage: q('.mv-stage'),
+    image: q('.mv-image'),
+    grid: q('.mv-grid'),
+    markers: q('.mv-markers'),
+    labels: q('.mv-labels'),
+    notice: q('.mv-notice'),
   };
 
   const state = {
@@ -72,9 +85,34 @@ export function createMapViewer(handlers) {
     clickPoint: null, // { lat, lon } 地図クリック位置
     markerItems: [], // { el, lat, lon, waypoint }
     loadSeq: 0, // 地図切替の競合防止
+    applyingRemoteView: false, // 連動で相手の視点適用中(通知ループ防止)
   };
 
   const scale = () => state.fitScale * state.zoom;
+
+  // --- 視点(パン/ズーム)の連動 -------------------------------------------
+
+  function getView() {
+    return { zoom: state.zoom, tx: state.tx, ty: state.ty, fitScale: state.fitScale };
+  }
+
+  function setView(view) {
+    if (!view || !state.imgW) return;
+    state.applyingRemoteView = true;
+    // ビューポート寸法が同じ前提で fitScale は共通になるが、寸法差が
+    // ある場合は相手の fitScale をそのまま使う方が見た目が揃う
+    if (view.fitScale) state.fitScale = view.fitScale;
+    state.zoom = view.zoom;
+    state.tx = view.tx;
+    state.ty = view.ty;
+    render();
+    state.applyingRemoteView = false;
+  }
+
+  function emitView() {
+    if (state.applyingRemoteView) return;
+    handlers.onViewChange?.(getView());
+  }
 
   // --- 地図の読み込み -------------------------------------------------
 
@@ -249,6 +287,7 @@ export function createMapViewer(handlers) {
     state.tx = (vw - state.imgW * s) / 2;
     state.ty = (vh - state.imgH * s) / 2;
     render();
+    emitView();
   }
 
   function clampZoom(z) {
@@ -267,6 +306,7 @@ export function createMapViewer(handlers) {
     state.ty = cy - (cy - state.ty) * (s1 / s0);
     state.zoom = newZoom;
     render();
+    emitView();
   }
 
   function screenToLatLon(clientX, clientY) {
@@ -296,6 +336,7 @@ export function createMapViewer(handlers) {
         state.tx = drag.tx + dx;
         state.ty = drag.ty + dy;
         render();
+        emitView();
       }
     });
     els.viewport.addEventListener('pointerup', (e) => {
@@ -336,12 +377,19 @@ export function createMapViewer(handlers) {
 
   function refresh() {
     refreshMapOptions();
+    const maps = handlers.getAvailableMaps();
     const currentMap = handlers.getCurrentMap();
+    const sharedMap = handlers.getMapName ? handlers.getMapName() : '';
     // Genesis_WP は陸・海どちらの地図か一意に決まらないため、Current Map が
-    // Genesis_WP の場合はビューア側の選択(ドロップダウン)を優先する
-    const target = currentMap && currentMap !== '__all__' && currentMap !== GENESIS_MAP_NAME
-      ? currentMap
-      : (els.mapSelect.value || handlers.getAvailableMaps()[0] || '');
+    // Genesis_WP の場合は共有マップ名(ドロップダウンの選択)を優先する
+    let target = '';
+    if (currentMap && currentMap !== '__all__' && currentMap !== GENESIS_MAP_NAME) {
+      target = currentMap;
+    } else if (sharedMap && maps.includes(sharedMap)) {
+      target = sharedMap;
+    } else {
+      target = els.mapSelect.value || maps[0] || '';
+    }
     if (!target) {
       setNotice('表示できるマップがありません。');
       return;
@@ -355,7 +403,10 @@ export function createMapViewer(handlers) {
     }
   }
 
-  els.mapSelect.addEventListener('change', () => loadMap(els.mapSelect.value));
+  els.mapSelect.addEventListener('change', () => {
+    handlers.onMapChange?.(els.mapSelect.value);
+    loadMap(els.mapSelect.value);
+  });
   els.fitBtn.addEventListener('click', fit);
   els.zoomInBtn.addEventListener('click', () =>
     zoomAt(els.viewport.clientWidth / 2, els.viewport.clientHeight / 2, 1.3));
@@ -375,5 +426,5 @@ export function createMapViewer(handlers) {
   }
   bindViewportEvents();
 
-  return { refresh, loadMap };
+  return { refresh, loadMap, refreshMarkers, getView, setView };
 }

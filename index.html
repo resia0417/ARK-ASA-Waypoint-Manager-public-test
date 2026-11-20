@@ -31,7 +31,7 @@
       <span id="statusText" class="status-text">GameUserSettings.ini を読み込んでください。</span>
 
       <div class="header-right">
-        <span class="header-version">v0.3</span>
+        <span class="header-version">v0.4</span>
         <a id="githubLink" class="header-link" href="https://github.com/resia0417/ARK-ASA-Waypoint-Manager" target="_blank" rel="noopener">GitHub</a>
         <button id="settingsBtn" class="header-link header-link-btn">Settings</button>
       </div>
@@ -43,6 +43,56 @@
         <select id="currentMapSelect"><option value="__all__">All Maps</option></select>
       </label>
     </div>
+
+    <!-- 地図エリア(v0.4.0: 2枚並べて常時表示。左=INI / 右=Storage・Library、パン・ズーム連動) -->
+    <section class="maps-row" id="mapsRow">
+      <div class="map-pane" id="mapPaneIni">
+        <div class="column-head"><h2>Map — GameUserSettings.ini</h2></div>
+        <div class="column-toolbar">
+          <select class="mv-map-select" title="表示するマップ"></select>
+          <button class="mv-fit-btn btn-bracket btn-small">[ Fit ]</button>
+          <button class="mv-zoom-out-btn btn-bracket btn-small">[ − ]</button>
+          <button class="mv-zoom-in-btn btn-bracket btn-small">[ + ]</button>
+          <label class="meta-item"><input type="checkbox" class="mv-grid-toggle" checked /> Grid</label>
+          <span class="mv-readout meta-item"></span>
+        </div>
+        <div class="column-meta"><span class="mv-info meta-item">0 Waypoints を表示中</span></div>
+        <div class="mv-viewport">
+          <div class="mv-stage">
+            <img class="mv-image" alt="Map" />
+            <div class="mv-grid"></div>
+          </div>
+          <div class="mv-markers"></div>
+          <div class="mv-labels"></div>
+          <p class="mv-notice hidden"></p>
+        </div>
+      </div>
+
+      <div class="map-pane" id="mapPaneLib">
+        <div class="column-head"><h2>Map — My Storage / Location Library</h2></div>
+        <div class="column-toolbar">
+          <select class="mv-map-select" title="表示するマップ"></select>
+          <button class="mv-fit-btn btn-bracket btn-small">[ Fit ]</button>
+          <button class="mv-zoom-out-btn btn-bracket btn-small">[ − ]</button>
+          <button class="mv-zoom-in-btn btn-bracket btn-small">[ + ]</button>
+          <label class="meta-item"><input type="checkbox" class="mv-grid-toggle" checked /> Grid</label>
+          <span class="mv-readout meta-item"></span>
+        </div>
+        <div class="column-meta"><span class="mv-info meta-item">0 Waypoints を表示中</span></div>
+        <div class="mv-viewport">
+          <div class="mv-stage">
+            <img class="mv-image" alt="Map" />
+            <div class="mv-grid"></div>
+          </div>
+          <div class="mv-markers"></div>
+          <div class="mv-labels"></div>
+          <p class="mv-notice hidden"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- スプリッター(地図エリアの高さをドラッグで変更) -->
+    <div class="splitter-h" id="mapsSplitter" title="ドラッグして地図の高さを変更"></div>
 
     <!-- メイン: GameUserSettings.ini | Library(タブ) -->
     <main class="workspace">
@@ -81,7 +131,6 @@
           <button class="library-tab" data-tab="storage">My Storage</button>
           <button class="library-tab" data-tab="library">Location Library</button>
           <button class="library-tab" data-tab="log">Waypoint Log</button>
-          <button class="library-tab" data-tab="mapviewer">Map Viewer</button>
           <button class="library-tab debug-only hidden" data-tab="calibration" id="calibrationTabBtn">Map Calibration</button>
           <!-- 将来追加: <button class="library-tab" data-tab="community">Community Library</button> -->
         </div>
@@ -153,29 +202,7 @@
           </div>
         </div>
 
-        <!-- タブ4: Map Viewer -->
-        <div class="library-tab-panel" id="tabpanel-mapviewer" data-list-key="mapviewer">
-          <div class="column-toolbar">
-            <select id="mvMapSelect" title="表示するマップ"></select>
-            <button id="mvFitBtn" class="btn-bracket btn-small">[ Fit ]</button>
-            <button id="mvZoomOutBtn" class="btn-bracket btn-small">[ − ]</button>
-            <button id="mvZoomInBtn" class="btn-bracket btn-small">[ + ]</button>
-            <label class="meta-item"><input type="checkbox" id="mvGridToggle" checked /> Grid</label>
-            <span id="mvReadout" class="meta-item mv-readout"></span>
-          </div>
-          <div class="column-meta"><span id="mvInfo" class="meta-item">0 Waypoints を表示中</span></div>
-          <div class="mv-viewport" id="mvViewport">
-            <div class="mv-stage" id="mvStage">
-              <img id="mvImage" alt="Map" />
-              <div class="mv-grid" id="mvGrid"></div>
-            </div>
-            <div class="mv-markers" id="mvMarkers"></div>
-            <div class="mv-labels" id="mvLabels"></div>
-            <p class="mv-notice hidden" id="mvNotice"></p>
-          </div>
-        </div>
-
-        <!-- タブ5: Map Calibration / MapConfig Manager(Debug Mode専用) -->
+        <!-- タブ4: Map Calibration / MapConfig Manager(Debug Mode専用) -->
         <div class="library-tab-panel debug-only hidden" id="tabpanel-calibration" data-list-key="calibration">
           <div class="column-toolbar">
             <span class="meta-item calibration-current-map">Target: <strong id="calibrationTargetMapLabel">-</strong></span>

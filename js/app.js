@@ -74,7 +74,9 @@ let storageFileHandle = null;
 let logFileHandle = null;
 let libraryFileHandle = null;
 let lastCalibrationResult = null; // { config, axisReport, residualError, warnings } | null
-let mapViewer = null; // Map Viewer(createMapViewer の戻り値)
+let mapViewerIni = null; // 地図ビューア: GameUserSettings.ini 専用(v0.4.0で2台構成に)
+let mapViewerLib = null; // 地図ビューア: My Storage / Location Library 専用
+let viewerMapName = ''; // 2台のビューアで共有する表示マップ名
 
 const els = {};
 
@@ -111,9 +113,13 @@ function cacheElements() {
     'choiceModal', 'choiceTitle', 'choiceMessage', 'choiceButtons',
     // Library タブ・Splitter
     'libraryTabs', 'mainSplitter',
+    // 地図エリア(v0.4.0)
+    'mapsRow', 'mapsSplitter',
   ];
   for (const id of ids) els[id] = document.getElementById(id);
   els.colIni = document.getElementById('col-ini');
+  els.mapPaneIni = document.getElementById('mapPaneIni');
+  els.mapPaneLib = document.getElementById('mapPaneLib');
 }
 
 function init() {
@@ -125,11 +131,13 @@ function init() {
   bindHeaderEvents();
   bindLibraryTabs();
   bindSplitter();
+  bindMapsSplitter();
   bindGlobalMapFilter();
   bindDebugMode();
   bindCalibrationEvents();
-  initMapViewer();
+  initMapViewers();
   restoreLayoutSettings();
+  refreshMapViewers();
 
   AUTO_SAVE_HANDLERS.storage = autoSaveStorage;
   AUTO_SAVE_HANDLERS.library = autoSaveLibrary;
@@ -234,32 +242,55 @@ function notifyMapViewer(waypoint) {
 }
 
 /**
- * Map Viewer(map_viewer.js)を生成し、アプリ側のデータ・コールバックを
- * 注入する。Map Viewerは全リストのWaypointを地図へ描画し、マーカーの
- * クリックは通常のリスト選択(handleSelect)へそのまま流す。
+ * Map Viewer(map_viewer.js)を2台生成し、アプリ側のデータ・コールバックを
+ * 注入する(v0.4.0)。左は GameUserSettings.ini のWaypoint、右は
+ * My Storage / Location Library のWaypointを表示し、同じマップを
+ * 見比べられるよう表示マップとパン/ズームを連動させる。
+ * マーカーのクリックは通常のリスト選択(handleSelect)へそのまま流す。
  */
-function initMapViewer() {
-  mapViewer = createMapViewer({
-    getWaypoints: () => LIST_KEYS.flatMap((key) =>
-      controllers[key].getAll().map((waypoint) => ({ waypoint, listKey: key }))),
-    getCurrentMap: () => els.currentMapSelect.value || '__all__',
-    getAvailableMaps: () => {
-      // Genesis_WP 自体は表示対象の地図ではないため候補から外し、
-      // WaypointからはZ判別後の実効MapName(Genesis1_WP/Genesis1Ocean_WP)を候補にする。
-      // また KNOWN_MAP_FOLDERS にはフォルダ解決専用の別名(末尾 _WP なしの
-      // "Extinction" 等)が含まれるため、候補の種は _WP で終わる名前に限る
-      const names = new Set(Object.keys(KNOWN_MAP_FOLDERS).filter((n) => n !== GENESIS_MAP_NAME && n.endsWith('_WP')));
-      for (const key of LIST_KEYS) {
-        for (const wp of controllers[key].getAll()) {
-          if (wp.parsed.map) names.add(resolveEffectiveMapName(wp.parsed.map, wp.parsed.z));
-        }
+function initMapViewers() {
+  const getAvailableMaps = () => {
+    // Genesis_WP 自体は表示対象の地図ではないため候補から外し、
+    // WaypointからはZ判別後の実効MapName(Genesis1_WP/Genesis1Ocean_WP)を候補にする。
+    // また KNOWN_MAP_FOLDERS にはフォルダ解決専用の別名(末尾 _WP なしの
+    // "Extinction" 等)が含まれるため、候補の種は _WP で終わる名前に限る
+    const names = new Set(Object.keys(KNOWN_MAP_FOLDERS).filter((n) => n !== GENESIS_MAP_NAME && n.endsWith('_WP')));
+    for (const key of LIST_KEYS) {
+      for (const wp of controllers[key].getAll()) {
+        if (wp.parsed.map) names.add(resolveEffectiveMapName(wp.parsed.map, wp.parsed.z));
       }
-      return [...names].sort();
-    },
+    }
+    return [...names].sort();
+  };
+  const shared = {
+    getCurrentMap: () => els.currentMapSelect.value || '__all__',
+    getMapName: () => viewerMapName,
+    getAvailableMaps,
     getLatLon,
     getIconMarkup,
     onSelect: (waypoint, listKey) => handleSelect(waypoint, listKey),
-  });
+  };
+  const collect = (keys) => () => keys.flatMap((key) =>
+    controllers[key].getAll().map((waypoint) => ({ waypoint, listKey: key })));
+
+  mapViewerIni = createMapViewer({
+    ...shared,
+    getWaypoints: collect(['ini']),
+    onMapChange: (name) => { viewerMapName = name; mapViewerLib?.refresh(); },
+    onViewChange: (view) => mapViewerLib?.setView(view),
+  }, els.mapPaneIni);
+  mapViewerLib = createMapViewer({
+    ...shared,
+    getWaypoints: collect(['storage', 'library']),
+    onMapChange: (name) => { viewerMapName = name; mapViewerIni?.refresh(); },
+    onViewChange: (view) => mapViewerIni?.setView(view),
+  }, els.mapPaneLib);
+}
+
+/** 両方の地図ビューアを最新データで再描画する */
+function refreshMapViewers() {
+  mapViewerIni?.refresh();
+  mapViewerLib?.refresh();
 }
 
 function renderDetailBar(wp) {
@@ -313,7 +344,7 @@ function applyCurrentMapFilter(persist) {
   }
   if (persist) settingsStore.set('currentMap', value);
   syncCalibrationToCurrentMap();
-  mapViewer?.refresh();
+  refreshMapViewers();
 }
 
 // --- 前回セッションの復元 ------------------------------------------
@@ -1182,7 +1213,6 @@ function switchLibraryTab(tab) {
     panel.classList.toggle('active', panel.dataset.listKey === tab);
   });
   settingsStore.set('activeLibraryTab', tab);
-  if (tab === 'mapviewer') mapViewer?.refresh();
 }
 
 // --- Splitter(左右カラム幅、ドラッグで変更・保存) ---------------------------
@@ -1207,6 +1237,27 @@ function bindSplitter() {
   });
 }
 
+/** 地図エリアの高さSplitter(ドラッグで変更・保存、v0.4.0) */
+function bindMapsSplitter() {
+  els.mapsSplitter.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    const startY = e.clientY;
+    const startHeight = els.mapsRow.getBoundingClientRect().height;
+
+    const onMove = (moveEvent) => {
+      const newHeight = Math.min(640, Math.max(180, Math.round(startHeight + (moveEvent.clientY - startY))));
+      els.mapsRow.style.height = `${newHeight}px`;
+    };
+    const onUp = () => {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      settingsStore.set('layout.mapsRowHeight', Math.round(els.mapsRow.getBoundingClientRect().height));
+    };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
+}
+
 function restoreLayoutSettings() {
   const savedWidth = settingsStore.get('layout.iniColumnWidth', null);
   if (savedWidth) els.colIni.style.flex = `0 0 ${savedWidth}px`;
@@ -1214,7 +1265,11 @@ function restoreLayoutSettings() {
   const debugMode = settingsStore.get('debugMode', false);
   let savedTab = settingsStore.get('activeLibraryTab', 'storage');
   if (savedTab === 'calibration' && !debugMode) savedTab = 'storage'; // Debug Mode OFF時は復元しない
+  if (savedTab === 'mapviewer') savedTab = 'storage'; // v0.4.0でMap Viewerタブは廃止(地図は常時表示)
   switchLibraryTab(savedTab);
+
+  const savedMapsHeight = settingsStore.get('layout.mapsRowHeight', null);
+  if (savedMapsHeight) els.mapsRow.style.height = `${savedMapsHeight}px`;
 }
 
 // --- ヘッダー(Settings: Debug Modeトグルを含む) -----------------------------------
