@@ -16,6 +16,7 @@
 // =============================================================
 
 import { parseSavedMinimapMarks, convertToWaypointData } from './ini_parser.js';
+import { t } from './i18n.js';
 import { createWaypoint } from './waypoint.js';
 
 /**
@@ -34,10 +35,10 @@ export function parseLibrary(jsonText) {
   try {
     data = JSON.parse(jsonText);
   } catch (err) {
-    throw new Error('Location LibraryのJSON構文が不正です: ' + err.message);
+    throw new Error(t('error.libraryJsonSyntax', { error: err.message }));
   }
   if (!data || !Array.isArray(data.waypoints)) {
-    throw new Error('Location Libraryの構造が不正です(waypoints配列がありません)。');
+    throw new Error(t('error.libraryJsonStructure'));
   }
 
   const list = [];
@@ -55,6 +56,7 @@ export function parseLibrary(jsonText) {
       // 食い違ってしまうため(v0.6.9)
       if (entry.map && (!parsed.map || parsed.map.trim() === '')) parsed.map = String(entry.map);
       parsed.category = String(entry.category ?? '').trim();
+      parsed.nameJa = String(entry.nameJa ?? '').trim();
     } else {
       parsed.category = '';
     }

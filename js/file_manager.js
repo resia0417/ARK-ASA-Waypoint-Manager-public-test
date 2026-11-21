@@ -1,3 +1,5 @@
+import { t } from './i18n.js';
+
 // =============================================================
 // file_manager.js
 // File System Access API を利用したファイル選択・読み書きと、
@@ -30,7 +32,7 @@ export function isFileSystemAccessSupported() {
 function openDB() {
   return new Promise((resolve, reject) => {
     if (!('indexedDB' in window)) {
-      reject(new Error('このブラウザはIndexedDBに対応していません。'));
+      reject(new Error(t('error.noIndexedDb')));
       return;
     }
     const request = indexedDB.open(DB_NAME, DB_VERSION);
@@ -92,7 +94,7 @@ async function idbDelete(key) {
 /** 既存ファイルを「開く」ための共通ピッカー(showOpenFilePicker)。 */
 async function pickOpenFile(description, mime, extensions) {
   if (!isFileSystemAccessSupported()) {
-    throw new Error('このブラウザはFile System Access APIに対応していません(Chrome/Edge推奨)。');
+    throw new Error(t('error.noFileSystemAccess'));
   }
   try {
     const [handle] = await window.showOpenFilePicker({

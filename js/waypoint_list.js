@@ -31,6 +31,7 @@
 // コールバック(内部でwaypoint_icon.jsのWaypointIconを利用する)に委譲する
 // (要件12「アイコン描画処理はWaypointIconへ集約してください」への対応)。
 import { escapeHtml as esc, formatNum, roundTo } from './util.js';
+import { t } from './i18n.js';
 
 const CONFIGURABLE_COLUMNS = [
   { key: 'lat', label: 'Lat', numeric: true },
@@ -60,7 +61,7 @@ export class WaypointListController {
   constructor({
     listKey, theadRow, tbody, emptyStateEl, countEl, searchInputEl,
     categoryFilterEl, settingsStore, onSelect, getLatLon, getIconMarkup,
-    rowActions, onEditRequest, onDeleteRequest, getMapKey, onVisibleChange,
+    rowActions, onEditRequest, onDeleteRequest, getMapKey, onVisibleChange, getDisplayName,
   }) {
     this.listKey = listKey;
     this.theadRow = theadRow;
@@ -74,6 +75,7 @@ export class WaypointListController {
     // Lat/Lonの値を算出する外部コールバック。(wp) => {lat:number, lon:number} | null を返す。
     // nullは「config未読込などで算出できない」ことを示し、'…'として表示する。
     this.getLatLon = getLatLon || (() => null);
+    this.getDisplayName = getDisplayName || null;
     // MarkIconのアイコン表示(HTML文字列)を算出する外部コールバック。
     // (wp) => string を返す(waypoint_icon.jsのrenderWaypointIconHtmlを利用する)。
     this.getIconMarkup = getIconMarkup || (() => '');
@@ -308,7 +310,7 @@ export class WaypointListController {
     // 何もフィルターされていない状態(=全件表示)では自然に全件数と
     // 一致する。要件の「ALL選択時のみ全Waypoint数」は、フィルター無しなら
     // 表示件数=全件数になるという形で満たされる。
-    this.countEl.textContent = `${visible.length} Waypoints`;
+    this.countEl.textContent = t('count.waypoints', { n: visible.length });
     this.tbody.innerHTML = '';
 
     if (visible.length === 0) {
@@ -352,8 +354,8 @@ export class WaypointListController {
     }
 
     const cats = Array.from(counts.keys()).sort((a, b) => a.localeCompare(b, 'ja'));
-    const options = [`<option value="__all__">All (${scoped.length})</option>`];
-    if (unsetCount > 0) options.push(`<option value="__none__">(未設定) (${unsetCount})</option>`);
+    const options = [`<option value="__all__">${esc(t('category.allCount', { n: scoped.length }))}</option>`];
+    if (unsetCount > 0) options.push(`<option value="__none__">${esc(t('category.none'))} (${unsetCount})</option>`);
     options.push(...cats.map((c) => `<option value="${esc(c)}">${esc(c)} (${counts.get(c)})</option>`));
 
     this.categoryFilterEl.innerHTML = options.join('');
@@ -364,10 +366,10 @@ export class WaypointListController {
   _activeColumns() {
     // 列の並び・表示は固定(v0.6.3で設定UIを廃止)。可変なのは列幅のみ
     const cols = [
-      { key: 'icon', label: 'Icon', numeric: false },
-      { key: 'name', label: 'Name', numeric: false },
+      { key: 'icon', label: t('col.icon'), numeric: false },
+      { key: 'name', label: t('col.name'), numeric: false },
     ];
-    if (this.mapColumnVisible) cols.push({ key: 'map', label: 'Map', numeric: false });
+    if (this.mapColumnVisible) cols.push({ key: 'map', label: t('col.map'), numeric: false });
     for (const def of CONFIGURABLE_COLUMNS) cols.push(def);
     return cols;
   }
@@ -384,7 +386,7 @@ export class WaypointListController {
     }
 
     let value = '';
-    if (col.key === 'name') value = wp.parsed.name;
+    if (col.key === 'name') value = this.getDisplayName ? this.getDisplayName(wp) : wp.parsed.name;
     else if (col.key === 'map') value = wp.parsed.map;
     else if (col.key === 'customTag') value = wp.parsed.customTag;
     else if (col.key === 'lat' || col.key === 'lon') {

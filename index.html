@@ -30,13 +30,13 @@
       </div>
 
       <span id="statusText" class="status-text">GameUserSettings.ini を読み込んでください。</span>
-      <button id="reconnectBtn" class="btn-bracket btn-small" hidden>[ 前回のファイルを再接続 ]</button>
+      <button id="reconnectBtn" class="btn-bracket btn-small" hidden data-i18n="header.reconnect">[ 前回のファイルを再接続 ]</button>
 
       <div class="header-right">
-        <span class="header-version">v0.10.1</span>
+        <span class="header-version">v0.11.0</span>
         <button id="mapsToggleBtn" class="btn-bracket btn-small">[ 全Waypoint表示 ]</button>
         <a class="header-link" href="https://github.com/resia0417/ARK-ASA-Waypoint-Manager" target="_blank" rel="noopener">GitHub</a>
-        <button id="settingsBtn" class="header-link">Settings</button>
+        <button id="settingsBtn" class="header-link" data-i18n="header.settings">設定</button>
       </div>
     </header>
 
@@ -50,7 +50,7 @@
           </div>
           <div class="mv-markers"></div>
           <div class="mv-labels"></div>
-          <select class="mv-map-select mv-overlay-select" title="表示するマップ"></select>
+          <select class="mv-map-select mv-overlay-select" title="表示するマップ" data-i18n-title="maps.selectTitle"></select>
           <span class="mv-chip">INI</span>
           <span class="mv-readout mv-overlay-bc"></span>
           <span class="mv-info mv-overlay-br">0 Waypoints を表示中</span>
@@ -75,7 +75,7 @@
     </section>
 
     <!-- スプリッター(地図エリアの高さをドラッグで変更) -->
-    <div class="splitter-h" id="mapsSplitter" title="ドラッグして地図の高さを変更"></div>
+    <div class="splitter-h" id="mapsSplitter" title="ドラッグして地図の高さを変更" data-i18n-title="splitter.mapsTitle"></div>
 
     <!-- メイン: GameUserSettings.ini | Library(タブ) -->
     <main class="workspace">
@@ -84,8 +84,9 @@
       <section class="column" id="col-ini" data-list-key="ini">
         <div class="column-head"><h2>GameUserSettings.ini</h2>
           <div class="head-tools">
-            <input id="iniSearchInput" type="search" placeholder="Search" />
-            <span id="iniCount" class="meta-item">0 Waypoints</span>
+            <input id="iniSearchInput" type="search" placeholder="検索" data-i18n-ph="search.placeholder" />
+            <span id="iniCount" class="meta-item">0件</span>
+            <button id="iniBulkBtn" class="btn-bracket btn-small" data-i18n="btn.bulkMove">一括移動</button>
             <button id="iniSaveBtn" class="btn-bracket btn-small btn-accent" disabled>[ Save ]</button>
           </div>
         </div>
@@ -93,14 +94,14 @@
           <table class="wp-table">
             <thead><tr id="iniTheadRow"></tr></thead>
             <tbody id="iniTableBody"></tbody>
-            <tfoot><tr><td class="add-row-cell"><button id="iniAddBtn" class="add-row-btn">＋ Add Waypoint</button></td></tr></tfoot>
+            <tfoot><tr><td class="add-row-cell"><button id="iniAddBtn" class="add-row-btn" data-i18n="btn.addWaypoint">＋ Waypointを追加</button></td></tr></tfoot>
           </table>
-          <p class="empty-state" id="iniEmptyState">GameUserSettings.iniを読み込んでください。<br /><button id="iniReadBtn" class="btn-bracket btn-small empty-action">[ Load ]</button></p>
+          <p class="empty-state" id="iniEmptyState"><span data-i18n="empty.ini">GameUserSettings.iniを読み込んでください。</span><br /><button id="iniReadBtn" class="btn-bracket btn-small empty-action">[ Load ]</button></p>
         </div>
       </section>
 
       <!-- スプリッター(左右カラムの幅をドラッグで変更) -->
-      <div class="splitter" id="mainSplitter" title="ドラッグして幅を変更"></div>
+      <div class="splitter" id="mainSplitter" title="ドラッグして幅を変更" data-i18n-title="splitter.mainTitle"></div>
 
       <!-- カラム2: Library(My Storage / Location Library / Waypoint Log をタブ切替) -->
       <section class="column library-panel">
@@ -112,18 +113,21 @@
           </div>
           <div class="head-tools">
             <div class="head-tool-group active" data-list-key="storage">
-              <input id="storageSearchInput" type="search" placeholder="Search" />
-              <span id="storageCount" class="meta-item">0 Waypoints</span>
+              <input id="storageSearchInput" type="search" placeholder="検索" data-i18n-ph="search.placeholder" />
+              <span id="storageCount" class="meta-item">0件</span>
+              <button id="storageBulkBtn" class="btn-bracket btn-small" data-i18n="btn.bulkMove">一括移動</button>
               <button id="storageSaveBtn" class="btn-bracket btn-small btn-accent" disabled>[ Save ]</button>
             </div>
             <div class="head-tool-group" data-list-key="library">
-              <input id="librarySearchInput" type="search" placeholder="Search" />
-              <select id="libraryCategoryFilter" class="category-filter"><option value="__all__">All Categories</option></select>
-              <span id="libraryCount" class="meta-item">0 Waypoints</span>
+              <input id="librarySearchInput" type="search" placeholder="検索" data-i18n-ph="search.placeholder" />
+              <select id="libraryCategoryFilter" class="category-filter"><option value="__all__" data-i18n="category.all">全カテゴリ</option></select>
+              <span id="libraryCount" class="meta-item">0件</span>
+              <button id="libraryBulkBtn" class="btn-bracket btn-small" data-i18n="btn.bulkMove">一括移動</button>
             </div>
             <div class="head-tool-group" data-list-key="log">
-              <input id="logSearchInput" type="search" placeholder="Search" />
-              <span id="logCount" class="meta-item">0 Waypoints</span>
+              <input id="logSearchInput" type="search" placeholder="検索" data-i18n-ph="search.placeholder" />
+              <span id="logCount" class="meta-item">0件</span>
+              <button id="logBulkBtn" class="btn-bracket btn-small" data-i18n="btn.bulkMove">一括移動</button>
             </div>
           </div>
         </div>
@@ -133,9 +137,9 @@
             <table class="wp-table">
               <thead><tr id="storageTheadRow"></tr></thead>
               <tbody id="storageTableBody"></tbody>
-              <tfoot><tr><td class="add-row-cell"><button id="storageAddBtn" class="add-row-btn">＋ Add Waypoint</button></td></tr></tfoot>
+              <tfoot><tr><td class="add-row-cell"><button id="storageAddBtn" class="add-row-btn" data-i18n="btn.addWaypoint">＋ Waypointを追加</button></td></tr></tfoot>
             </table>
-            <p class="empty-state" id="storageEmptyState">Waypointがまだありません。下の「Add」で追加するか、他のリストからドラッグしてください。<br /><button id="storageReadBtn" class="btn-bracket btn-small empty-action">[ Load ]</button></p>
+            <p class="empty-state" id="storageEmptyState"><span data-i18n="empty.storage">Waypointがまだありません。下の「Waypointを追加」で追加するか、他のリストからドラッグしてください。</span><br /><button id="storageReadBtn" class="btn-bracket btn-small empty-action">[ Load ]</button></p>
           </div>
         </div>
 
@@ -146,7 +150,7 @@
               <thead><tr id="libraryTheadRow"></tr></thead>
               <tbody id="libraryTableBody"></tbody>
             </table>
-            <p class="empty-state" id="libraryEmptyState">Location Libraryのファイルを読み込んでください。<br /><button id="libraryReadBtn" class="btn-bracket btn-small empty-action">[ Load ]</button></p>
+            <p class="empty-state" id="libraryEmptyState"><span data-i18n="empty.library">Location Libraryのファイルを読み込んでください。</span><br /><button id="libraryReadBtn" class="btn-bracket btn-small empty-action">[ Load ]</button></p>
           </div>
         </div>
 
@@ -157,7 +161,7 @@
               <thead><tr id="logTheadRow"></tr></thead>
               <tbody id="logTableBody"></tbody>
             </table>
-            <p class="empty-state" id="logEmptyState">Python版WaypointLoggerの出力ファイルを開いてください。<br /><button id="logOpenBtn" class="btn-bracket btn-small empty-action">[ Open Log ]</button></p>
+            <p class="empty-state" id="logEmptyState"><span data-i18n="empty.log">Python版WaypointLoggerの出力ファイルを開いてください。</span><br /><button id="logOpenBtn" class="btn-bracket btn-small empty-action" data-i18n="btn.openLog">[ ログを開く ]</button></p>
           </div>
         </div>
 
@@ -169,7 +173,7 @@
 
     <!-- Waypoint詳細ペイン(下部固定) -->
     <footer class="detail-bar" id="detailBar">
-      <p class="detail-placeholder" id="detailPlaceholder">Waypointを選択すると詳細が表示されます。</p>
+      <p class="detail-placeholder" id="detailPlaceholder" data-i18n="detail.placeholder">Waypointを選択すると詳細が表示されます。</p>
       <div class="detail-content hidden" id="detailContent">
         <div class="detail-field"><span class="detail-label">Name</span><span id="detailName" class="detail-value"></span></div>
         <div class="detail-field"><span class="detail-label">Map</span><span id="detailMap" class="detail-value"></span></div>
@@ -181,7 +185,7 @@
         <div class="detail-field detail-rawtext">
           <span class="detail-label">RawText</span>
           <textarea id="detailRawText" class="detail-rawtext-box" readonly rows="2"></textarea>
-          <button id="copyRawTextBtn" class="btn-bracket btn-small">[ Copy ]</button>
+          <button id="copyRawTextBtn" class="btn-bracket btn-small" data-i18n="btn.copy">[ コピー ]</button>
         </div>
       </div>
     </footer>
@@ -191,28 +195,28 @@
   <!-- Waypoint 追加/編集モーダル -->
   <div id="editModal" class="modal-overlay hidden">
     <div class="modal modal-wide">
-      <button id="modalCloseBtn" class="modal-close-btn" title="閉じる">✕</button>
+      <button id="modalCloseBtn" class="modal-close-btn" title="閉じる" data-i18n-title="modal.close">✕</button>
       <div class="modal-form-col">
         <h3 id="modalTitle">Waypoint を追加</h3>
 
         <label>Name
-          <input id="formName" type="text" placeholder="例: Base Camp" />
+          <input id="formName" type="text" placeholder="例: Base Camp" data-i18n-ph="form.namePlaceholder" />
         </label>
 
-        <label>CustomTag<input id="formTag" type="text" placeholder="任意" /></label>
+        <label>CustomTag<input id="formTag" type="text" placeholder="任意" data-i18n-ph="form.tagPlaceholder" /></label>
 
         <fieldset class="field-group">
           <legend>Location</legend>
           <div class="grid-3">
             <label>Lat<input id="formLat" type="number" step="any" value="0" /></label>
             <label>Lon<input id="formLon" type="number" step="any" value="0" /></label>
-            <label>Z <span class="label-note">(UE座標)</span><input id="formZ" type="number" step="any" value="0" /></label>
+            <label>Z <span class="label-note" data-i18n="form.zNote">(UE座標)</span><input id="formZ" type="number" step="any" value="0" /></label>
           </div>
         </fieldset>
 
         <label>MapName
           <div class="combo-row">
-            <input id="formMap" type="text" list="mapCandidates" placeholder="例: TheIsland_WP(自由入力可)" />
+            <input id="formMap" type="text" list="mapCandidates" placeholder="例: TheIsland_WP(自由入力可)" data-i18n-ph="form.mapPlaceholder" />
             <datalist id="mapCandidates"></datalist>
           </div>
         </label>
@@ -220,17 +224,17 @@
         <div class="modal-actions">
           <button id="modalSaveBtn" class="btn-bracket btn-accent">[ Save ]</button>
           <button id="modalCancelBtn" class="btn-bracket">[ Cancel ]</button>
-          <button id="modalDeleteBtn" class="btn-bracket btn-icon-danger hidden" title="このWaypointを削除"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></button>
+          <button id="modalDeleteBtn" class="btn-bracket btn-icon-danger hidden" title="このWaypointを削除" data-i18n-title="modal.deleteTitle"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></button>
         </div>
       </div>
 
       <div class="modal-preview-col">
-        <div class="preview-label">Waypoint Preview</div>
+        <div class="preview-label" data-i18n="preview.label">Waypoint プレビュー</div>
         <div id="waypointPreview" class="waypoint-preview"></div>
         <div id="waypointPreviewName" class="preview-name">-</div>
 
         <fieldset class="field-group">
-          <legend>Base Color</legend>
+          <legend data-i18n="color.base">ベースカラー</legend>
           <div id="colorEditor" class="color-editor" data-target="color"></div>
         </fieldset>
 
@@ -239,7 +243,7 @@
         </label>
 
         <fieldset class="field-group">
-          <legend>Icon Color</legend>
+          <legend data-i18n="color.icon">アイコンカラー</legend>
           <div id="iconColorEditor" class="color-editor" data-target="iconColor"></div>
         </fieldset>
       </div>
@@ -249,7 +253,7 @@
   <!-- 汎用の選択ダイアログ(座標/CustomTag衝突確認、INI保存確認などに使用) -->
   <div id="choiceModal" class="modal-overlay hidden">
     <div class="modal">
-      <h3 id="choiceTitle">確認</h3>
+      <h3 id="choiceTitle" data-i18n="choice.defaultTitle">確認</h3>
       <p id="choiceMessage" class="choice-message"></p>
       <div id="choiceButtons" class="modal-actions choice-buttons"></div>
     </div>
@@ -258,12 +262,19 @@
   <!-- Settings -->
   <div id="settingsModal" class="modal-overlay hidden">
     <div class="modal">
-      <h3>Settings</h3>
-      <h4 class="settings-section-title">保存される設定</h4>
-      <p class="settings-desc">Splitter位置・選択中のMap・Libraryタブ・列幅・検索文字・ソート状態は、自動的に保存されます。</p>
-      <p class="settings-desc">リセットすると、これらの設定と前回開いたファイルの記憶が、初期状態に戻ります。</p>
+      <h3 data-i18n="settings.title">設定</h3>
+      <h4 class="settings-section-title" data-i18n="settings.displaySection">表示</h4>
+      <label class="settings-lang-row"><span data-i18n="settings.langLabel">表示言語(UIとLocation Libraryの名前)</span>
+        <select id="uiLangSelect">
+          <option value="ja">日本語</option>
+          <option value="en">English</option>
+        </select>
+      </label>
+      <h4 class="settings-section-title" data-i18n="settings.savedSection">保存される設定</h4>
+      <p class="settings-desc" data-i18n="settings.descSaved">Splitter位置・選択中のMap・Libraryタブ・列幅・検索文字・ソート状態は、自動的に保存されます。</p>
+      <p class="settings-desc" data-i18n="settings.descReset">リセットすると、これらの設定と前回開いたファイルの記憶が、初期状態に戻ります。</p>
       <div class="settings-reset-row">
-        <button id="settingsResetBtn" class="btn-bracket">[ 設定をリセット ]</button>
+        <button id="settingsResetBtn" class="btn-bracket" data-i18n="settings.reset">[ 設定をリセット ]</button>
       </div>
       <div class="modal-actions">
         <button id="settingsCloseBtn" class="btn-bracket btn-accent">[ Close ]</button>
@@ -275,10 +286,10 @@
   <div id="mobileWarningOverlay" class="mobile-warning-overlay hidden">
     <div class="mobile-warning-box">
       <h2>ARK ASA Waypoint Manager</h2>
-      <p>このアプリはPC向けに設計されています。<br />スマートフォンでは正常に利用できません。<br />続行しますか?</p>
+      <p data-i18n="mobile.text">このアプリはPC向けに設計されています。スマートフォンでは正常に利用できません。続行しますか?</p>
       <div class="mobile-warning-actions">
-        <button id="mobileBackBtn" class="btn-bracket">[ 戻る ]</button>
-        <button id="mobileContinueBtn" class="btn-bracket btn-accent">[ 続行 ]</button>
+        <button id="mobileBackBtn" class="btn-bracket" data-i18n="mobile.back">[ 戻る ]</button>
+        <button id="mobileContinueBtn" class="btn-bracket btn-accent" data-i18n="mobile.continue">[ 続行 ]</button>
       </div>
     </div>
   </div>

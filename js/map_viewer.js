@@ -47,6 +47,7 @@ import {
   resolveEffectiveMapName,
   GENESIS_MAP_NAME,
 } from './map_config.js';
+import { t } from './i18n.js';
 
 const GRID_STEP = 10; // グリッド線・ラベルの間隔(Lat/Lon)
 
@@ -121,7 +122,7 @@ export function createMapViewer(handlers, root) {
     state.markerItems = [];
     state.markerSignature = null;
     els.markers.innerHTML = '';
-    setNotice('読み込み中…');
+    setNotice(t('notice.loading'));
 
     const config = await resolveMapConfig(mapName);
     if (seq !== state.loadSeq) return;
@@ -147,14 +148,14 @@ export function createMapViewer(handlers, root) {
       state.imgH = 0;
       els.image.removeAttribute('src');
       els.markers.innerHTML = '';
-      setNotice(`地図画像が読み込めませんでした(${url})。実画像が配置されているか確認してください。`);
+      setNotice(t('notice.imageError', { url }));
     };
     img.src = url;
   }
 
   function updateNotice() {
     if (state.config && !state.config.isCalibrated) {
-      setNotice('このマップの座標設定(config.json)が見つからないため、Lat/Lonを表示できません。');
+      setNotice(t('notice.noConfig'));
     } else {
       setNotice('');
     }
@@ -197,7 +198,7 @@ export function createMapViewer(handlers, root) {
       // Waypointがあるため、特別な強調はしない。v0.8.5)。
       const el = document.createElement('div');
       el.className = 'mv-marker';
-      el.title = waypoint.parsed.name || '(無名)';
+      el.title = (handlers.getDisplayName ? handlers.getDisplayName(waypoint) : waypoint.parsed.name) || t('map.unnamed');
       el.innerHTML = handlers.getIconMarkup(waypoint);
       el.addEventListener('pointerdown', (e) => e.stopPropagation());
       el.addEventListener('click', (e) => {
@@ -207,7 +208,7 @@ export function createMapViewer(handlers, root) {
       els.markers.appendChild(el);
       state.markerItems.push({ el, lat, lon, waypoint });
     }
-    els.info.textContent = `${items.length} Waypoints を表示中`;
+    els.info.textContent = t('maps.showing', { n: items.length });
     render();
   }
 
@@ -402,7 +403,7 @@ export function createMapViewer(handlers, root) {
       target = (els.mapSelect ? els.mapSelect.value : '') || maps[0] || '';
     }
     if (!target) {
-      setNotice('表示できるマップがありません。');
+      setNotice(t('notice.noMaps'));
       return;
     }
     if (els.mapSelect && els.mapSelect.value !== target) els.mapSelect.value = target;

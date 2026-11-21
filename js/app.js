@@ -52,6 +52,7 @@ import { createMapViewer } from './map_viewer.js';
 import { renderWaypointIconHtml, mountWaypointIcon } from './waypoint_icon.js';
 import { MARK_ICON_DEFINITIONS, findMarkIconById, findMarkIconByRawText, DEFAULT_MARK_ICON_ID } from './mark_icon.js';
 import { escapeHtml, formatNum, clamp01, roundTo } from './util.js';
+import { t, setUiLang, getUiLang } from './i18n.js';
 
 const LIST_KEYS = ['ini', 'storage', 'library', 'log'];
 const LABELS = { ini: 'GameUserSettings.ini', storage: 'My Storage', library: 'Location Library', log: 'Waypoint Log' };
@@ -87,18 +88,18 @@ const els = {};
 
 function cacheElements() {
   const ids = [
-    'statusText', 'settingsBtn', 'settingsModal', 'settingsCloseBtn', 'settingsResetBtn', 'mapsToggleBtn', 'libMapChip',
+    'statusText', 'settingsBtn', 'settingsModal', 'settingsCloseBtn', 'settingsResetBtn', 'mapsToggleBtn', 'libMapChip', 'uiLangSelect',
     // GameUserSettings.ini
-    'iniReadBtn', 'iniAddBtn', 'iniSaveBtn',
+    'iniReadBtn', 'iniAddBtn', 'iniSaveBtn', 'iniBulkBtn',
     'iniSearchInput', 'iniCount', 'iniTheadRow', 'iniTableBody', 'iniEmptyState', 'iniDropZone',
     // My Storage
-    'storageReadBtn', 'storageAddBtn', 'storageSaveBtn',
+    'storageReadBtn', 'storageAddBtn', 'storageSaveBtn', 'storageBulkBtn',
     'storageSearchInput', 'storageCount', 'storageTheadRow', 'storageTableBody', 'storageEmptyState', 'storageDropZone',
     // Location Library
-    'libraryReadBtn',
+    'libraryReadBtn', 'libraryBulkBtn',
     'librarySearchInput', 'libraryCategoryFilter', 'libraryCount', 'libraryTheadRow', 'libraryTableBody', 'libraryEmptyState', 'libraryDropZone',
     // Waypoint Log
-    'logOpenBtn',
+    'logOpenBtn', 'logBulkBtn',
     'logSearchInput', 'logCount', 'logTheadRow', 'logTableBody', 'logEmptyState', 'logDropZone',
     // 詳細ペイン
     'detailBar', 'detailPlaceholder', 'detailContent',
@@ -124,6 +125,11 @@ function cacheElements() {
 
 function init() {
   cacheElements();
+  setUiLang(settingsStore.get('uiLang', 'ja'));
+  els.uiLangSelect.value = getUiLang();
+  document.documentElement.lang = getUiLang();
+  applyI18nStatics();
+  els.statusText.textContent = t('status.initial');
   createControllers();
   bindToolbarEvents();
   bindDragAndDrop();
@@ -139,10 +145,39 @@ function init() {
 
 
   if (!fm.isFileSystemAccessSupported()) {
-    setStatus('このブラウザはFile System Access APIに未対応です。Chrome/Edgeでの利用を推奨します。');
+    setStatus(t('status.unsupportedBrowser'));
     return;
   }
   tryRestoreLastSession();
+}
+
+// --- 表示言語(i18n) ---------------------------------------------------
+
+/** index.html 内の data-i18n 属性を持つ静的テキストへ、現在の言語を適用する。 */
+function applyI18nStatics() {
+  document.querySelectorAll('[data-i18n]').forEach((el) => { el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-ph]').forEach((el) => { el.placeholder = t(el.dataset.i18nPh); });
+  document.querySelectorAll('[data-i18n-title]').forEach((el) => { el.title = t(el.dataset.i18nTitle); });
+}
+
+/** Settingsでの表示言語切り替え: 静的テキスト・一覧・地図・詳細を再描画する。 */
+function applyLanguage(lang) {
+  setUiLang(lang);
+  settingsStore.set('uiLang', lang);
+  document.documentElement.lang = lang;
+  applyI18nStatics();
+  els.mapsToggleBtn.textContent = t(mapsCollapsed ? 'header.mapsPerMap' : 'header.mapsShowAll');
+  renderAllLists();
+  refreshMapViewers();
+  if (currentSelection) handleSelect(currentSelection.waypoint, currentSelection.listKey);
+}
+
+/**
+ * 一覧・詳細・地図で表示する名前。表示言語が日本語で、Waypointに
+ * 日本語名(Location Libraryの nameJa)があればそちらを使う。
+ */
+function displayNameOf(wp) {
+  return (getUiLang() === 'ja' && wp.parsed.nameJa) ? wp.parsed.nameJa : wp.parsed.name;
 }
 
 // --- 4つのWaypointListコントローラーを生成 ------------------------------
@@ -167,7 +202,7 @@ function createControllers() {
       emptyStateEl: els[`${key}EmptyState`],
       countEl: els[`${key}Count`],
       searchInputEl: els[`${key}SearchInput`],
-      settingsStore, onSelect: handleSelect, getLatLon, getIconMarkup, getMapKey,
+      settingsStore, onSelect: handleSelect, getLatLon, getIconMarkup, getMapKey, getDisplayName: displayNameOf,
       onVisibleChange: () => refreshMapViewers(),
       ...(key === 'library' ? { categoryFilterEl: els.libraryCategoryFilter } : {}),
       ...(key === 'ini' || key === 'storage' ? rowActionHandlers(key) : {}),
@@ -295,6 +330,7 @@ function initMapViewers() {
   // v0.6.0: 選択肢はデータに存在する実効マップ名のみ(refreshMapSelectionが維持する)
   const getAvailableMaps = () => availableMapNames;
   const shared = {
+    getDisplayName: displayNameOf,
     getCurrentMap: () => viewerMapName || '__all__',
     getMapName: () => viewerMapName,
     getAvailableMaps,
@@ -344,14 +380,14 @@ function renderDetailBar(wp) {
   }
   els.detailPlaceholder.style.display = 'none';
   els.detailContent.classList.remove('hidden');
-  els.detailName.textContent = wp.parsed.name || '(無名)';
+  els.detailName.textContent = displayNameOf(wp) || t('map.unnamed');
   els.detailMap.textContent = wp.parsed.map || '-';
   els.detailX.textContent = formatNum(wp.parsed.x);
   els.detailY.textContent = formatNum(wp.parsed.y);
   els.detailZ.textContent = formatNum(wp.parsed.z);
   els.detailTag.textContent = wp.parsed.customTag || '-';
   els.detailIcon.textContent = wp.parsed.markIcon || '-';
-  els.detailRawText.value = wp.rawText || '(RawTextなし: 手動追加されたWaypoint)';
+  els.detailRawText.value = wp.rawText || t('detail.noRawText');
 }
 
 // --- マップ選択(グローバルフィルター) -------------------------------------
@@ -474,13 +510,13 @@ async function tryRestoreLastSession() {
   const notices = accumulatedLoadNotices;
   accumulatedLoadNotices = '';
   if (restored.length > 0 && pendingReconnect.length > 0) {
-    setStatus(`前回のセッション情報を復元しました(${restored.join('・')})。一部のファイルは再接続が必要です。${notices}`);
+    setStatus(t('status.restoredNeedReconnect', { lists: restored.join(getUiLang() === 'ja' ? '・' : ', '), notices }));
   } else if (restored.length > 0) {
-    setStatus(`前回のセッション情報を復元しました(${restored.join('・')})。${notices}`);
+    setStatus(t('status.restored', { lists: restored.join(getUiLang() === 'ja' ? '・' : ', '), notices }));
   } else if (pendingReconnect.length > 0) {
-    setStatus('前回のファイルへのアクセス許可が必要です。[ 前回のファイルを再接続 ]を押してください。');
+    setStatus(t('status.needReconnect'));
   } else if (bundledCount > 0) {
-    setStatus(`Location Library(同梱データ)から${bundledCount}件のWaypointを表示しています。`);
+    setStatus(t('status.bundledLibrary', { n: bundledCount }));
   }
 }
 
@@ -511,9 +547,9 @@ async function onReconnectFiles() {
     applySavedMapSelection();
     const notices = accumulatedLoadNotices;
     accumulatedLoadNotices = '';
-    setStatus(`再接続しました(${restored.join('・')})。${notices}`);
+    setStatus(t('status.reconnected', { lists: restored.join(getUiLang() === 'ja' ? '・' : ', '), notices }));
   } else {
-    setStatus('再接続が許可されませんでした。利用するファイルは[Load]から読み込み直してください。');
+    setStatus(t('status.reconnectDenied'));
   }
 }
 
@@ -540,8 +576,8 @@ async function loadIniLikeFile(handle, listKey) {
 /** 読込結果への注意書き(座標が不完全な行・未認識の行)を組み立てる。 */
 function loadNoticeText({ warningCount, unrecognizedCount }) {
   let note = '';
-  if (warningCount > 0) note += `座標が不完全な行が${warningCount}件あります。`;
-  if (unrecognizedCount > 0) note += `未認識の行が${unrecognizedCount}件あります(壊れている可能性があります)。`;
+  if (warningCount > 0) note += t('notice.incompleteLines', { n: warningCount });
+  if (unrecognizedCount > 0) note += t('notice.unrecognizedLines', { n: unrecognizedCount });
   return note;
 }
 
@@ -566,6 +602,10 @@ function bindToolbarEvents() {
   els.reconnectBtn.addEventListener('click', onReconnectFiles);
   els.iniAddBtn.addEventListener('click', () => openAddEditModal('ini', null));
   els.iniSaveBtn.addEventListener('click', onIniSave);
+  els.iniBulkBtn.addEventListener('click', () => onBulkMove('ini'));
+  els.storageBulkBtn.addEventListener('click', () => onBulkMove('storage'));
+  els.libraryBulkBtn.addEventListener('click', () => onBulkMove('library'));
+  els.logBulkBtn.addEventListener('click', () => onBulkMove('log'));
 
   els.storageReadBtn.addEventListener('click', onStorageRead);
   els.storageAddBtn.addEventListener('click', () => openAddEditModal('storage', null));
@@ -616,15 +656,15 @@ async function onIniRead() {
     // 上書きされて消えてしまうため)
     // (File System Access APIの制約上、ファイルパス名だけから
     //  自動でファイルを作成・特定することはできないため)
-    let message = `GameUserSettings.iniから${result.list.length}件のWaypointを読み込みました。${loadNoticeText(result)}`;
+    let message = t('status.iniLoaded', { n: result.list.length, notices: loadNoticeText(result) });
     if (!storageFileHandle) {
       switchLibraryTab('storage');
-      message += `My Storageタブの[Load]から ${STORAGE_FILE_NAME} を新規作成・読込してください。`;
+      message += t('status.storageCreateHint', { file: STORAGE_FILE_NAME });
     }
     setStatus(message);
   } catch (err) {
     console.error(err);
-    setStatus('GameUserSettings.iniの読み込み中にエラーが発生しました: ' + err.message);
+    setStatus(t('status.iniLoadError', { error: err.message }));
   }
 }
 
@@ -638,17 +678,17 @@ async function onIniRead() {
  * 追加の確認ダイアログを出す。上書き前の内容は緊急用バックアップ
  * としてIndexedDBへ保持する。 */
 async function onIniSave() {
-  if (!iniFileHandle) { setStatus('先に[Load]でGameUserSettings.iniを読み込んでください。'); return; }
+  if (!iniFileHandle) { setStatus(t('status.iniLoadFirst')); return; }
   const choice = await showChoiceDialog(
-    'GameUserSettings.iniへの保存確認',
-    'ゲーム本体の設定ファイル(SavedMinimapMarks)を書き換えます。\nこの操作は元に戻せません。続行しますか?',
-    [{ key: 'overwrite', label: '上書き保存' }, { key: 'cancel', label: 'キャンセル' }]
+    t('dialog.iniSaveConfirmTitle'),
+    t('dialog.iniSaveConfirm'),
+    [{ key: 'overwrite', label: t('btn.saveOverwrite') }, { key: 'cancel', label: t('btn.cancel') }]
   );
   if (choice !== 'overwrite') return;
 
   try {
     const granted = await fm.verifyPermission(iniFileHandle, 'readwrite');
-    if (!granted) { setStatus('GameUserSettings.iniへの書き込み権限が許可されませんでした。'); return; }
+    if (!granted) { setStatus(t('status.iniWriteDenied')); return; }
 
     const currentText = await fm.readFile(iniFileHandle);
     let baseText = iniOriginalText;
@@ -657,11 +697,11 @@ async function onIniSave() {
       const markLinesOf = (t) => t.split(/\r?\n/).filter((l) => l.trim().startsWith('SavedMinimapMarks=')).join('\n');
       if (markLinesOf(currentText) !== markLinesOf(iniOriginalText)) {
         const c2 = await showChoiceDialog(
-          'ファイルが変更されています',
-          '読み込み後にGameUserSettings.iniのWaypoint行が変更されています(ゲーム側で追加・削除された可能性があります)。\nアプリ側の一覧で上書きしますか?',
-          [{ key: 'overwrite', label: 'アプリの一覧で保存' }, { key: 'cancel', label: 'キャンセル' }]
+          t('dialog.fileChangedTitle'),
+          t('dialog.fileChanged'),
+          [{ key: 'overwrite', label: t('btn.saveWithAppList') }, { key: 'cancel', label: t('btn.cancel') }]
         );
-        if (c2 !== 'overwrite') { setStatus('保存を中止しました。最新の状態で作業するには[Load]で読み込み直してください。'); return; }
+        if (c2 !== 'overwrite') { setStatus(t('status.iniSaveAborted')); return; }
       }
       baseText = currentText;
       usedFreshBase = true;
@@ -676,10 +716,10 @@ async function onIniSave() {
     await fm.writeFile(iniFileHandle, newText);
     iniOriginalText = newText;
     markClean('ini');
-    setStatus(`GameUserSettings.iniへ保存しました(${controllers.ini.getAll().length}件)${usedFreshBase ? '。読み込み後の外部変更も保持しました' : ''}${cleaned.removed ? '。目印の[ARKASAWaypointManager]セクションを削除しました' : ''}。`);
+    setStatus(t('status.iniSaved', { n: controllers.ini.getAll().length }) + (usedFreshBase ? t('status.iniSavedFreshBase') : '') + (cleaned.removed ? t('status.iniSavedCleaned') : '') + t('punct.period'));
   } catch (err) {
     console.error(err);
-    setStatus('GameUserSettings.iniの保存中にエラーが発生しました: ' + err.message);
+    setStatus(t('status.iniSaveError', { error: err.message }));
   }
 }
 
@@ -701,32 +741,32 @@ async function onStorageRead() {
     controllers.storage.setAll(list);
     markRead('storage');
     markClean('storage');
-    setStatus(`My Storageから${list.length}件のWaypointを読み込みました。`);
+    setStatus(t('status.storageLoaded', { n: list.length }));
     refreshMapSelection();
   } catch (err) {
     console.error(err);
-    setStatus('My Storageの読み込み中にエラーが発生しました: ' + err.message);
+    setStatus(t('status.storageLoadError', { error: err.message }));
   }
 }
 
 /** My Storageの手動保存(v0.6.0でINIと同じくボタン式に変更。変更時はボタンが有効化される) */
 async function onStorageSave() {
   if (!storageFileHandle) {
-    setStatus('My Storage: 先にファイルを読み込んでください(Load)。');
+    setStatus(t('status.storageLoadFirst'));
     return;
   }
   try {
     const granted = await fm.verifyPermission(storageFileHandle, 'readwrite');
     if (!granted) {
-      setStatus('My Storage: ファイルへの書き込み権限が許可されませんでした。');
+      setStatus(t('status.storageWriteDenied'));
       return;
     }
     await fm.writeFile(storageFileHandle, serializeStorage(controllers.storage.getAll()));
     markClean('storage');
-    setStatus(`My Storageを保存しました(${controllers.storage.getAll().length} Waypoints)。`);
+    setStatus(t('status.storageSaved', { n: controllers.storage.getAll().length }));
   } catch (err) {
     console.error(err);
-    setStatus('My Storageの保存に失敗しました: ' + err.message);
+    setStatus(t('status.storageSaveError', { error: err.message }));
   }
 }
 
@@ -744,11 +784,11 @@ async function onLibraryRead() {
     await fm.saveLastLibraryHandle(handle);
     controllers.library.setAll(list);
     markRead('library');
-    setStatus(`Location Libraryから${list.length}件のWaypointを読み込みました。`);
+    setStatus(t('status.libraryLoaded', { n: list.length }));
     refreshMapSelection();
   } catch (err) {
     console.error(err);
-    setStatus('Location Libraryの読み込み中にエラーが発生しました: ' + err.message);
+    setStatus(t('status.libraryLoadError', { error: err.message }));
   }
 }
 
@@ -761,11 +801,11 @@ async function onLogOpen() {
     const result = await loadIniLikeFile(handle, 'log');
     logFileHandle = handle;
     await fm.saveLastLogHandle(handle);
-    setStatus(`Waypoint Logから${result.list.length}件のWaypointを読み込みました。${loadNoticeText(result)}`);
+    setStatus(t('status.logLoaded', { n: result.list.length, notices: loadNoticeText(result) }));
     refreshMapSelection();
   } catch (err) {
     console.error(err);
-    setStatus('Waypoint Logの読み込み中にエラーが発生しました: ' + err.message);
+    setStatus(t('status.logLoadError', { error: err.message }));
   }
 }
 
@@ -774,21 +814,21 @@ async function onCopyRawText() {
   if (!text) return;
   try {
     await navigator.clipboard.writeText(text);
-    setStatus('RawTextをクリップボードへコピーしました。');
+    setStatus(t('status.copiedRaw'));
   } catch (err) {
     console.error(err);
-    setStatus('クリップボードへのコピーに失敗しました。手動で選択してコピーしてください。');
+    setStatus(t('status.copyFailed'));
   }
 }
 
 // --- 行内Delete処理(v0.5.0: 行のゴミ箱アイコンから呼ばれる。確認ダイアログは維持) ---
 
 function onDeleteWaypoint(listKey, wp) {
-  const confirmed = window.confirm(`Waypoint「${wp.parsed.name}」を${LABELS[listKey]}から削除しますか?`);
+  const confirmed = window.confirm(t('confirm.delete', { name: wp.parsed.name, list: LABELS[listKey] }));
   if (!confirmed) return;
 
   controllers[listKey].remove(wp.id);
-  setStatus(`Waypoint「${wp.parsed.name}」を${LABELS[listKey]}から削除しました。`);
+  setStatus(t('status.deleted', { name: wp.parsed.name, list: LABELS[listKey] }));
   markDirty(listKey);
   refreshMapSelection(); // 削除でマップが消えた場合にCurrent Mapの選択肢と絞り込みを追随させる
 }
@@ -825,13 +865,13 @@ async function openAddEditModal(listKey, id) {
 
   if (id) {
     const wp = controllers[listKey].find(id);
-    els.modalTitle.textContent = `Waypoint を編集 (${LABELS[listKey]})`;
+    els.modalTitle.textContent = t('modal.editTitle', { list: LABELS[listKey] });
     const config = await resolveMapConfig(resolveEffectiveMapName(wp.parsed.map, wp.parsed.z));
     const { lat, lon } = new CoordinateConverter(config).ueToGame(wp.parsed.x, wp.parsed.y);
     fillForm({ ...wp.parsed, lat, lon });
     editingOriginalForm = { lat: els.formLat.value, lon: els.formLon.value, map: els.formMap.value, x: wp.parsed.x, y: wp.parsed.y };
   } else {
-    els.modalTitle.textContent = `Waypoint を追加 (${LABELS[listKey]})`;
+    els.modalTitle.textContent = t('modal.addTitle') + ` (${LABELS[listKey]})`;
     // MapNameの初期値はCurrent Mapの選択中マップ(v0.5.1: All Maps廃止のため、
     // データがあれば常に特定マップが選択されている。Genesis陸/海の別名は保存時に正規化される)
     const defaultMap = viewerMapName;
@@ -1010,7 +1050,7 @@ function updateWaypointPreview() {
     iconColor: iconColorEditorApi?.getValue() ?? defaultColor(),
     size: 64,
   });
-  els.waypointPreviewName.textContent = els.formName.value.trim() || '(無名)';
+  els.waypointPreviewName.textContent = els.formName.value.trim() || t('map.unnamed');
 }
 
 async function onModalSave() {
@@ -1022,11 +1062,11 @@ async function onModalSave() {
   const lon = Number(els.formLon.value);
 
   if (isNaN(lat) || isNaN(lon)) {
-    alert('Lat / Lon は数値を入力してください。');
+    alert(t('alert.latLonNumeric'));
     return;
   }
   if (els.formZ.value.trim() === '' || isNaN(Number(zValue))) {
-    alert('Z は数値を入力してください。');
+    alert(t('alert.zNumeric'));
     return;
   }
 
@@ -1094,9 +1134,9 @@ async function onModalSave() {
     const conflict = controller.getAll().find((w) => w.id !== id && (w.parsed.customTag || '').trim() === tag);
     if (conflict) {
       const choice = await showChoiceDialog(
-        'CustomTag重複の確認',
-        'CustomTag が既に存在します。',
-        [{ key: 'overwrite', label: '上書き' }, { key: 'rename', label: '連番追加' }, { key: 'cancel', label: 'キャンセル' }]
+        t('dialog.tagDuplicateTitle'),
+        t('dialog.tagDuplicate'),
+        [{ key: 'overwrite', label: t('btn.overwrite') }, { key: 'rename', label: t('btn.renameNumber') }, { key: 'cancel', label: t('btn.cancel') }]
       );
       if (choice === 'cancel' || !choice) return; // モーダルは開いたまま(保存を中断)
       if (choice === 'overwrite') {
@@ -1118,7 +1158,7 @@ async function onModalSave() {
     controller.replace(id, updated);
     controller.setSelectedId(id);
     handleSelect(updated, listKey);
-    setStatus(`Waypoint「${finalParsed.name}」を${LABELS[listKey]}で更新しました。`);
+    setStatus(t('status.updated', { name: finalParsed.name, list: LABELS[listKey] }));
   } else {
     if (removeConflictId) controller.remove(removeConflictId);
     const rawText = buildRawText('', finalParsed);
@@ -1126,12 +1166,92 @@ async function onModalSave() {
     controller.add(created);
     controller.setSelectedId(created.id);
     handleSelect(created, listKey);
-    setStatus(`Waypoint「${finalParsed.name}」を${LABELS[listKey]}へ追加しました。`);
+    setStatus(t('status.added', { name: finalParsed.name, list: LABELS[listKey] }));
   }
 
   refreshMapSelection();
   markDirty(listKey);
   closeModal();
+}
+
+// --- 一括移動(表示中の分をまとめて移動/コピー) -------------------------
+//
+// 各リストのタイトル行にある「一括移動」ボタンから使う。対象は、その
+// リストで現在表示されている(検索・Category・Current Mapで絞り込まれた)
+// Waypointすべて。移動先はダイアログで選ぶ(Location Libraryは固定
+// データのため移動先にはならない)。
+// 衝突は1件ずつ確認せず、まとめて固定ルールで処理する:
+// - 同じ座標のものはスキップ(再実行しても安全なように)
+// - CustomTagが同じものは、ドラッグ時と同じ自動連番で追加
+// - Waypoint Logへは、単体ドラッグと同じく確認なしでそのまま追加
+
+async function onBulkMove(sourceKey) {
+  const items = controllers[sourceKey].getVisibleItems();
+  if (items.length === 0) { setStatus(t('status.bulkNone')); return; }
+  const verb = t(EDITABLE_LISTS.has(sourceKey) ? 'verb.move' : 'verb.copy');
+  const choices = LIST_KEYS
+    .filter((k) => k !== sourceKey && k !== 'library')
+    .map((k) => ({ key: k, label: t('dialog.bulkTo', { list: LABELS[k] }) }));
+  choices.push({ key: 'cancel', label: t('btn.cancel') });
+  const choice = await showChoiceDialog(
+    t('dialog.bulkTitle'),
+    t('dialog.bulkMessage', { list: LABELS[sourceKey], n: items.length, verb }),
+    choices
+  );
+  if (!choice || choice === 'cancel') return;
+  bulkMove(sourceKey, choice, items);
+}
+
+function bulkMove(sourceKey, targetKey, items) {
+  const removesFromSource = EDITABLE_LISTS.has(sourceKey);
+  const verbPast = t(removesFromSource ? 'verb.movePast' : 'verb.copyPast');
+  const target = controllers[targetKey];
+  const targetIsEditable = EDITABLE_LISTS.has(targetKey);
+  const movedPairs = [];
+  let skipped = 0;
+  let renamed = 0;
+
+  for (const wp of items) {
+    if (targetIsEditable) {
+      const targetList = target.getAll();
+      if (targetList.some((existing) => isSameLocation(existing, wp))) { skipped++; continue; }
+      let newTag;
+      if (targetList.some((existing) => isSameCustomTag(existing, wp))) {
+        newTag = generateUniqueTag(wp.parsed.customTag, targetList);
+        renamed++;
+      }
+      const clone = cloneWaypointForTarget(wp, targetKey, removesFromSource ? wp.id : undefined, newTag);
+      target.add(clone);
+      movedPairs.push({ src: wp, dst: clone });
+    } else {
+      const clone = cloneWaypointForTarget(wp, targetKey, removesFromSource ? wp.id : undefined);
+      target.add(clone);
+      movedPairs.push({ src: wp, dst: clone });
+    }
+  }
+
+  if (removesFromSource) {
+    for (const { src } of movedPairs) controllers[sourceKey].remove(src.id);
+    if (movedPairs.length > 0) markDirty(sourceKey);
+  }
+  if (movedPairs.length > 0) markDirty(targetKey);
+  refreshMapSelection();
+
+  // 選択中だったWaypointが移動した場合は、移動先で選択し直す
+  const selectedPair = currentSelection && currentSelection.listKey === sourceKey
+    ? movedPairs.find(({ src }) => src.id === currentSelection.waypoint.id)
+    : null;
+  if (selectedPair) {
+    controllers[targetKey].setSelectedId(selectedPair.dst.id);
+    handleSelect(selectedPair.dst, targetKey);
+  } else if (currentSelection) {
+    handleSelect(currentSelection.waypoint, currentSelection.listKey);
+  }
+
+  let message = t('status.bulkDone', { n: movedPairs.length, list: LABELS[targetKey], verbPast });
+  if (skipped > 0) message += t('status.bulkSkipped', { skipped });
+  if (renamed > 0) message += t('status.bulkRenamed', { renamed });
+  setStatus(message);
 }
 
 // --- ドラッグ&ドロップ(4リスト全方向・共通の競合処理) -----------------------
@@ -1165,7 +1285,7 @@ function onDrop(e, targetKey) {
   try { payload = JSON.parse(e.dataTransfer.getData('text/plain')); } catch { return; }
   if (!payload?.listKey || !payload?.id || payload.listKey === targetKey) return;
   if (targetKey === 'library') {
-    setStatus('Location Libraryは固定データのため、Waypointを追加できません。');
+    setStatus(t('status.libraryFixed'));
     return;
   }
 
@@ -1179,8 +1299,16 @@ function onDrop(e, targetKey) {
  * rawText も再構築し、一覧表示と保存内容を一致させる(表示だけ差し替えて
  * rawText が古いままだと、保存時に元のタグへ戻ってしまうため)。 */
 function cloneWaypointForTarget(wp, targetKey, id, customTag) {
-  const parsed = customTag ? { ...wp.parsed, customTag } : { ...wp.parsed };
-  const rawText = customTag ? buildRawText(wp.rawText, parsed) : wp.rawText;
+  // 表示言語が日本語で日本語名(nameJa)があるWaypointは、コピー先でも
+  // 日本語名で登録する(Location Libraryからのコピーを想定)
+  const localizedName = displayNameOf(wp);
+  const nameChanged = localizedName !== wp.parsed.name;
+  const parsed = {
+    ...wp.parsed,
+    ...(customTag ? { customTag } : {}),
+    ...(nameChanged ? { name: localizedName } : {}),
+  };
+  const rawText = (customTag || nameChanged) ? buildRawText(wp.rawText, parsed) : wp.rawText;
   return createWaypoint({ id, rawText, parsed });
 }
 
@@ -1196,7 +1324,7 @@ function cloneWaypointForTarget(wp, targetKey, id, customTag) {
  */
 async function moveWaypoint(sourceKey, targetKey, wp) {
   const removesFromSource = EDITABLE_LISTS.has(sourceKey);
-  const verb = removesFromSource ? '移動' : 'コピー';
+  const verbPast = t(removesFromSource ? 'verb.movePast' : 'verb.copyPast');
   const newId = removesFromSource ? wp.id : undefined;
   const wasSelected = !!(currentSelection && currentSelection.listKey === sourceKey && currentSelection.waypoint.id === wp.id);
 
@@ -1220,7 +1348,7 @@ async function moveWaypoint(sourceKey, targetKey, wp) {
     const copy = cloneWaypointForTarget(wp, targetKey, newId);
     controllers[targetKey].add(copy);
     finalize(copy);
-    setStatus(`Waypoint「${wp.parsed.name}」を${LABELS[targetKey]}へ追加しました。`);
+    setStatus(t('status.added', { name: wp.parsed.name, list: LABELS[targetKey] }));
     return;
   }
 
@@ -1230,15 +1358,15 @@ async function moveWaypoint(sourceKey, targetKey, wp) {
   const locationConflict = targetList.find((existing) => isSameLocation(existing, wp));
   if (locationConflict) {
     const choice = await showChoiceDialog(
-      '座標衝突の確認',
-      `${LABELS[targetKey]}に同一座標のWaypoint「${locationConflict.parsed.name}」が既に存在します。\n上書きしますか?`,
-      [{ key: 'overwrite', label: '上書き' }, { key: 'cancel', label: 'キャンセル' }]
+      t('dialog.locationConflictTitle'),
+      t('dialog.locationConflict', { list: LABELS[targetKey], name: locationConflict.parsed.name }),
+      [{ key: 'overwrite', label: t('btn.overwrite') }, { key: 'cancel', label: t('btn.cancel') }]
     );
     if (choice !== 'overwrite') return;
     const merged = cloneWaypointForTarget(wp, targetKey, locationConflict.id);
     controllers[targetKey].replace(locationConflict.id, merged);
     finalize(merged);
-    setStatus(`Waypoint「${wp.parsed.name}」を${LABELS[targetKey]}へ${verb}しました(上書き)。`);
+    setStatus(t('status.movedOverwrite', { name: wp.parsed.name, list: LABELS[targetKey], verbPast }));
     return;
   }
 
@@ -1246,9 +1374,9 @@ async function moveWaypoint(sourceKey, targetKey, wp) {
   const tagConflict = targetList.find((existing) => isSameCustomTag(existing, wp));
   if (tagConflict) {
     const choice = await showChoiceDialog(
-      'CustomTag衝突の確認',
-      `${LABELS[targetKey]}に同一のCustomTag「${wp.parsed.customTag}」を持つWaypointが既に存在します。`,
-      [{ key: 'rename', label: '末尾番号追加' }, { key: 'overwrite', label: '上書き' }, { key: 'cancel', label: 'キャンセル' }]
+      t('dialog.tagConflictTitle'),
+      t('dialog.tagConflict', { list: LABELS[targetKey], tag: wp.parsed.customTag }),
+      [{ key: 'rename', label: t('btn.renameSuffix') }, { key: 'overwrite', label: t('btn.overwrite') }, { key: 'cancel', label: t('btn.cancel') }]
     );
     if (choice === 'cancel' || !choice) return;
 
@@ -1256,7 +1384,7 @@ async function moveWaypoint(sourceKey, targetKey, wp) {
       const merged = cloneWaypointForTarget(wp, targetKey, tagConflict.id);
       controllers[targetKey].replace(tagConflict.id, merged);
       finalize(merged);
-      setStatus(`Waypoint「${wp.parsed.name}」を${LABELS[targetKey]}へ${verb}しました(上書き)。`);
+      setStatus(t('status.movedOverwrite', { name: wp.parsed.name, list: LABELS[targetKey], verbPast }));
       return;
     }
 
@@ -1264,7 +1392,7 @@ async function moveWaypoint(sourceKey, targetKey, wp) {
     const renamed = cloneWaypointForTarget(wp, targetKey, newId, newTag);
     controllers[targetKey].add(renamed);
     finalize(renamed);
-    setStatus(`Waypoint「${wp.parsed.name}」を${LABELS[targetKey]}へ${verb}しました(CustomTag: ${newTag})。`);
+    setStatus(t('status.movedRenamed', { name: wp.parsed.name, list: LABELS[targetKey], verbPast, tag: newTag }));
     return;
   }
 
@@ -1273,8 +1401,8 @@ async function moveWaypoint(sourceKey, targetKey, wp) {
   controllers[targetKey].add(moved);
   finalize(moved);
   setStatus(removesFromSource
-    ? `Waypoint「${wp.parsed.name}」を${LABELS[sourceKey]}から${LABELS[targetKey]}へ移動しました。`
-    : `Waypoint「${wp.parsed.name}」を${LABELS[targetKey]}へコピーしました。`);
+    ? t('status.movedFromTo', { name: wp.parsed.name, from: LABELS[sourceKey], to: LABELS[targetKey] })
+    : t('status.copiedTo', { name: wp.parsed.name, to: LABELS[targetKey] }));
 }
 
 // --- 汎用選択ダイアログ(Promiseベース) ------------------------------------
@@ -1382,7 +1510,7 @@ function applyMapsCollapsed(collapsed, persist) {
   mapsCollapsed = collapsed;
   els.mapsRow.classList.toggle('hidden', collapsed);
   els.mapsSplitter.classList.toggle('hidden', collapsed);
-  els.mapsToggleBtn.textContent = collapsed ? '[ マップ別表示に戻す ]' : '[ 全Waypoint表示 ]';
+  els.mapsToggleBtn.textContent = t(collapsed ? 'header.mapsPerMap' : 'header.mapsShowAll');
   if (persist) settingsStore.set('layout.mapsCollapsed', collapsed);
   // 地図を隠している間はマップ選択ができないため、リストは全Waypoint表示にする(v0.6.2)
   applyCurrentMapFilter(false);
@@ -1407,9 +1535,10 @@ function restoreLayoutSettings() {
 
 function bindHeaderEvents() {
   els.settingsBtn.addEventListener('click', () => els.settingsModal.classList.remove('hidden'));
+  els.uiLangSelect.addEventListener('change', () => applyLanguage(els.uiLangSelect.value));
   els.settingsCloseBtn.addEventListener('click', () => els.settingsModal.classList.add('hidden'));
   els.settingsResetBtn.addEventListener('click', async () => {
-    if (!window.confirm('保存されている設定(レイアウト・選択中のMap・タブ・列幅・検索文字・ソート)と、前回のセッション情報(前回開いたファイルの記憶)をすべて初期状態に戻しますか？')) return;
+    if (!window.confirm(t('settings.resetConfirm'))) return;
     settingsStore.clearAll();
     // 前回のセッション情報(IndexedDB内のファイルハンドルとINIバックアップ)も消す(v0.8.3)
     try {
@@ -1457,7 +1586,7 @@ function startApp() {
     window.history.back();
     // 戻り先が無い(直接開いた等)環境向けのフォールバック
     setTimeout(() => {
-      document.body.innerHTML = '<p style="padding:40px;text-align:center;color:#7c8b96;font-family:monospace;">このタブを閉じてご利用ください。</p>';
+      document.body.innerHTML = `<p style="padding:40px;text-align:center;color:#7c8b96;font-family:monospace;">${t('mobile.closeTab')}</p>`;
     }, 400);
   });
 

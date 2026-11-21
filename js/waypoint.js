@@ -42,6 +42,7 @@ export function createWaypoint(data = {}) {
       customTag: src.customTag ?? '',
       markIcon: src.markIcon ?? '',
       category: src.category ?? '', // Location Library等で使用するカテゴリ
+      nameJa: src.nameJa ?? '', // Location Libraryの日本語名(表示言語が日本語のとき表示に使う)
       color: normalizeColor(src.color),
       iconColor: normalizeColor(src.iconColor),
     },

@@ -1,4 +1,11 @@
-# ARK ASA Waypoint Manager Web — 仕様書 (v0.10.1)
+# ARK ASA Waypoint Manager Web — 仕様書 (v0.11.0)
+
+## 0.35 v0.11.0: 表示言語(日本語/English)と一括移動
+
+- **表示言語の切替**: `js/i18n.js` を新設し、UIテキストの辞書(ja/en)を保持する。Settings に「表示」セクションと言語セレクトを追加し、`settingsStore` の `uiLang` に保存する(既定は日本語)。静的テキストは index.html の `data-i18n` / `data-i18n-ph` / `data-i18n-title` 属性から、動的テキスト(ステータス・ダイアログ・通知・列見出し・カテゴリ選択肢)は各モジュールの `t()` 呼び出しから適用する。リスト名(My Storage 等)・フィールド名(CustomTag 等)・`[ Save ]` / `[ Load ]` のブラケット表記は固有名詞として両言語共通とする。
+- **件数表示**: リストの件数は言語連動にした(日本語: 「N件」/ English: 「N Waypoints」)。地図ペインの「表示中」件数も同じ辞書を使う。
+- **Location Library の日本語名**: `location_library.json` の全864エントリに `nameJa` を収録した(翻訳方針: 固有名詞はカタカナ転写、一般名詞は意訳。公式の日本語名が確認できないものも含むため、公式名の転記ではない)。`location_library.js` が `parsed.nameJa` へ読み込み、`waypoint.js` の parsed にも保持する。表示言語が日本語のとき、一覧・詳細・地図マーカーの表示名に日本語名を使い(`displayNameOf`)、Library からのコピー(ドラッグ/一括移動)では日本語名で登録される(`cloneWaypointForTarget` が rawText を再構築する)。英語表示では従来どおり英語名を使う。
+- **一括移動**: 各リストのタイトル行に「一括移動」ボタン(`iniBulkBtn` 等)を追加した。対象はそのリストで現在表示されている(検索・Category・Current Map の絞り込み適用後)全件で、移動先は選択ダイアログで選ぶ(Location Library は固定データのため移動先にならない)。意味づけはドラッグと同じ(INI/My Storage からは移動、Library/Log からはコピー)。衝突は1件ずつ確認せず固定ルールで処理する: 同じ座標のものはスキップ、CustomTag が同じものは自動連番、Waypoint Log へはそのまま追加。処理結果は「移動 N 件・スキップ M 件・タグ変更 K 件」の形でステータスに報告する。
 
 ## 0.34 v0.10.1での変更概要(Claudeレビュー v0.9.1 の残り指摘への対応)
 
