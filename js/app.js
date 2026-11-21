@@ -823,9 +823,23 @@ async function onCopyRawText() {
 
 // --- 行内Delete処理(v0.5.0: 行のゴミ箱アイコンから呼ばれる。確認ダイアログは維持) ---
 
-function onDeleteWaypoint(listKey, wp) {
-  const confirmed = window.confirm(t('confirm.delete', { name: wp.parsed.name, list: LABELS[listKey] }));
-  if (!confirmed) return;
+// 削除確認の「次回から確認しない」はセッション限り(保存しない。ページを再読み込みすると再び確認する)(v0.11.2)
+let suppressDeleteConfirm = false;
+
+async function onDeleteWaypoint(listKey, wp) {
+  if (!suppressDeleteConfirm) {
+    const res = await showChoiceDialog(
+      t('confirm.deleteTitle'),
+      t('confirm.delete', { name: wp.parsed.name, list: LABELS[listKey] }),
+      [
+        { key: 'cancel', label: t('btn.cancel') },
+        { key: 'delete', label: t('btn.delete'), danger: true },
+      ],
+      { checkboxLabel: t('confirm.dontAskAgain'), escKey: 'cancel', focusKey: 'cancel' },
+    );
+    if (res.key !== 'delete') return;
+    if (res.checked) suppressDeleteConfirm = true;
+  }
 
   controllers[listKey].remove(wp.id);
   setStatus(t('status.deleted', { name: wp.parsed.name, list: LABELS[listKey] }));
@@ -1401,28 +1415,57 @@ async function moveWaypoint(sourceKey, targetKey, wp) {
 
 // --- 汎用選択ダイアログ(Promiseベース) ------------------------------------
 
-function showChoiceDialog(title, message, choices) {
+// options(v0.11.2): checkboxLabel を渡すと「次回から確認しない」等のチェック欄を出し、
+// 解決値は { key, checked } になる。escKey は Esc で選ぶキー、focusKey は初期フォーカスのキー。
+// choice.danger が付いたボタンは赤系で表示する。
+function showChoiceDialog(title, message, choices, options = {}) {
   return new Promise((resolve) => {
     els.choiceTitle.textContent = title;
     els.choiceMessage.textContent = message;
     els.choiceButtons.innerHTML = '';
 
+    let checkbox = null;
+    let checkboxRow = null;
+    if (options.checkboxLabel) {
+      checkboxRow = document.createElement('label');
+      checkboxRow.className = 'choice-checkbox';
+      checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.id = 'choiceDontAsk';
+      const span = document.createElement('span');
+      span.textContent = options.checkboxLabel;
+      checkboxRow.appendChild(checkbox);
+      checkboxRow.appendChild(span);
+      els.choiceButtons.before(checkboxRow);
+    }
+
     let settled = false;
+    const onKeydown = (e) => {
+      if (e.key === 'Escape' && options.escKey) { e.preventDefault(); finish(options.escKey); }
+    };
     const finish = (value) => {
       if (settled) return;
       settled = true;
+      document.removeEventListener('keydown', onKeydown, true);
+      if (checkboxRow) checkboxRow.remove();
       els.choiceModal.classList.add('hidden');
-      resolve(value);
+      resolve(options.checkboxLabel ? { key: value, checked: !!(checkbox && checkbox.checked) } : value);
     };
 
     for (const choice of choices) {
       const btn = document.createElement('button');
-      btn.className = 'btn-bracket' + (choice.key === 'cancel' ? '' : ' btn-accent');
+      btn.className = 'btn-bracket' + (choice.key === 'cancel' ? '' : ' btn-accent') + (choice.danger ? ' btn-danger' : '');
       btn.textContent = `[ ${choice.label} ]`;
+      btn.dataset.choiceKey = choice.key;
       btn.addEventListener('click', () => finish(choice.key));
       els.choiceButtons.appendChild(btn);
     }
+    if (options.escKey) document.addEventListener('keydown', onKeydown, true);
     els.choiceModal.classList.remove('hidden');
+    if (options.focusKey) {
+      const target = els.choiceButtons.querySelector(`[data-choice-key="${options.focusKey}"]`);
+      if (target) target.focus();
+    }
   });
 }
 
@@ -1533,7 +1576,16 @@ function bindHeaderEvents() {
   els.uiLangSelect.addEventListener('change', () => applyLanguage(els.uiLangSelect.value));
   els.settingsCloseBtn.addEventListener('click', () => els.settingsModal.classList.add('hidden'));
   els.settingsResetBtn.addEventListener('click', async () => {
-    if (!window.confirm(t('settings.resetConfirm'))) return;
+    const resetChoice = await showChoiceDialog(
+      t('dialog.resetTitle'),
+      t('settings.resetConfirm'),
+      [
+        { key: 'cancel', label: t('btn.cancel') },
+        { key: 'reset', label: t('btn.reset'), danger: true },
+      ],
+      { escKey: 'cancel', focusKey: 'cancel' },
+    );
+    if (resetChoice !== 'reset') return;
     settingsStore.clearAll();
     // 前回のセッション情報(IndexedDB内のファイルハンドルとINIバックアップ)も消す(v0.8.3)
     try {

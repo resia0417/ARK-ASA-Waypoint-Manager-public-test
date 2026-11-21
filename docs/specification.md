@@ -1,4 +1,10 @@
-# ARK ASA Waypoint Manager Web — 仕様書 (v0.11.1)
+# ARK ASA Waypoint Manager Web — 仕様書 (v0.11.2)
+
+## 0.37 v0.11.2: 確認ダイアログの独自化と「次回から確認しない」
+
+- Waypoint削除と設定リセットの確認を、ブラウザ標準の `window.confirm` からアプリ独自の選択ダイアログ(showChoiceDialog)に置き換えた。言語設定に連動し、実行ボタンは赤系(btn-danger)で表示する。Escキー=キャンセル、初期フォーカスはキャンセルボタン。背景クリックでは閉じない。
+- 削除確認には「次回から確認しない」チェックを追加。チェックして削除すると、そのページを開いている間は以後削除確認を省略する。この設定は保存しない(メモリ上のフラグのみ)ため、ページの再読み込みや再訪問では再び確認する。設定リセットの確認には付けない。
+- showChoiceDialog に options(checkboxLabel / escKey / focusKey)と choice.danger を追加。checkboxLabel 使用時の解決値は { key, checked }。
 
 ## 0.36 v0.11.1: v0.11.0 の表示まわりの修正
 

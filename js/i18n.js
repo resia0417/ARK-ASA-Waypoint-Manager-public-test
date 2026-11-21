@@ -61,6 +61,8 @@ const STRINGS = {
     'choice.defaultTitle': '確認',
     'btn.overwrite': '上書き',
     'btn.cancel': 'キャンセル',
+    'btn.delete': '削除',
+    'btn.reset': 'リセット',
     'btn.renameSuffix': '末尾番号追加',
 
     // --- Settings ---
@@ -148,6 +150,9 @@ const STRINGS = {
     'dialog.fileChanged': '読み込み後にGameUserSettings.iniのWaypoint行が変更されています(ゲーム側で追加・削除された可能性があります)。\nアプリ側の一覧で上書きしますか?',
     'btn.saveWithAppList': 'アプリの一覧で保存',
     'confirm.delete': 'Waypoint「{name}」を{list}から削除しますか?',
+    'confirm.deleteTitle': '削除の確認',
+    'confirm.dontAskAgain': '次回から確認しない',
+    'dialog.resetTitle': '設定リセットの確認',
     'alert.latLonNumeric': 'Lat / Lon は数値を入力してください。',
     'alert.zNumeric': 'Z は数値を入力してください。',
     'dialog.tagDuplicateTitle': 'CustomTag重複の確認',
@@ -224,6 +229,8 @@ const STRINGS = {
     'choice.defaultTitle': 'Confirmation',
     'btn.overwrite': 'Overwrite',
     'btn.cancel': 'Cancel',
+    'btn.delete': 'Delete',
+    'btn.reset': 'Reset',
     'btn.renameSuffix': 'Add number suffix',
 
     // --- Settings ---
@@ -311,6 +318,9 @@ const STRINGS = {
     'dialog.fileChanged': 'Waypoint lines in GameUserSettings.ini have changed since loading (the game may have added or removed some).\nOverwrite with the app list?',
     'btn.saveWithAppList': 'Save with the app list',
     'confirm.delete': 'Delete Waypoint "{name}" from {list}?',
+    'confirm.deleteTitle': 'Delete Confirmation',
+    'confirm.dontAskAgain': "Don't ask again",
+    'dialog.resetTitle': 'Reset Settings',
     'alert.latLonNumeric': 'Please enter numeric values for Lat / Lon.',
     'alert.zNumeric': 'Please enter a numeric value for Z.',
     'dialog.tagDuplicateTitle': 'Duplicate CustomTag',
