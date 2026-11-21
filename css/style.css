@@ -79,27 +79,6 @@ html, body {
 }
 .header-link:hover { color: var(--accent); }
 
-/* ---------- グローバルツールバー(Current Map) ---------- */
-
-.global-bar {
-  flex: 0 0 auto;
-  padding: 8px 24px;
-  border-bottom: 1px solid var(--border);
-  background: var(--panel-alt);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-.current-map-label {
-  font-family: var(--font-mono); font-size: 12px; color: var(--text-muted);
-  display: flex; align-items: center; gap: 8px;
-}
-.current-map-label select {
-  background: var(--bg); border: 1px solid var(--border); color: var(--accent);
-  font-family: var(--font-mono); font-size: 12px; padding: 5px 8px; border-radius: 4px;
-}
-
 /* ---------- ボタン共通 ---------- */
 
 #reconnectBtn[hidden] { display: none; }
@@ -118,8 +97,6 @@ html, body {
 .btn-small { padding: 5px 10px; font-size: 11.5px; }
 .btn-accent { color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
 .btn-accent:hover { background: rgba(77,210,255,0.08); }
-.btn-danger { color: var(--danger); box-shadow: inset 0 0 0 1px var(--danger-dim); }
-.btn-danger:hover { color: var(--danger); background: rgba(217,112,90,0.08); box-shadow: inset 0 0 0 1px var(--danger); }
 
 /* ---------- ワークスペース(2カラム + Splitter) ---------- */
 
@@ -167,11 +144,6 @@ html, body {
   box-shadow: 0 5px 7px -5px rgba(77,210,255,0.75); /* ゲーム内UI風の太いアンダーバー(v0.6.4) */
 }
 
-.column-toolbar {
-  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
-  padding: 8px 14px; border-bottom: 1px solid var(--border); flex: 0 0 auto;
-}
-
 /* v0.6.1: 検索・件数・列設定・Saveはタイトル行(.column-head)右側のhead-toolsへ集約し、専用の行を廃止 */
 .head-tools { display: flex; align-items: center; gap: 8px; flex: 1 1 auto; justify-content: flex-end; min-width: 0; }
 .head-tools input[type="search"] {
@@ -182,7 +154,6 @@ html, body {
 .head-tool-group { display: none; align-items: center; gap: 8px; min-width: 0; }
 .head-tool-group.active { display: flex; }
 .meta-item { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); white-space: nowrap; }
-.meta-item.subtle { opacity: 0.7; }
 
 .column-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; position: relative; }
 .column-body.drag-over { background: rgba(77,210,255,0.06); outline: 1px dashed var(--accent-dim); outline-offset: -3px; }
@@ -458,12 +429,6 @@ td.icon-cell { text-align: center; }
 .hidden { display: none !important; }
 
 .label-note { font-size: 10.5px; color: var(--text-muted); font-weight: 400; white-space: nowrap; }
-.modal-hint {
-  font-size: 11px;
-  color: var(--text-muted);
-  margin: -6px 0 12px;
-  line-height: 1.5;
-}
 
 .settings-section-title {
   font-family: var(--font-gothic);
@@ -506,16 +471,6 @@ td.icon-cell { text-align: center; }
 
 .btn-bracket.is-read { box-shadow: inset 0 0 0 1px var(--accent-dim); color: var(--accent); }
 
-/* ---------- 低解像度対応 ---------- */
-@media (max-width: 1100px), (max-height: 720px) {
-  .workspace { flex-direction: column; overflow-y: auto; }
-  #col-ini { flex: 0 0 260px !important; }
-  .library-panel { flex: 1 1 320px; }
-  .splitter { display: none; }
-  .topbar { flex-wrap: wrap; row-gap: 8px; }
-  .status-text { order: 3; width: 100%; margin-left: 0; }
-}
-
 /* ---------- 地図エリア(v0.4.0: 2枚並べて常時表示) ---------- */
 
 .maps-row {
@@ -552,7 +507,14 @@ td.icon-cell { text-align: center; }
 }
 .splitter-h:hover::after { background: var(--accent); }
 
+/* ---------- 低解像度対応 ---------- */
 @media (max-width: 1100px), (max-height: 720px) {
+  .workspace { flex-direction: column; overflow-y: auto; }
+  #col-ini { flex: 0 0 260px !important; }
+  .library-panel { flex: 1 1 320px; }
+  .splitter { display: none; }
+  .topbar { flex-wrap: wrap; row-gap: 8px; }
+  .status-text { order: 3; width: 100%; margin-left: 0; }
   .maps-row { height: 200px; }
 }
 

@@ -88,14 +88,6 @@ export class SettingsStore {
     }
   }
 
-  remove(key) {
-    try {
-      this.backend.removeItem(STORAGE_KEY_PREFIX + key);
-    } catch (err) {
-      console.warn(`設定「${key}」の削除に失敗しました。`, err);
-    }
-  }
-
   /** このアプリの設定をすべて削除する(Settingsのリセット用、v0.6.3)。 */
   clearAll() {
     try {

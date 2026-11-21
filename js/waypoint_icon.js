@@ -17,12 +17,12 @@
 //     mountWaypointIcon(container, { type, baseColor, iconColor, size })
 //       → 指定した要素の中にアイコンを描画する(Waypoint Preview等で使用)
 //
-// 一覧・詳細・Add/Edit・Map Viewer(将来)は、すべてこのモジュールだけを
+// 一覧・詳細・Add/Edit・Map Viewerは、すべてこのモジュールだけを
 // 経由してアイコンを描画する(要件12「アイコン描画処理はWaypointIconへ
 // 集約してください」への対応)。個々の画面がSVGやfill処理を直接書くことはない。
 // =============================================================
 
-import { MARK_ICON_DEFINITIONS, findMarkIconById, findMarkIconByRawText, DEFAULT_MARK_ICON_ID } from './mark_icon.js';
+import { findMarkIconById } from './mark_icon.js';
 import { ICON_IMAGES } from './icon_images.js';
 import { escapeHtml, clamp01 } from './util.js';
 
@@ -106,13 +106,13 @@ function toCssColor(color) {
  * @returns {string}
  */
 export function renderWaypointIconHtml({ type, baseColor, iconColor, size = 20, title }, onLoaded) {
-  const def = findMarkIconById(type) ?? findMarkIconById(DEFAULT_MARK_ICON_ID);
+  const def = findMarkIconById(type);
   const baseSvg = getCachedSvg(BASE_ICON_ID, onLoaded);
   // 資源系アイコンは実物画像(icon_images.js)で描画し、SVGは取得しない(v0.6.3)
   const imageUri = ICON_IMAGES[def.id] ?? null;
-  const glyphSvg = imageUri || !def.svg ? '' : getCachedSvg(def.svg, onLoaded);
+  const glyphSvg = imageUri ? '' : getCachedSvg(def.id, onLoaded);
 
-  const tooltip = escapeHtml(title ?? def.displayName);
+  const tooltip = escapeHtml(title ?? def.id);
 
   if (baseSvg == null || glyphSvg == null) {
     // 読み込み中: 枠だけのプレースホルダーを表示し、読み込み完了後に再描画される
@@ -146,5 +146,4 @@ export function mountWaypointIcon(container, props) {
 }
 
 
-export { findMarkIconById, findMarkIconByRawText, DEFAULT_MARK_ICON_ID, MARK_ICON_DEFINITIONS };
 

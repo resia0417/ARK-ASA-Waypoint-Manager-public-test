@@ -14,9 +14,10 @@ const DB_VERSION = 1;
 const STORE_NAME = 'fileHandles';
 
 const KEY_INI_HANDLE = 'lastIniFileHandle';
-const KEY_JSON_HANDLE = 'lastJsonFileHandle';
+// My Storage用。値は旧称JsonHandle時代のままで変えない(既存ユーザーの保存済みハンドルを引き継ぐため)
+const KEY_STORAGE_HANDLE = 'lastJsonFileHandle';
 const KEY_LOG_HANDLE = 'lastLogFileHandle';
-const KEY_LIBRARY_HANDLE = 'lastLocationLibraryFileHandle'; // v0.3.4よりファイル単体(waypoints.json)のハンドル
+const KEY_LIBRARY_HANDLE = 'lastLocationLibraryFileHandle'; // Location Library用ファイルのハンドル
 const KEY_INI_BACKUP = 'iniBackupV1'; // INI上書き直前の内容の緊急用バックアップ
 
 /**
@@ -46,50 +47,56 @@ function openDB() {
 
 async function idbSet(key, value) {
   const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    tx.objectStore(STORE_NAME).put(value, key);
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
+  try {
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      tx.objectStore(STORE_NAME).put(value, key);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  } finally {
+    db.close();
+  }
 }
 
 async function idbGet(key) {
   const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readonly');
-    const req = tx.objectStore(STORE_NAME).get(key);
-    req.onsuccess = () => resolve(req.result ?? null);
-    req.onerror = () => reject(req.error);
-  });
+  try {
+    return await new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readonly');
+      const req = tx.objectStore(STORE_NAME).get(key);
+      req.onsuccess = () => resolve(req.result ?? null);
+      req.onerror = () => reject(req.error);
+    });
+  } finally {
+    db.close();
+  }
 }
 
 async function idbDelete(key) {
   const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    tx.objectStore(STORE_NAME).delete(key);
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
+  try {
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      tx.objectStore(STORE_NAME).delete(key);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  } finally {
+    db.close();
+  }
 }
 
-/**
- * ユーザーにGameUserSettings.iniを選択させる。
- * @returns {Promise<FileSystemFileHandle|null>}
- */
-export async function pickIniFile() {
+// --- ファイルピッカー ------------------------------------------------
+
+/** 既存ファイルを「開く」ための共通ピッカー(showOpenFilePicker)。 */
+async function pickOpenFile(description, mime, extensions) {
   if (!isFileSystemAccessSupported()) {
     throw new Error('このブラウザはFile System Access APIに対応していません(Chrome/Edge推奨)。');
   }
   try {
     const [handle] = await window.showOpenFilePicker({
-      types: [
-        {
-          description: 'ARK GameUserSettings.ini',
-          accept: { 'text/plain': ['.ini'] },
-        },
-      ],
+      types: [{ description, accept: { [mime]: extensions } }],
       excludeAcceptAllOption: false,
       multiple: false,
     });
@@ -98,6 +105,14 @@ export async function pickIniFile() {
     if (err.name === 'AbortError') return null; // ユーザーがキャンセル
     throw err;
   }
+}
+
+/**
+ * ユーザーにGameUserSettings.iniを選択させる。
+ * @returns {Promise<FileSystemFileHandle|null>}
+ */
+export async function pickIniFile() {
+  return pickOpenFile('ARK GameUserSettings.ini', 'text/plain', ['.ini']);
 }
 
 /**
@@ -111,65 +126,27 @@ export async function pickLogFile() {
 }
 
 /**
- * 既存のJSONファイルを「開く」ためのピッカー(ネイティブのOpenダイアログ)。
- *
- * v0.3.4までは、My Storage / Location Libraryの[Read](旧[Open])ボタンが
- * pickSaveJsonFile()(showSaveFilePicker)を再利用していたため、ブラウザの
- * ファイル選択ダイアログが「保存」の見た目で表示されてしまう問題があった。
- * [Read]は既存データの読み込みのみを行うため、本来のOpenダイアログ
- * (showOpenFilePicker)を使うよう分離した。新規ファイルの作成は、
- * 空ファイルを用意して[Read]で開く運用とする。
+ * 既存のJSONファイルを「開く」ためのピッカー(Location Library用)。
+ * 読み込み専用の操作のため、保存ダイアログではなくOpenダイアログを使う。
  * @param {string} description
  * @returns {Promise<FileSystemFileHandle|null>}
  */
 export async function pickOpenJsonFile(description = 'JSON file') {
-  if (!isFileSystemAccessSupported()) {
-    throw new Error('このブラウザはFile System Access APIに対応していません(Chrome/Edge推奨)。');
-  }
-  try {
-    const [handle] = await window.showOpenFilePicker({
-      types: [{ description, accept: { 'application/json': ['.json'] } }],
-      excludeAcceptAllOption: false,
-      multiple: false,
-    });
-    return handle;
-  } catch (err) {
-    if (err.name === 'AbortError') return null;
-    throw err;
-  }
+  return pickOpenFile(description, 'application/json', ['.json']);
 }
 
 /**
- * 既存のテキスト(.txt)ファイルを「開く」ためのピッカー(showOpenFilePicker)。
- * My Storage(v0.3.6よりSavedMinimapMarks形式のプレーンテキストで保存する)の
- * 読込に使用する。
+ * 既存のテキスト(.txt)ファイルを「開く」ためのピッカー。
+ * My Storage(SavedMinimapMarks形式のプレーンテキスト)の読込に使用する。
  * @param {string} description
  * @returns {Promise<FileSystemFileHandle|null>}
  */
 export async function pickOpenTextFile(description = 'Text file') {
-  if (!isFileSystemAccessSupported()) {
-    throw new Error('このブラウザはFile System Access APIに対応していません(Chrome/Edge推奨)。');
-  }
-  try {
-    const [handle] = await window.showOpenFilePicker({
-      types: [{ description, accept: { 'text/plain': ['.txt'] } }],
-      excludeAcceptAllOption: false,
-      multiple: false,
-    });
-    return handle;
-  } catch (err) {
-    if (err.name === 'AbortError') return null;
-    throw err;
-  }
+  return pickOpenFile(description, 'text/plain', ['.txt']);
 }
 
-/**
- * ファイルハンドルの読み取り/書き込み権限を確認し、必要であれば
- * ユーザーへ許可ダイアログを表示する。
- * @param {FileSystemFileHandle} handle
- * @param {'read'|'readwrite'} mode
- * @returns {Promise<boolean>} 権限が得られたか
- */
+// --- 権限 ------------------------------------------------------------
+
 /**
  * 権限の状態だけを確認する(許可ダイアログは出さない)。
  * 起動時のセッション復元など、ユーザー操作の無い場面で使う。
@@ -186,6 +163,13 @@ export async function queryPermissionState(handle, mode = 'read') {
   }
 }
 
+/**
+ * ファイルハンドルの読み取り/書き込み権限を確認し、必要であれば
+ * ユーザーへ許可ダイアログを表示する。
+ * @param {FileSystemFileHandle} handle
+ * @param {'read'|'readwrite'} mode
+ * @returns {Promise<boolean>} 権限が得られたか
+ */
 export async function verifyPermission(handle, mode = 'read') {
   if (!handle) return false;
   const options = { mode };
@@ -216,12 +200,34 @@ export async function writeFile(handle, text) {
 
 // --- 前回使用したファイルハンドルの永続化 -------------------------
 
-export async function saveLastIniHandle(handle) {
-  await idbSet(KEY_INI_HANDLE, handle);
+function makeHandleStore(key) {
+  return {
+    save: async (handle) => { await idbSet(key, handle); },
+    load: async () => idbGet(key),
+    clear: async () => { await idbDelete(key); },
+  };
 }
-export async function loadLastIniHandle() {
-  return await idbGet(KEY_INI_HANDLE);
-}
+
+const iniHandles = makeHandleStore(KEY_INI_HANDLE);
+export const saveLastIniHandle = iniHandles.save;
+export const loadLastIniHandle = iniHandles.load;
+export const clearLastIniHandle = iniHandles.clear;
+
+const storageHandles = makeHandleStore(KEY_STORAGE_HANDLE);
+export const saveLastStorageHandle = storageHandles.save;
+export const loadLastStorageHandle = storageHandles.load;
+export const clearLastStorageHandle = storageHandles.clear;
+
+const logHandles = makeHandleStore(KEY_LOG_HANDLE);
+export const saveLastLogHandle = logHandles.save;
+export const loadLastLogHandle = logHandles.load;
+export const clearLastLogHandle = logHandles.clear;
+
+const libraryHandles = makeHandleStore(KEY_LIBRARY_HANDLE);
+export const saveLastLibraryHandle = libraryHandles.save;
+export const loadLastLibraryHandle = libraryHandles.load;
+export const clearLastLibraryHandle = libraryHandles.clear;
+
 /** INI上書き直前の内容を、緊急用バックアップとしてIndexedDBへ保持する。 */
 export async function saveIniBackup(text) {
   try {
@@ -234,36 +240,4 @@ export async function saveIniBackup(text) {
 /** 緊急用INIバックアップを破棄する(Settingsリセット用)。 */
 export async function clearIniBackup() {
   await idbDelete(KEY_INI_BACKUP);
-}
-
-export async function saveLastJsonHandle(handle) {
-  await idbSet(KEY_JSON_HANDLE, handle);
-}
-export async function loadLastJsonHandle() {
-  return await idbGet(KEY_JSON_HANDLE);
-}
-export async function saveLastLogHandle(handle) {
-  await idbSet(KEY_LOG_HANDLE, handle);
-}
-export async function loadLastLogHandle() {
-  return await idbGet(KEY_LOG_HANDLE);
-}
-export async function saveLastLibraryHandle(handle) {
-  await idbSet(KEY_LIBRARY_HANDLE, handle);
-}
-export async function loadLastLibraryHandle() {
-  return await idbGet(KEY_LIBRARY_HANDLE);
-}
-/** 記憶されたmaps/ルートフォルダのハンドルを破棄する(自己修復リトライ用)。 */
-export async function clearLastIniHandle() {
-  await idbDelete(KEY_INI_HANDLE);
-}
-export async function clearLastJsonHandle() {
-  await idbDelete(KEY_JSON_HANDLE);
-}
-export async function clearLastLogHandle() {
-  await idbDelete(KEY_LOG_HANDLE);
-}
-export async function clearLastLibraryHandle() {
-  await idbDelete(KEY_LIBRARY_HANDLE);
 }

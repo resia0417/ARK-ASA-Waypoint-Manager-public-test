@@ -12,6 +12,8 @@
 //   "GameUserSettings" | "Storage" | "LocationLibrary" | "Log"
 // =============================================================
 
+import { clamp01 } from './util.js';
+
 let idCounter = 0;
 
 /** 未設定時のデフォルト色(不透明の白)。ARKの既定に近い中立色として採用している。 */
@@ -22,39 +24,27 @@ export function defaultColor() {
 /**
  * Waypointオブジェクトを生成する。
  * 不足フィールドはデフォルト値で補完される。
- * @param {object} data - { id?, rawText?, parsed?, source? } または
- *                          v0.1形式のフラットなデータも受け付ける(移行用)
+ * @param {object} data - { id?, rawText?, parsed? }
  * @returns {object} Waypoint
  */
 export function createWaypoint(data = {}) {
-  // v0.1形式(フラット構造)からの移行を許容する
-  const flatParsed = data.parsed ?? {
-    name: data.name,
-    map: data.map,
-    x: data.x,
-    y: data.y,
-    z: data.z,
-    customTag: data.customTag,
-    markIcon: data.markIcon,
-  };
+  const src = data.parsed ?? {};
 
   return {
     id: data.id ?? generateId(),
     rawText: data.rawText ?? '',
     parsed: {
-      name: flatParsed.name ?? '',
-      map: flatParsed.map ?? '',
-      x: toFiniteNumber(flatParsed.x),
-      y: toFiniteNumber(flatParsed.y),
-      z: toFiniteNumber(flatParsed.z),
-      customTag: flatParsed.customTag ?? '',
-      markIcon: flatParsed.markIcon ?? '',
-      category: flatParsed.category ?? '', // Location Library等で使用するカテゴリ
-      color: normalizeColor(flatParsed.color),
-      iconColor: normalizeColor(flatParsed.iconColor),
+      name: src.name ?? '',
+      map: src.map ?? '',
+      x: toFiniteNumber(src.x),
+      y: toFiniteNumber(src.y),
+      z: toFiniteNumber(src.z),
+      customTag: src.customTag ?? '',
+      markIcon: src.markIcon ?? '',
+      category: src.category ?? '', // Location Library等で使用するカテゴリ
+      color: normalizeColor(src.color),
+      iconColor: normalizeColor(src.iconColor),
     },
-    source: data.source ?? 'Storage',
-    libraryPath: data.libraryPath ?? null, // Location Library由来の場合、そのファイルパス
   };
 }
 
@@ -62,17 +52,11 @@ export function createWaypoint(data = {}) {
 function normalizeColor(c) {
   if (!c || typeof c !== 'object') return defaultColor();
   return {
-    r: toFiniteNumberInRange(c.r, 1),
-    g: toFiniteNumberInRange(c.g, 1),
-    b: toFiniteNumberInRange(c.b, 1),
-    a: toFiniteNumberInRange(c.a, 1),
+    r: clamp01(c.r),
+    g: clamp01(c.g),
+    b: clamp01(c.b),
+    a: clamp01(c.a),
   };
-}
-
-function toFiniteNumberInRange(v, fallback) {
-  const n = Number(v);
-  if (!Number.isFinite(n)) return fallback;
-  return Math.min(1, Math.max(0, n));
 }
 
 function toFiniteNumber(v) {

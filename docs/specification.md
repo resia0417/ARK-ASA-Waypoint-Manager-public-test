@@ -1,4 +1,17 @@
-# ARK ASA Waypoint Manager Web — 仕様書 (v0.10.0)
+# ARK ASA Waypoint Manager Web — 仕様書 (v0.10.1)
+
+## 0.34 v0.10.1での変更概要(Claudeレビュー v0.9.1 の残り指摘への対応)
+
+REVIEW_CLAUDE_v091.md の「2. 未使用コード」「3. コメントの問題」「4. 重複・集約できる処理」への対応。振る舞いの変更はない。
+
+- **Location Library の保存経路を削除**: 固定データ化(v0.8.1)以降は到達不能だった自動保存(autoSaveLibrary・AUTO_SAVE_HANDLERS・serializeLibrary・createEmptyLibrary)と、モーダルのCategory編集欄(formCategoryField・populateCategoryCandidates)を削除。EDITABLE_LISTS からも 'library' を外した。
+- **未使用コードの削除**: map_config.js の toJSON / setCachedMapConfig / MAP_CONFIG_FILENAME(loadMapConfig・KNOWN_MAP_FOLDERS は内部利用のみとし export を外した)、waypoint.js の source / libraryPath / v0.1形式移行分岐、waypoint_list.js の setExternalMapFilter / setMapColumnVisible / 列の order・visible 設定、map_viewer.js の CoordinateConverter 保持、settings_store.js の remove()、到達不能なフォールバック、未使用の export・HTML id / class・CSS ルール(.btn-danger 等6種と重複 @media の統合)。
+- **MarkIcon定義の簡素化**: displayName / svg フィールドは全件 id と同値だったため廃止し、id が表示名とSVGファイル名を兼ねる形にした。
+- **重複処理の集約**: file_manager.js のピッカー3種を共通関数へ、ハンドル保存12関数をキー別のストア生成へ集約し、IndexedDB の接続を操作ごとに閉じるよう変更。あわせて「Json」ハンドル系の名前を実態(My Storage)に合わせて改名した(IDBのキー文字列は互換のため不変)。createControllers はリストキーのループへ変更。列幅リサイズの再描画と、読込完了時の全リスト再描画は requestAnimationFrame でフレーム単位に一本化した。getLatLon の CoordinateConverter は config ごとにキャッシュする。
+- **コメント・ドキュメントの是正**: app.js / waypoint_list.js の冒頭説明を現行仕様へ書き直し、削除済み機能(Map Calibration)への言及、JSDoc の位置ずれ、README のバージョン表記(v0.8.8 のままだった)を修正。parseLibrary のエラー文は waypoints.json ではなく Location Library と表示する。
+- **意図的に残したもの**: ini_parser.js 内の2つの分割ロジックは、パーサの安定性を優先して統合していない。白の既定色リテラル3か所も、モジュール間の依存方向を崩さないため集約していない。MapConfig の mapName / displayName は config.json の保持フィールドとして残す。
+
+なお §1・§3.4・§4 には、削除済み機能(Map Calibration・[ARKASAWaypointManager]目印セクション等)の記述が当時の記録として残っている。現行仕様は §0 の変更概要と各モジュールの冒頭コメントが正である。
 
 ## 0.33 v0.10.0での変更概要(Claudeレビュー v0.9.1 のバグ指摘への対応)
 
@@ -264,6 +277,8 @@ Genesis Part 1 の Waypoint は全バイオーム共通で MapName="Genesis_WP" 
 その他の仕様・UI・動作(v0.3.5までに実装済みのすべての機能)は変更していない。
 
 ## 1. Map Calibration保存処理の修正
+
+(注: Map Calibration機能は v0.9.0 で廃止した。本節は当時の記録であり、現行の仕様ではない。)
 
 ### 1.1 不具合
 

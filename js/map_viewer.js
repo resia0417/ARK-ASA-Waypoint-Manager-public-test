@@ -18,9 +18,8 @@
 //   Lat 0 / Lon 0、右下隅が Lat 100 / Lon 100 に対応する前提で、
 //   マーカー位置は Lat/Lon のパーセント配置で決まる。
 // - 座標変換そのものは一切ここに書かない。UE座標⇔Lat/Lon は
-//   CoordinateConverter と、app.js から渡される getLatLon
-//   コールバック経由でのみ行う(要件「UIから直接座標計算を
-//   行わない」への対応)。
+//   app.js から渡される getLatLon コールバック経由でのみ行う
+//   (要件「UIから直接座標計算を行わない」への対応)。
 // - アイコン描画もここでは行わず、app.js の getIconMarkup
 //   (= waypoint_icon.js のラッパー)が返すHTMLをそのまま使う。
 // - 複数インスタンス対応: 要素は document 全体ではなく、生成時に
@@ -41,7 +40,6 @@
 //   該当マーカーをハイライトする(既存の拡張ポイントを利用)。
 // =============================================================
 
-import { CoordinateConverter } from './coordinate_converter.js';
 import {
   mapNameToFolder,
   getMapImageFilename,
@@ -128,7 +126,6 @@ export function createMapViewer(handlers, root) {
     const config = await resolveMapConfig(mapName);
     if (seq !== state.loadSeq) return;
     state.config = config;
-    state.converter = new CoordinateConverter(config);
 
     const folder = mapNameToFolder(mapName);
     const url = `maps/${folder}/${getMapImageFilename(folder)}`;
@@ -157,7 +154,7 @@ export function createMapViewer(handlers, root) {
 
   function updateNotice() {
     if (state.config && !state.config.isCalibrated) {
-      setNotice('このマップは未キャリブレーションです(config.json が見つからないため、座標変換は初期値のままです)。');
+      setNotice('このマップの座標設定(config.json)が見つからないため、Lat/Lonを表示できません。');
     } else {
       setNotice('');
     }
@@ -351,7 +348,7 @@ export function createMapViewer(handlers, root) {
     els.viewport.addEventListener('pointerup', (e) => {
       const wasDrag = drag && drag.moved;
       drag = null;
-      if (wasDrag || !state.imgW || !state.converter) return;
+      if (wasDrag || !state.imgW || !state.config) return;
       const { lat, lon } = screenToLatLon(e.clientX, e.clientY);
       if (lat < 0 || lat > 100 || lon < 0 || lon > 100) {
         state.clickPoint = null;
@@ -438,5 +435,5 @@ export function createMapViewer(handlers, root) {
   }
   bindViewportEvents();
 
-  return { refresh, loadMap, refreshMarkers, getView, setView, getClickPoint: () => state.clickPoint };
+  return { refresh, getView, setView, getClickPoint: () => state.clickPoint };
 }

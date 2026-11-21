@@ -9,6 +9,10 @@
 // UI(app.js)はこのモジュールが提供するAPIを呼ぶだけで、
 // MapConfigの構造やファイルパスの組み立てルールを意識しない。
 //
+// なお Genesis1 / Genesis1Ocean の config.json は、longitudeOrigin が
+// latitudeOrigin より 1 小さい値になっている。これは実測で得た
+// キャリブレーション値そのままで、意図的なものである。
+//
 // ファイル配置について:
 // 本リポジトリはビルドツールを持たない素のGitHub Pages配信を
 // 前提としているため、要件にある "public/maps/<Map>/..." という構成は、
@@ -34,7 +38,6 @@
 export function getMapImageFilename(folder) {
   return `${folder}_map.webp`;
 }
-export const MAP_CONFIG_FILENAME = 'config.json';
 
 /**
  * ARKの内部マップ名(SavedMinimapMarksのMapName)から、
@@ -43,7 +46,7 @@ export const MAP_CONFIG_FILENAME = 'config.json';
  * 一致しないMapName(MODマップ等)は、末尾の "_WP" を除去した文字列を
  * そのままフォルダ名として扱うフォールバックを用いる。
  */
-export const KNOWN_MAP_FOLDERS = {
+const KNOWN_MAP_FOLDERS = {
   TheIsland_WP: 'TheIsland',
   ScorchedEarth_WP: 'ScorchedEarth',
   Aberration_WP: 'Aberration',
@@ -53,7 +56,7 @@ export const KNOWN_MAP_FOLDERS = {
   Genesis1_WP: 'Genesis1',
   Genesis1Ocean_WP: 'Genesis1Ocean',
   // Genesis_WP はZ座標で陸・海が分かれる(下記の resolveEffectiveMapName 参照)。
-  // MapNameだけで解決しなければならない場面(キャリブレーション等)では
+  // MapNameだけで解決しなければならない場面では
   // 陸側(Genesis1)へフォールバックする。
   Genesis_WP: 'Genesis1',
   TheCenter_WP: 'TheCenter',
@@ -127,7 +130,7 @@ export function mapNameToFolder(mapName) {
   return name.endsWith('_WP') ? name.slice(0, -3) : name;
 }
 
-/** config.jsonのうち、現バージョンで実際に使用するフィールドのデフォルト値(未キャリブレーション状態) */
+/** config.jsonのうち、現バージョンで実際に使用するフィールドのデフォルト値(config未読込時の値) */
 const DEFAULT_NUMERIC_FIELDS = {
   latitudeScale: 1,
   longitudeScale: 1,
@@ -146,15 +149,15 @@ export class MapConfig {
     this.longitudeScale = numOr(data.longitudeScale, DEFAULT_NUMERIC_FIELDS.longitudeScale);
     this.latitudeOrigin = numOr(data.latitudeOrigin, DEFAULT_NUMERIC_FIELDS.latitudeOrigin);
     this.longitudeOrigin = numOr(data.longitudeOrigin, DEFAULT_NUMERIC_FIELDS.longitudeOrigin);
-    // 以下は現バージョンでは未使用。将来のMap Viewerのために保持するのみ。
+    // 以下はMap Viewerの初期ズーム・ズーム範囲に使う
     this.defaultZoom = numOr(data.defaultZoom, 1);
     this.minZoom = numOr(data.minZoom, 0.5);
     this.maxZoom = numOr(data.maxZoom, 4);
-    // このMapConfigがキャリブレーション済みかどうか(デフォルト値のままかどうか)
+    // config.jsonから読み込めたかどうか(デフォルト値のままなら false)
     this.isCalibrated = Boolean(data.isCalibrated);
   }
 
-  /** 未キャリブレーション状態(恒等変換)のMapConfigを生成する */
+  /** config.json未読込時のデフォルトMapConfigを生成する */
   static default(mapName) {
     return new MapConfig({ mapName, displayName: mapName, isCalibrated: false });
   }
@@ -164,31 +167,6 @@ export class MapConfig {
     return new MapConfig({ ...json, isCalibrated: true });
   }
 
-  /**
-   * config.json形式のプレーンオブジェクトへ変換する。
-   * 要件のフォーマット(mapName/displayName/4つの座標値/
-   * defaultZoom/minZoom/maxZoom)を厳密に守る。
-   * image/imageWidth/imageHeightはv0.3.3で廃止した
-   * (Map Viewerは<フォルダ名>_map.webpを読み込み、画像サイズは
-   * 地図画像ファイル自体から取得する設計としたため)。
-   */
-  toJSON() {
-    return {
-      // Genesis は陸/海どちらの config.json でも mapName を Genesis_WP に
-      // 統一する(保存されるWaypointのMapNameは常に Genesis_WP のため。v0.6.9)
-      mapName: (this.mapName === GENESIS_LAND_MAP_NAME || this.mapName === GENESIS_OCEAN_MAP_NAME)
-        ? GENESIS_MAP_NAME
-        : this.mapName,
-      displayName: this.displayName,
-      latitudeScale: this.latitudeScale,
-      longitudeScale: this.longitudeScale,
-      latitudeOrigin: this.latitudeOrigin,
-      longitudeOrigin: this.longitudeOrigin,
-      defaultZoom: this.defaultZoom,
-      minZoom: this.minZoom,
-      maxZoom: this.maxZoom,
-    };
-  }
 }
 
 // mapName -> MapConfig のキャッシュ(同じマップを何度もfetchしないため)
@@ -196,16 +174,6 @@ const configCache = new Map();
 // mapName -> Promise<MapConfig> (読み込み中の重複fetch防止)
 const pendingLoads = new Map();
 
-/**
- * MapConfigキャッシュへ直接値を設定する。
- * Map Calibrationで新しいMapConfigを算出・保存した直後に、再fetchすることなく
- * 一覧のLat/Lon表示へ即座に反映させるために使用する。
- * @param {string} mapName
- * @param {MapConfig} config
- */
-export function setCachedMapConfig(mapName, config) {
-  configCache.set(mapName, config);
-}
 
 /**
  * 指定したマップ名のMapConfigを非同期で確実に取得する。
@@ -285,7 +253,7 @@ export function getCachedMapConfig(mapName, onLoaded) {
  * @param {string} mapName
  * @returns {Promise<MapConfig>}
  */
-export async function loadMapConfig(mapName) {
+async function loadMapConfig(mapName) {
   const folder = mapNameToFolder(mapName);
   const url = `maps/${folder}/config.json`;
   const res = await fetch(url);

@@ -9,23 +9,19 @@
 //
 // 管理ロジック(add/remove/find等のデータ操作)と表示ロジック(render)を
 // 1クラスにまとめてはいるが、外部(app.js)からは常にメソッド経由で
-// 操作する設計とし、Waypoint配列を直接いじらせないことで、
-// 将来Map Viewerなど他の画面を追加する際も、このクラスのAPIだけを
-// 経由すれば安全にWaypoint一覧を扱えるようにしている。
+// 操作する設計とし、Waypoint配列を直接いじらせない。
+// Map Viewerも、このクラスのAPI(getVisibleItems等)経由で
+// 表示中の一覧を取得している。
 //
-// 列設定(表示列・列順・列幅)・検索文字・ソート状態は SettingsStore
-// (settings_store.js)を通じて永続化される。このクラス自身は
+// 列幅・検索文字・ソート状態は SettingsStore(settings_store.js)を
+// 通じて永続化される(列の表示/順序は固定)。このクラス自身は
 // localStorageを直接参照しない。
 // =============================================================
 
-// Icon / Name / Map は常に固定表示・固定位置(Iconが最左列、次にName、
-// Mapは外部からの表示切替のみ)とし、ユーザーが表示/非表示・順序を
-// 変更できるのは Lat / Lon / CustomTag の3列のみ。
-// これは「列幅変更・列順変更・表示列変更」という要件を、
-// 実装コストを抑えつつ満たすための設計上の割り切りである
-// (Name/Mapを非表示にできてしまうと行の内容が分からなくなるため。
-//  Iconは「ICON列を最左列としてください」という要件のため、
-//  ユーザーが順序を動かせない固定列として扱う)。
+// 列構成(Icon / Name / Map / Lat / Lon / CustomTag)と並びは固定で、
+// ユーザーが変更できるのは列幅(ドラッグリサイズ)だけ
+// (v0.6.3で列の表示/順序を変える設定UIは廃止した)。
+// Map列は、特定マップ選択中は冗長なため自動で隠れる。
 //
 // Lat/Lonの値そのものはこのクラスでは計算しない。「UIから直接座標計算を
 // 行わないでください」という要件のため、値の算出は app.js が注入する
@@ -34,7 +30,7 @@
 // Icon列も同様に、実際の描画は app.js が注入する getIconMarkup(wp)
 // コールバック(内部でwaypoint_icon.jsのWaypointIconを利用する)に委譲する
 // (要件12「アイコン描画処理はWaypointIconへ集約してください」への対応)。
-import { escapeHtml as esc, formatNum } from './util.js';
+import { escapeHtml as esc, formatNum, roundTo } from './util.js';
 
 const CONFIGURABLE_COLUMNS = [
   { key: 'lat', label: 'Lat', numeric: true },
@@ -76,7 +72,7 @@ export class WaypointListController {
     this.settingsStore = settingsStore;
     this.onSelect = onSelect || (() => {});
     // Lat/Lonの値を算出する外部コールバック。(wp) => {lat:number, lon:number} | null を返す。
-    // nullは「未キャリブレーション等でまだ算出できない」ことを示し、'…'として表示する。
+    // nullは「config未読込などで算出できない」ことを示し、'…'として表示する。
     this.getLatLon = getLatLon || (() => null);
     // MarkIconのアイコン表示(HTML文字列)を算出する外部コールバック。
     // (wp) => string を返す(waypoint_icon.jsのrenderWaypointIconHtmlを利用する)。
@@ -103,8 +99,6 @@ export class WaypointListController {
     // 保存済みの設定からは列幅だけを引き継ぐ(過去に列を隠した設定が残っていても全列表示に戻る)。
     const storedColumns = this.settingsStore.get(this._settingsKey('columns'), null);
     this.columnConfig = {
-      order: ['lat', 'lon', 'customTag'],
-      visible: { lat: true, lon: true, customTag: true },
       widths: (storedColumns && storedColumns.widths) || {},
     };
     // Icon列は固定列のため表示列設定(order/visible)には含めないが、
@@ -143,9 +137,6 @@ export class WaypointListController {
   // --- データ操作(管理ロジック) -------------------------------------
 
   getAll() { return this.items; }
-
-  /** 検索・Category・Current Mapフィルター適用後の表示中アイテム(v0.8.4: マップのマーカー連動用) */
-  getVisibleItems() { return this._visibleItems(); }
 
   setAll(items) {
     this.items = items;
@@ -206,21 +197,6 @@ export class WaypointListController {
     }
   }
 
-  /** Current Map(グローバルフィルター)が変化した際に app.js から呼ばれる */
-  setExternalMapFilter(mapValue) {
-    const v = mapValue || '__all__';
-    if (this.externalMapFilter === v) return; // 無変化なら描画しない(v0.8.6 軽量化④)
-    this.externalMapFilter = v;
-    this.render();
-  }
-
-  /** Map列の表示/非表示(Current Mapが「All Maps」かどうか)を切り替える */
-  setMapColumnVisible(visible) {
-    if (this.mapColumnVisible === visible) return; // 無変化なら描画しない(v0.8.6 軽量化④)
-    this.mapColumnVisible = visible;
-    this.render();
-  }
-
   /** フィルターとMap列表示をまとめて設定し、描画は最大1回にする(v0.8.6 軽量化④) */
   setMapFilter(mapValue, columnVisible) {
     const v = mapValue || '__all__';
@@ -252,7 +228,7 @@ export class WaypointListController {
     this.onSelect(this.getSelected(), this.listKey);
   }
 
-  bindDragEvents(onDragStart) {
+  bindDragEvents() {
     this.tbody.addEventListener('dragstart', (e) => {
       if (e.target.closest('[data-row-action]')) { e.preventDefault(); return; } // アイコン操作をドラッグにしない
       const tr = e.target.closest('tr');
@@ -260,7 +236,6 @@ export class WaypointListController {
       tr.classList.add('dragging');
       e.dataTransfer.effectAllowed = 'move';
       e.dataTransfer.setData('text/plain', JSON.stringify({ listKey: this.listKey, id: tr.dataset.id }));
-      onDragStart?.(tr.dataset.id);
     });
     this.tbody.addEventListener('dragend', (e) => {
       const tr = e.target.closest('tr');
@@ -270,7 +245,8 @@ export class WaypointListController {
 
   // --- 検索・ソート・フィルターを適用した表示用リストを取得 -------------------
 
-  _visibleItems() {
+  /** 検索・Category・Current Mapフィルター適用後の表示中アイテム */
+  getVisibleItems() {
     let list = this.items;
 
     if (this.externalMapFilter && this.externalMapFilter !== '__all__') {
@@ -326,7 +302,7 @@ export class WaypointListController {
     if (footCell) footCell.colSpan = this._activeColumns().length + (this.rowActions ? 1 : 0);
     this._renderCategoryFilterOptions();
 
-    const visible = this._visibleItems();
+    const visible = this.getVisibleItems();
     this.onVisibleChange();
     // Current Map等のフィルターが効いている間は「現在表示中の件数」を、
     // 何もフィルターされていない状態(=全件表示)では自然に全件数と
@@ -386,40 +362,36 @@ export class WaypointListController {
   }
 
   _activeColumns() {
+    // 列の並び・表示は固定(v0.6.3で設定UIを廃止)。可変なのは列幅のみ
     const cols = [
-      { key: 'icon', label: 'Icon', numeric: false, fixed: true },
-      { key: 'name', label: 'Name', numeric: false, fixed: true },
+      { key: 'icon', label: 'Icon', numeric: false },
+      { key: 'name', label: 'Name', numeric: false },
     ];
-    if (this.mapColumnVisible) cols.push({ key: 'map', label: 'Map', numeric: false, fixed: true });
-
-    for (const key of this.columnConfig.order) {
-      if (this.columnConfig.visible[key] === false) continue;
-      const def = CONFIGURABLE_COLUMNS.find((c) => c.key === key);
-      if (def) cols.push(def);
-    }
+    if (this.mapColumnVisible) cols.push({ key: 'map', label: 'Map', numeric: false });
+    for (const def of CONFIGURABLE_COLUMNS) cols.push(def);
     return cols;
+  }
+
+  /** 列幅の style 属性文字列(未設定なら空)。 */
+  _widthStyle(key) {
+    const width = this.columnConfig.widths[key];
+    return width ? ` style="width:${width}px;max-width:${width}px;"` : '';
   }
 
   _renderCell(col, wp) {
     if (col.key === 'icon') {
-      const width = this.columnConfig.widths[col.key];
-      const style = width ? ` style="width:${width}px;max-width:${width}px;"` : '';
-      return `<td class="icon-cell"${style}>${this.getIconMarkup(wp)}</td>`;
+      return `<td class="icon-cell"${this._widthStyle(col.key)}>${this.getIconMarkup(wp)}</td>`;
     }
 
-    let value;
+    let value = '';
     if (col.key === 'name') value = wp.parsed.name;
     else if (col.key === 'map') value = wp.parsed.map;
     else if (col.key === 'customTag') value = wp.parsed.customTag;
     else if (col.key === 'lat' || col.key === 'lon') {
       const latLon = this.getLatLon(wp);
-      value = latLon && Number.isFinite(latLon[col.key]) ? formatNum(round2(latLon[col.key])) : '…';
-    } else {
-      value = '';
+      value = latLon && Number.isFinite(latLon[col.key]) ? formatNum(roundTo(latLon[col.key], 2)) : '…';
     }
-    const width = this.columnConfig.widths[col.key];
-    const style = width ? ` style="width:${width}px;max-width:${width}px;"` : '';
-    return `<td class="${col.numeric ? 'num' : ''}"${style}>${esc(value)}</td>`;
+    return `<td class="${col.numeric ? 'num' : ''}"${this._widthStyle(col.key)}>${esc(value)}</td>`;
   }
 
   /** 行内アクション(編集=ペン / 削除=ゴミ箱)のセル。ARK本編のWaypoint一覧と同じ並び */
@@ -432,8 +404,7 @@ export class WaypointListController {
   _renderHeader() {
     const columns = this._activeColumns();
     this.theadRow.innerHTML = columns.map((col) => {
-      const width = this.columnConfig.widths[col.key];
-      const style = width ? ` style="width:${width}px;max-width:${width}px;"` : '';
+      const style = this._widthStyle(col.key);
       const sortable = col.key !== 'icon';
       const sortIndicator = sortable && this.sortState.field === col.key ? (this.sortState.dir === 'asc' ? ' ▲' : ' ▼') : '';
       return `<th class="${col.numeric ? 'num' : ''} ${sortable ? 'sortable' : ''}" data-col="${col.key}"${style}>${esc(col.label)}${sortIndicator}<span class="col-resizer" data-col="${col.key}"></span></th>`;
@@ -470,22 +441,22 @@ export class WaypointListController {
     const startX = e.clientX;
     const startWidth = th.getBoundingClientRect().width;
 
+    let resizeFrame = 0;
     const onMove = (moveEvent) => {
       const newWidth = Math.max(40, Math.round(startWidth + (moveEvent.clientX - startX)));
       this.columnConfig.widths[colKey] = newWidth;
-      this.render();
+      if (resizeFrame) return; // 再描画はフレーム単位に間引く
+      resizeFrame = requestAnimationFrame(() => { resizeFrame = 0; this.render(); });
     };
     const onUp = () => {
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseup', onUp);
+      if (resizeFrame) { cancelAnimationFrame(resizeFrame); resizeFrame = 0; }
+      this.render();
       this.settingsStore.set(this._settingsKey('columns'), { widths: this.columnConfig.widths });
     };
     document.addEventListener('mousemove', onMove);
     document.addEventListener('mouseup', onUp);
   }
 
-}
-
-function round2(n) {
-  return Math.round(n * 100) / 100;
 }

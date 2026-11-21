@@ -18,6 +18,11 @@ export function formatNum(n) {
 }
 
 /** 色チャンネル値を 0〜1 へ丸める(数値でなければ 1)。 */
+export function roundTo(n, digits) {
+  const p = 10 ** digits;
+  return Math.round(n * p) / p;
+}
+
 export function clamp01(n) {
   const v = Number(n);
   if (!Number.isFinite(v)) return 1;

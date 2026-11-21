@@ -3,23 +3,16 @@
 // GameUserSettings.ini を解析し、SavedMinimapMarks を
 // Waypoint 用データへ変換するモジュール。
 //
-// v0.2での修正点:
-// - XYZが常に0になる不具合を修正。
-//   原因: 座標は "Location=(X=...,Y=...,Z=...)" というキー名で
-//   格納されているが、v0.1では候補キーに "Location" が
-//   含まれていなかったため取得に失敗していた。
-// - 「X=」「Y=」「Z=」を単純な文字列検索で取得することは禁止。
-//   必ず "Location=(...)" のブロックを抽出してから、その内部を
-//   再帰的にパースする方式のみを用いる(parseParenObjectが担う)。
-// - 出力形式を { rawText, parsed } のネスト構造に変更し、
-//   RawTextを正としたデータ保持方針に統一した。
+// パース上の規則:
+// - 座標は "Location=(X=...,Y=...,Z=...)" のブロックを抽出してから、
+//   その内部を再帰的にパースする(parseParenObjectが担う)。
+//   「X=」「Y=」等を単純な文字列検索で取得することはしない
+//   (他のフィールドの値と誤認するため)。
+// - データ保持は { rawText, parsed } のネスト構造とし、RawTextを正とする
+//   (編集時は buildRawText が既知フィールドだけを置換し、
+//    未知フィールドはそのまま保持する)。
 // =============================================================
 
-/**
- * INIテキスト全体から SavedMinimapMarks 行を抽出する。
- * @param {string} iniText - GameUserSettings.ini の内容
- * @returns {Array<{rawText: string, parsed: object}>} 生の解析結果(キー名はゲーム内表記のまま)
- */
 /**
  * "SavedMinimapMarks=" で始まらないのに MinimapMarks= を含む行
  * (先頭のSが欠けた壊れた行など)の件数を返す。一覧には出ないが
@@ -36,6 +29,11 @@ export function countUnrecognizedMarkLines(iniText) {
   return count;
 }
 
+/**
+ * INIテキスト全体から SavedMinimapMarks 行を抽出する。
+ * @param {string} iniText - GameUserSettings.ini の内容
+ * @returns {Array<{rawText: string, parsed: object}>} 生の解析結果(キー名はゲーム内表記のまま)
+ */
 export function parseSavedMinimapMarks(iniText) {
   const lines = iniText.split(/\r?\n/);
   const results = [];

@@ -1,25 +1,25 @@
 // =============================================================
-// app.js (v0.3.4)
+// app.js
 // アプリケーションのエントリーポイント。
 // GameUserSettings.ini と、Libraryパネル(My Storage / Location Library /
 // Waypoint Log のタブ切替)という2カラム構成を、共通の
 // WaypointListController(waypoint_list.js)を4つ生成して構築する。
+// 上部には2枚の地図(Map Viewer)を並べ、一覧の絞り込みと連動させる。
 //
-// 現在の設計(v0.3.4時点):
-// - レイアウトは「GameUserSettings.ini | Library(タブ)」の2カラム
-// - Mapフィルターは画面全体で1つ(Current Map)。選択すると全リストへ
-//   同時反映される。「All Maps」以外を選ぶとMap列を隠す
-// - My Storage / Location Library はいずれも単一JSONファイルを読み書きする
-//   編集可能なリスト(Add/Edit/Delete/Save)。Waypoint Logのみ読み取り専用
-//   (GameUserSettings.iniと同じParserを再利用する読込専用インポート元)
-// - 検索・列ソート・列の表示/順序/幅・左右カラム幅(Splitter)を
-//   SettingsStore経由で永続化
-// - ドラッグ&ドロップは4リストすべてが対象。GameUserSettings.ini /
-//   My Storage / Location Libraryは対等な編集可能リストのため「真の移動」、
-//   Waypoint Logは読み取り専用の参照元のため、そこからのドラッグは
-//   「コピー」(元のリストは変化しない)とし、そこへのドロップは
-//   競合確認なしの「追加のみ」として扱う(Edit/Save機能が無いため、
-//   上書きという概念が成立しない)。
+// 現在の設計:
+// - レイアウトは「GameUserSettings.ini | Library(タブ)」の2カラム + 地図2枚
+// - Mapフィルターは画面全体で1つ(左の地図の選択が唯一の正)。全リストへ
+//   同時反映され、特定マップ選択中はMap列を隠す。地図を隠している間は全表示
+// - 保存方式はリストごとに異なる: GameUserSettings.ini と My Storage は
+//   手動Saveボタン式。Location Library は固定データ(同梱データまたは
+//   読み込んだファイルを表示するだけで、編集・保存はしない)。
+//   Waypoint Log は読み取り専用のインポート元
+// - 検索・ソート・列幅・カラム幅(Splitter)・選択中マップ/タブを
+//   SettingsStore経由で永続化する(列の表示/順序は固定)
+// - ドラッグ&ドロップは4リスト間で行う。GameUserSettings.ini /
+//   My Storage からは「真の移動」、Location Library / Waypoint Log
+//   からは「コピー」(移動元は変化しない)。Location Library への
+//   ドロップは不可(固定データのため)
 // - Waypoint一覧のMarkIcon列・Add/EditのMarkIcon選択・Waypoint Previewは
 //   すべて waypoint_icon.js の共通WaypointIcon描画関数のみを経由する
 //   (アイコン描画処理をこのモジュールへ集約している)。
@@ -42,24 +42,22 @@ import {
   defaultColor,
 } from './waypoint.js';
 import { serializeStorage, parseStorage, STORAGE_FILE_NAME } from './storage.js';
-import { createEmptyLibrary, serializeLibrary, parseLibrary } from './location_library.js';
+import { parseLibrary } from './location_library.js';
 import * as fm from './file_manager.js';
 import { WaypointListController } from './waypoint_list.js';
 import { settingsStore } from './settings_store.js';
 import { CoordinateConverter } from './coordinate_converter.js';
-import { getCachedMapConfig, resolveMapConfig, KNOWN_MAP_FOLDERS, GENESIS_MAP_NAME, GENESIS_LAND_MAP_NAME, GENESIS_OCEAN_MAP_NAME, GENESIS_OCEAN_Z_THRESHOLD, GENESIS_OCEAN_DEFAULT_Z, GENESIS_LAND_DEFAULT_Z, resolveEffectiveMapName } from './map_config.js';
+import { getCachedMapConfig, resolveMapConfig, GENESIS_MAP_NAME, GENESIS_LAND_MAP_NAME, GENESIS_OCEAN_MAP_NAME, GENESIS_OCEAN_Z_THRESHOLD, GENESIS_OCEAN_DEFAULT_Z, GENESIS_LAND_DEFAULT_Z, resolveEffectiveMapName } from './map_config.js';
 import { createMapViewer } from './map_viewer.js';
-import { MARK_ICON_DEFINITIONS, findMarkIconById, findMarkIconByRawText, DEFAULT_MARK_ICON_ID, renderWaypointIconHtml, mountWaypointIcon } from './waypoint_icon.js';
-import { escapeHtml, formatNum, clamp01 } from './util.js';
+import { renderWaypointIconHtml, mountWaypointIcon } from './waypoint_icon.js';
+import { MARK_ICON_DEFINITIONS, findMarkIconById, findMarkIconByRawText, DEFAULT_MARK_ICON_ID } from './mark_icon.js';
+import { escapeHtml, formatNum, clamp01, roundTo } from './util.js';
 
 const LIST_KEYS = ['ini', 'storage', 'library', 'log'];
 const LABELS = { ini: 'GameUserSettings.ini', storage: 'My Storage', library: 'Location Library', log: 'Waypoint Log' };
-const SOURCE_FIELD = { ini: 'GameUserSettings', storage: 'Storage', library: 'LocationLibrary', log: 'Log' };
-// 対等な「編集可能リスト」。この3つの間だけ、衝突確認付きの真の移動を行う。
-// v0.3.4よりLocation Libraryも単一waypoints.json形式の編集可能リストになったため追加した。
-const EDITABLE_LISTS = new Set(['ini', 'storage', 'library']);
-// 変更のたびに自動保存するリスト(要件「終了時自動保存」への実務的対応。v0.2.1以来の方針)
-const AUTO_SAVE_HANDLERS = {}; // listKey -> () => Promise<void> (init()の末尾で設定する)
+// 編集可能なリスト。この2つの間では、衝突確認付きの真の移動を行う
+// (Location Library は固定データ、Waypoint Log は読み取り専用)。
+const EDITABLE_LISTS = new Set(['ini', 'storage']);
 
 // --- アプリケーション状態 ---------------------------------------
 const controllers = {};
@@ -106,7 +104,7 @@ function cacheElements() {
     'detailBar', 'detailPlaceholder', 'detailContent',
     'detailName', 'detailMap', 'detailX', 'detailY', 'detailZ', 'detailTag', 'detailIcon', 'detailRawText', 'copyRawTextBtn',
     // Add/Editモーダル
-    'editModal', 'modalTitle', 'formName', 'formCategoryField', 'formCategory', 'categoryCandidates',
+    'editModal', 'modalTitle', 'formName',
     'formMap', 'mapCandidates', 'formLat', 'formLon', 'formZ', 'formTag',
     'colorEditor', 'iconColorEditor', 'markIconPickerBtn',
     'waypointPreview', 'waypointPreviewName',
@@ -139,7 +137,6 @@ function init() {
   restoreLayoutSettings();
   refreshMapViewers();
 
-  AUTO_SAVE_HANDLERS.library = autoSaveLibrary;
 
   if (!fm.isFileSystemAccessSupported()) {
     setStatus('このブラウザはFile System Access APIに未対応です。Chrome/Edgeでの利用を推奨します。');
@@ -159,29 +156,23 @@ function createControllers() {
     onEditRequest: (wp) => openAddEditModal(key, wp.id),
     onDeleteRequest: (wp) => onDeleteWaypoint(key, wp),
   });
-  controllers.ini = new WaypointListController({
-    listKey: 'ini', theadRow: els.iniTheadRow, tbody: els.iniTableBody,
-    emptyStateEl: els.iniEmptyState, countEl: els.iniCount, searchInputEl: els.iniSearchInput,
-    settingsStore, onSelect: handleSelect, getLatLon, getIconMarkup, getMapKey, onVisibleChange: () => refreshMapViewers(),
-    ...rowActionHandlers('ini'),
-  });
-  controllers.storage = new WaypointListController({
-    listKey: 'storage', theadRow: els.storageTheadRow, tbody: els.storageTableBody,
-    emptyStateEl: els.storageEmptyState, countEl: els.storageCount, searchInputEl: els.storageSearchInput,
-    settingsStore, onSelect: handleSelect, getLatLon, getIconMarkup, getMapKey, onVisibleChange: () => refreshMapViewers(),
-    ...rowActionHandlers('storage'),
-  });
-  controllers.library = new WaypointListController({
-    listKey: 'library', theadRow: els.libraryTheadRow, tbody: els.libraryTableBody,
-    emptyStateEl: els.libraryEmptyState, countEl: els.libraryCount, searchInputEl: els.librarySearchInput,
-    categoryFilterEl: els.libraryCategoryFilter, settingsStore, onSelect: handleSelect, getLatLon, getIconMarkup, getMapKey, onVisibleChange: () => refreshMapViewers(),
-    // Location Libraryは固定データのため、編集/削除ボタンは付けない(v0.8.1)
-  });
-  controllers.log = new WaypointListController({
-    listKey: 'log', theadRow: els.logTheadRow, tbody: els.logTableBody,
-    emptyStateEl: els.logEmptyState, countEl: els.logCount, searchInputEl: els.logSearchInput,
-    settingsStore, onSelect: handleSelect, getLatLon, getIconMarkup, getMapKey, onVisibleChange: () => refreshMapViewers(),
-  });
+  // 要素IDは `${listKey}TheadRow` 等の規則で揃っているため、ループで構築する。
+  // リストごとの差分は、LibraryのCategoryフィルターと、
+  // 編集可能なリスト(INI / My Storage)の行内アクションだけ。
+  for (const key of LIST_KEYS) {
+    controllers[key] = new WaypointListController({
+      listKey: key,
+      theadRow: els[`${key}TheadRow`],
+      tbody: els[`${key}TableBody`],
+      emptyStateEl: els[`${key}EmptyState`],
+      countEl: els[`${key}Count`],
+      searchInputEl: els[`${key}SearchInput`],
+      settingsStore, onSelect: handleSelect, getLatLon, getIconMarkup, getMapKey,
+      onVisibleChange: () => refreshMapViewers(),
+      ...(key === 'library' ? { categoryFilterEl: els.libraryCategoryFilter } : {}),
+      ...(key === 'ini' || key === 'storage' ? rowActionHandlers(key) : {}),
+    });
+  }
 }
 
 /**
@@ -197,8 +188,14 @@ function createControllers() {
 // 読込完了コールバックは参照を固定した関数を使う。行ごとに新しいクロージャを
 // 登録すると、読込完了時に登録数ぶんの全リスト再描画が雪崩のように発生する
 // (Set で重複排除される側と対で効く)
+let renderAllScheduled = false;
 function renderAllLists() {
-  for (const key of LIST_KEYS) controllers[key].render();
+  if (renderAllScheduled) return;
+  renderAllScheduled = true;
+  requestAnimationFrame(() => {
+    renderAllScheduled = false;
+    for (const key of LIST_KEYS) controllers[key].render();
+  });
 }
 
 function onIconAssetsLoaded() {
@@ -216,8 +213,23 @@ function getLatLon(wp) {
   // 恒等変換のまま UE 生値を Lat/Lon として表示してしまわないため
   // (waypoint_list.js 側の契約: null は「算出できない」として '…' 表示)
   if (!config.isCalibrated) return null;
-  return new CoordinateConverter(config).ueToGame(wp.parsed.x, wp.parsed.y);
+  return converterFor(config).ueToGame(wp.parsed.x, wp.parsed.y);
 }
+
+// CoordinateConverterはconfigごとに使い回す(行ごとの生成を避ける)
+const converterCache = new WeakMap();
+function converterFor(config) {
+  let converter = converterCache.get(config);
+  if (!converter) {
+    converter = new CoordinateConverter(config);
+    converterCache.set(config, converter);
+  }
+  return converter;
+}
+
+// アイコンHTMLのメモ化(v0.8.6 軽量化③)。組み合わせは「アイコン種×Color×
+// IconColor」で決まり、件数が多くても実質数十通りしかない。
+const iconMarkupCache = new Map();
 
 /**
  * WaypointのMarkIcon表示(HTML文字列)を算出する、一覧描画用のコールバック。
@@ -227,9 +239,6 @@ function getLatLon(wp) {
  * @param {object} wp - Waypointモデル
  * @returns {string} HTML文字列
  */
-// アイコンHTMLのメモ化(v0.8.6 軽量化③)。組み合わせは「アイコン種×Color×
-// IconColor」で決まり、件数が多くても実質数十通りしかない。
-const iconMarkupCache = new Map();
 function getIconMarkup(wp) {
   const def = findMarkIconByRawText(wp.parsed.markIcon) ?? findMarkIconById(DEFAULT_MARK_ICON_ID);
   const c = wp.parsed.color;
@@ -268,8 +277,8 @@ function handleSelect(waypoint, listKey) {
 }
 
 /**
- * 将来のMap Viewer拡張ポイント。地図描画は一切行わず、選択状態が
- * 変化するたびに `waypoint:selected` イベントを window へ発火するのみ。
+ * 選択状態の変化を Map Viewer へ通知する。map_viewer.js が
+ * `waypoint:selected` イベントを購読し、選択マーカーの表示を同期する。
  */
 function notifyMapViewer(waypoint) {
   window.dispatchEvent(new CustomEvent('waypoint:selected', { detail: waypoint }));
@@ -298,20 +307,21 @@ function initMapViewers() {
     controllers[key].getVisibleItems().map((waypoint) => ({ waypoint, listKey: key })));
 
   // 右の地図の表示元はLibraryのアクティブタブに追随する(v0.6.0)
-  const libSourceKeys = () => activeLibraryTab === 'storage' ? ['storage']
-    : activeLibraryTab === 'library' ? ['library']
-    : activeLibraryTab === 'log' ? ['log'] : ['storage', 'library'];
+  const libSourceKeys = () => (activeLibraryTab === 'library' || activeLibraryTab === 'log')
+    ? [activeLibraryTab]
+    : ['storage'];
 
+  const onViewerMapChange = (name) => { viewerMapName = name; applyCurrentMapFilter(true); };
   mapViewerIni = createMapViewer({
     ...shared,
     getWaypoints: collect(['ini']),
-    onMapChange: (name) => { viewerMapName = name; applyCurrentMapFilter(true); },
+    onMapChange: onViewerMapChange,
     onViewChange: (view) => mapViewerLib?.setView(view),
   }, els.mapPaneIni);
   mapViewerLib = createMapViewer({
     ...shared,
     getWaypoints: () => collect(libSourceKeys())(),
-    onMapChange: (name) => { viewerMapName = name; applyCurrentMapFilter(true); },
+    onMapChange: onViewerMapChange,
     onViewChange: (view) => mapViewerIni?.setView(view),
   }, els.mapPaneLib);
 }
@@ -319,9 +329,8 @@ function initMapViewers() {
 /** 両方の地図ビューアを最新データで再描画する(右ペインのラベルもタブに合わせて更新) */
 function refreshMapViewers() {
   if (els.libMapChip) {
-    els.libMapChip.textContent = activeLibraryTab === 'storage' ? 'Storage'
-      : activeLibraryTab === 'library' ? 'Library'
-      : activeLibraryTab === 'log' ? 'Log' : 'Storage ・ Library';
+    els.libMapChip.textContent = activeLibraryTab === 'library' ? 'Library'
+      : activeLibraryTab === 'log' ? 'Log' : 'Storage';
   }
   mapViewerIni?.refresh();
   mapViewerLib?.refresh();
@@ -419,13 +428,13 @@ async function tryRestoreLastSession() {
     markClean('ini');
   }, () => fm.clearLastIniHandle());
 
-  await attempt('My Storage', 'readwrite', () => fm.loadLastJsonHandle(), async (handle) => {
+  await attempt('My Storage', 'readwrite', () => fm.loadLastStorageHandle(), async (handle) => {
     const text = await fm.readFile(handle);
     storageFileHandle = handle;
     controllers.storage.setAll(parseStorage(text));
     markRead('storage');
     markClean('storage');
-  }, () => fm.clearLastJsonHandle());
+  }, () => fm.clearLastStorageHandle());
 
   await attempt('Waypoint Log', 'read', () => fm.loadLastLogHandle(), async (handle) => {
     const result = await loadIniLikeFile(handle, 'log');
@@ -438,7 +447,6 @@ async function tryRestoreLastSession() {
     libraryFileHandle = handle;
     controllers.library.setAll(parseLibrary(text));
     markRead('library');
-    markClean('library');
   }, () => fm.clearLastLibraryHandle());
 
   // Location Library: 前回開いたファイルが無い(再接続待ちでもない)場合は、
@@ -454,7 +462,6 @@ async function tryRestoreLastSession() {
         if (list.length > 0) {
           controllers.library.setAll(list);
           markRead('library');
-          markClean('library');
           bundledCount = list.length;
         }
       }
@@ -520,7 +527,7 @@ async function loadIniLikeFile(handle, listKey) {
 
   const entries = parseSavedMinimapMarks(text);
   const list = entries.map((e) =>
-    createWaypoint({ rawText: e.rawText, parsed: convertToWaypointData(e), source: SOURCE_FIELD[listKey] })
+    createWaypoint({ rawText: e.rawText, parsed: convertToWaypointData(e) })
   );
   controllers[listKey].setAll(list);
   return {
@@ -540,13 +547,13 @@ function loadNoticeText({ warningCount, unrecognizedCount }) {
 
 // --- ツールバー: GameUserSettings.ini ------------------------------------
 
-// Read状態(✓表示)を管理するボタン要素のマップ。v0.5.0でツールバーは廃止され、
+// Load状態(✓表示)を管理するボタン要素のマップ。v0.5.0でツールバーは廃止され、
 // Loadボタンは各リストの空状態の中、Addボタンはリスト末尾の行に移った。
-// Edit/Deleteは行内アイコン、SaveはStorage/Libraryでは自動保存に置き換わった。
-// 例外としてGameUserSettings.iniはゲーム本体のファイルのため自動保存せず、
-// v0.5.1でカラム見出し右端のSaveボタン+確認ダイアログによる手動保存に戻した。
+// Edit/Deleteは行内アイコン。SaveはINIとMy Storageにあり、いずれも手動ボタン式
+// (ゲーム本体のファイルや自分のデータを、変更のたびに自動で書き換えないため)。
+// INIのSaveはカラム見出し右端のボタン+確認ダイアログによる手動保存。
 const READ_BTN_EL = {};
-const SAVE_BTN_EL = {}; // ini のみ
+const SAVE_BTN_EL = {}; // ini / storage のみ
 
 function bindToolbarEvents() {
   READ_BTN_EL.ini = els.iniReadBtn;
@@ -690,7 +697,7 @@ async function onStorageRead() {
     const text = await fm.readFile(handle);
     const list = parseStorage(text);
     storageFileHandle = handle;
-    await fm.saveLastJsonHandle(handle);
+    await fm.saveLastStorageHandle(handle);
     controllers.storage.setAll(list);
     markRead('storage');
     markClean('storage');
@@ -737,25 +744,11 @@ async function onLibraryRead() {
     await fm.saveLastLibraryHandle(handle);
     controllers.library.setAll(list);
     markRead('library');
-    markClean('library');
     setStatus(`Location Libraryから${list.length}件のWaypointを読み込みました。`);
     refreshMapSelection();
   } catch (err) {
     console.error(err);
     setStatus('Location Libraryの読み込み中にエラーが発生しました: ' + err.message);
-  }
-}
-
-/** Location Libraryへの変更があるたびに自動保存する(自動保存はLibraryのみ。INIとMy Storageはv0.6.0から手動Save)。 */
-async function autoSaveLibrary() {
-  if (!libraryFileHandle) return;
-  try {
-    const granted = await fm.verifyPermission(libraryFileHandle, 'readwrite');
-    if (!granted) return;
-    await fm.writeFile(libraryFileHandle, serializeLibrary(controllers.library.getAll()));
-    markClean('library');
-  } catch (err) {
-    console.warn('Location Libraryの自動保存に失敗しました:', err);
   }
 }
 
@@ -797,7 +790,6 @@ function onDeleteWaypoint(listKey, wp) {
   controllers[listKey].remove(wp.id);
   setStatus(`Waypoint「${wp.parsed.name}」を${LABELS[listKey]}から削除しました。`);
   markDirty(listKey);
-  AUTO_SAVE_HANDLERS[listKey]?.();
   refreshMapSelection(); // 削除でマップが消えた場合にCurrent Mapの選択肢と絞り込みを追随させる
 }
 
@@ -829,13 +821,7 @@ async function openAddEditModal(listKey, id) {
   editingRef = { listKey, id };
   populateMapCandidates();
 
-  // Category はLocation Library専用の管理情報(GameUserSettings.ini /
-  // My Storageのデータには存在しない)ため、Location Library編集時のみ
-  // Category欄を表示する。
   els.modalDeleteBtn.classList.toggle('hidden', !id); // 削除ボタンは編集時のみ(v0.6.5)
-  const isLibrary = listKey === 'library';
-  els.formCategoryField.classList.toggle('hidden', !isLibrary);
-  if (isLibrary) populateCategoryCandidates();
 
   if (id) {
     const wp = controllers[listKey].find(id);
@@ -868,7 +854,6 @@ function closeModal() {
 
 function fillForm(parsed) {
   els.formName.value = parsed.name;
-  els.formCategory.value = parsed.category || '';
   els.formMap.value = parsed.map;
   els.formLat.value = formatCoord(parsed.lat);
   els.formLon.value = formatCoord(parsed.lon);
@@ -887,7 +872,7 @@ function fillForm(parsed) {
 }
 
 function formatCoord(n) {
-  return Number.isFinite(n) ? Math.round(n * 1000) / 1000 : 0;
+  return Number.isFinite(n) ? roundTo(n, 3) : 0;
 }
 
 /**
@@ -907,23 +892,6 @@ function populateMapCandidates() {
   }
   const sorted = Array.from(maps).sort((a, b) => a.localeCompare(b, 'ja'));
   els.mapCandidates.innerHTML = sorted.map((m) => `<option value="${escapeHtml(m)}"></option>`).join('');
-}
-
-/**
- * Category入力欄のコンボボックス候補を生成する。
- * v0.3.6より、CategoryはLocation Library専用の管理情報になったため、
- * 候補もLocation Library自身に存在するCategoryのみから生成する
- * (GameUserSettings.ini / My Storageのデータには元々Categoryが
- *  存在しないため、候補源から除外した)。
- */
-function populateCategoryCandidates() {
-  const categories = new Set();
-  for (const wp of controllers.library.getAll()) {
-    const c = (wp.parsed.category || '').trim();
-    if (c) categories.add(c);
-  }
-  const sorted = Array.from(categories).sort((a, b) => a.localeCompare(b, 'ja'));
-  els.categoryCandidates.innerHTML = sorted.map((c) => `<option value="${escapeHtml(c)}"></option>`).join('');
 }
 
 // --- Color / IconColor(RGBA スライダー) ------------------------------------
@@ -1102,9 +1070,9 @@ async function onModalSave() {
     x, y,
     z: Number(zValue),
     customTag: els.formTag.value.trim(),
-    // Categoryは Location Library専用の管理情報。GameUserSettings.ini /
-    // My Storageのデータには保持しない(要件2への対応)。
-    category: editingRef.listKey === 'library' ? els.formCategory.value.trim() : '',
+    // Categoryは Location Library専用の管理情報。INI / My Storageの
+    // Waypoint では常に空で、モーダルでも編集しない。
+    category: '',
     markIcon: markIconRawText,
     color: colorEditorApi.getValue(),
     iconColor: iconColorEditorApi.getValue(),
@@ -1146,7 +1114,7 @@ async function onModalSave() {
     if (removeConflictId && removeConflictId !== id) controller.remove(removeConflictId);
     const original = controller.find(id);
     const newRawText = buildRawText(original?.rawText ?? '', finalParsed);
-    const updated = createWaypoint({ id, rawText: newRawText, parsed: finalParsed, source: original?.source });
+    const updated = createWaypoint({ id, rawText: newRawText, parsed: finalParsed });
     controller.replace(id, updated);
     controller.setSelectedId(id);
     handleSelect(updated, listKey);
@@ -1154,7 +1122,7 @@ async function onModalSave() {
   } else {
     if (removeConflictId) controller.remove(removeConflictId);
     const rawText = buildRawText('', finalParsed);
-    const created = createWaypoint({ rawText, parsed: finalParsed, source: SOURCE_FIELD[listKey] });
+    const created = createWaypoint({ rawText, parsed: finalParsed });
     controller.add(created);
     controller.setSelectedId(created.id);
     handleSelect(created, listKey);
@@ -1163,7 +1131,6 @@ async function onModalSave() {
 
   refreshMapSelection();
   markDirty(listKey);
-  AUTO_SAVE_HANDLERS[listKey]?.();
   closeModal();
 }
 
@@ -1214,7 +1181,7 @@ function onDrop(e, targetKey) {
 function cloneWaypointForTarget(wp, targetKey, id, customTag) {
   const parsed = customTag ? { ...wp.parsed, customTag } : { ...wp.parsed };
   const rawText = customTag ? buildRawText(wp.rawText, parsed) : wp.rawText;
-  return createWaypoint({ id, rawText, parsed, source: SOURCE_FIELD[targetKey] });
+  return createWaypoint({ id, rawText, parsed });
 }
 
 /**
@@ -1228,7 +1195,7 @@ function cloneWaypointForTarget(wp, targetKey, id, customTag) {
  *   共通の競合処理を行う。
  */
 async function moveWaypoint(sourceKey, targetKey, wp) {
-  const removesFromSource = EDITABLE_LISTS.has(sourceKey) && sourceKey !== 'library';
+  const removesFromSource = EDITABLE_LISTS.has(sourceKey);
   const verb = removesFromSource ? '移動' : 'コピー';
   const newId = removesFromSource ? wp.id : undefined;
   const wasSelected = !!(currentSelection && currentSelection.listKey === sourceKey && currentSelection.waypoint.id === wp.id);
@@ -1243,10 +1210,8 @@ async function moveWaypoint(sourceKey, targetKey, wp) {
       handleSelect(currentSelection.waypoint, currentSelection.listKey);
     }
     markDirty(targetKey);
-    AUTO_SAVE_HANDLERS[targetKey]?.();
     if (removesFromSource) {
       markDirty(sourceKey);
-      AUTO_SAVE_HANDLERS[sourceKey]?.();
     }
   };
 
@@ -1428,8 +1393,8 @@ function restoreLayoutSettings() {
   if (savedWidth) els.colIni.style.flex = `0 0 ${savedWidth}px`;
 
   let savedTab = settingsStore.get('activeLibraryTab', 'storage');
-  if (savedTab === 'calibration') savedTab = 'storage'; // v0.9.0でMap Calibrationタブは廃止
-  if (savedTab === 'mapviewer') savedTab = 'storage'; // v0.4.0でMap Viewerタブは廃止(地図は常時表示)
+  // 廃止されたタブ名(calibration / mapviewer等)が保存されていた場合は既定へ戻す
+  if (!['storage', 'library', 'log'].includes(savedTab)) savedTab = 'storage';
   switchLibraryTab(savedTab);
 
   const savedMapsHeight = settingsStore.get('layout.mapsRowHeight', null);
@@ -1449,7 +1414,7 @@ function bindHeaderEvents() {
     // 前回のセッション情報(IndexedDB内のファイルハンドルとINIバックアップ)も消す(v0.8.3)
     try {
       await Promise.all([
-        fm.clearLastIniHandle(), fm.clearLastJsonHandle(), fm.clearLastLogHandle(),
+        fm.clearLastIniHandle(), fm.clearLastStorageHandle(), fm.clearLastLogHandle(),
         fm.clearLastLibraryHandle(), fm.clearIniBackup(),
       ]);
     } catch (err) { console.info('セッション情報の消去に失敗しました:', err.message); }

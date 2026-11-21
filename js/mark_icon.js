@@ -3,7 +3,7 @@
 // MarkIconの定義テーブル。
 //
 // 要件5「MarkIconはRawTextではなく定義テーブルで管理してください」への
-// 対応。各定義は { id, displayName, svg, rawText } を持ち、
+// 対応。各定義は { id, rawText } を持ち、
 // Add/Editのドロップダウン・一覧のWaypointIcon表示・RawText生成の
 // 3箇所すべてでこの配列を共通データとして使用する(重複定義をしない)。
 //
@@ -13,15 +13,13 @@
 // ビルド不要・GitHub Pagesでそのまま公開できる」ことを前提とした
 // 素のHTML/CSS/JavaScript構成を採用しているため、同じ役割を果たす
 // プレーンなJavaScriptオブジェクト配列として実装している
-// (`svg`フィールドはコンポーネントファイル名ではなく、
-//  assets/waypoint-icons/ 配下のSVGファイル名(拡張子なし)を指す)。
+// (id は assets/waypoint-icons/ 配下のSVGファイル名(拡張子なし)および
+//  表示名も兼ねる。資源系の4種はSVGを持たず、実物画像で描画する)。
 // =============================================================
 
 /**
  * @typedef {object} MarkIconDefinition
- * @property {string} id - アイコンの識別子。SVGファイル名(拡張子なし)とも一致する。
- * @property {string} displayName - ドロップダウン・Tooltipに表示する名前。
- * @property {string} svg - assets/waypoint-icons/ 配下のSVGファイル名(拡張子なし)。
+ * @property {string} id - アイコンの識別子。SVGファイル名(拡張子なし)・表示名も兼ねる。
  * @property {string} rawText - SavedMinimapMarksのMarkIconフィールドへ書き込む実際の値。
  */
 
@@ -29,82 +27,58 @@
 export const MARK_ICON_DEFINITIONS = [
   {
     id: 'Location',
-    displayName: 'Location',
-    svg: 'Location',
     rawText: "/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Location.T_UI_HUDPointOfInterest_Location'",
   },
   {
     id: 'Root',
-    displayName: 'Root',
-    svg: 'Root',
     rawText: "/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'",
   },
   {
     id: 'Kill',
-    displayName: 'Kill',
-    svg: 'Kill',
     rawText: "/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Kill.T_UI_HUDPointOfInterest_Kill'",
   },
   {
     id: 'CircleSlash',
-    displayName: 'CircleSlash',
-    svg: 'CircleSlash',
     rawText: "/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_CircleSlash_No_Icon.T_UI_CircleSlash_No_Icon'",
   },
   {
     id: 'Star',
-    displayName: 'Star',
-    svg: 'Star',
     rawText: "/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Special.T_UI_HUDPointOfInterest_Special'",
   },
   {
     id: 'Dino',
-    displayName: 'Dino',
-    svg: 'Dino',
     rawText: "/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Tame.T_UI_HUDPointOfInterest_Tame'",
   },
   {
     id: 'MultiPlayer',
-    displayName: 'MultiPlayer',
-    svg: 'MultiPlayer',
     rawText: "/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_Missions_MultiplayerOptionalIcon.T_UI_Missions_MultiplayerOptionalIcon'",
   },
   {
     id: 'Wait',
-    displayName: 'Wait',
-    svg: 'Wait',
     rawText: "/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Wait.T_UI_HUDPointOfInterest_Wait'",
   },
   {
     id: 'Timer',
-    displayName: 'Timer',
-    svg: 'Timer',
     rawText: "/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_Missions_TimeRemainingIcon.T_UI_Missions_TimeRemainingIcon'",
   },
   {
     id: 'ArrowDown',
-    displayName: 'ArrowDown',
-    svg: 'ArrowDown',
     rawText: "/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPing_Icon.T_UI_HUDPing_Icon'",
   },
   {
     id: 'Metal',
-    displayName: 'Metal',
     rawText: "/Script/Engine.Texture2D'/Game/PrimalEarth/CoreBlueprints/Resources/Icons/MetalOre_Icon.MetalOre_Icon'",
   },
   {
     id: 'Obsidian',
-    displayName: 'Obsidian',
     rawText: "/Script/Engine.Texture2D'/Game/PrimalEarth/CoreBlueprints/Resources/Icons/Obsidian_Icon.Obsidian_Icon'",
   },
   {
     id: 'Crystal',
-    displayName: 'Crystal',
     rawText: "/Script/Engine.Texture2D'/Game/PrimalEarth/Test_Craig/Crystal_Icon.Crystal_Icon'",
   },
   {
     id: 'Pearl',
-    displayName: 'Pearl',
     rawText: "/Script/Engine.Texture2D'/Game/PrimalEarth/CoreBlueprints/Resources/Icons/Pearl_Icon.Pearl_Icon'",
   },
 ];
@@ -114,8 +88,7 @@ export const DEFAULT_MARK_ICON_ID = 'Location';
 /** idからMarkIconDefinitionを取得する。見つからなければデフォルト(Location)を返す。 */
 export function findMarkIconById(id) {
   return MARK_ICON_DEFINITIONS.find((d) => d.id === id)
-    ?? MARK_ICON_DEFINITIONS.find((d) => d.id === DEFAULT_MARK_ICON_ID)
-    ?? MARK_ICON_DEFINITIONS[0];
+    ?? MARK_ICON_DEFINITIONS.find((d) => d.id === DEFAULT_MARK_ICON_ID);
 }
 
 /**
