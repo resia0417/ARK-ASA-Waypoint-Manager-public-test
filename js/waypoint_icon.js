@@ -43,10 +43,24 @@ const pendingFetches = new Map();
  * @param {() => void} [onLoaded]
  * @returns {string|null}
  */
+// 読込完了コールバックは呼び出し元ごとに保持する(最初の呼び出し元の分だけ
+// 残すと、後続の呼び出し元の再描画が漏れるため)
+const pendingSvgCallbacks = new Map();
+
 function getCachedSvg(assetId, onLoaded) {
   if (svgCache.has(assetId)) return svgCache.get(assetId);
 
+  if (onLoaded) {
+    if (!pendingSvgCallbacks.has(assetId)) pendingSvgCallbacks.set(assetId, new Set());
+    pendingSvgCallbacks.get(assetId).add(onLoaded);
+  }
   if (!pendingFetches.has(assetId)) {
+    const notifyLoaded = () => {
+      const callbacks = pendingSvgCallbacks.get(assetId) ?? [];
+      pendingSvgCallbacks.delete(assetId);
+      callbacks.forEach((cb) => cb());
+    };
+    // Set で保持するため、同一参照のコールバックは1回だけ呼ばれる
     const promise = fetch(`${ICON_ASSET_DIR}${assetId}.svg`)
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -55,14 +69,14 @@ function getCachedSvg(assetId, onLoaded) {
       .then((text) => {
         svgCache.set(assetId, text);
         pendingFetches.delete(assetId);
-        onLoaded?.();
+        notifyLoaded();
         return text;
       })
       .catch((err) => {
         console.warn(`アイコンSVGの読み込みに失敗しました(${assetId}):`, err);
         svgCache.set(assetId, ''); // 空文字をキャッシュし、以後リトライで詰まらないようにする
         pendingFetches.delete(assetId);
-        onLoaded?.();
+        notifyLoaded();
         return '';
       });
     pendingFetches.set(assetId, promise);

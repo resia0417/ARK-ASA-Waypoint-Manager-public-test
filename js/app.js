@@ -69,6 +69,7 @@ let editingRef = null; // { listKey, id: string|null }
 // 丸められるため、未編集の保存で座標がずれるのを防ぐ(中9)
 let editingOriginalForm = null;
 let selectedMarkIconId = DEFAULT_MARK_ICON_ID; // Add/Editモーダルで現在選択中のMarkIcon
+let editingUnknownMarkIconRaw = null; // 定義14種に無いMarkIconの元のrawText(編集時に保持する)
 let colorEditorApi = null; // Add/Editモーダル内のColor編集UI(getValue/setValue)
 let iconColorEditorApi = null; // 同、IconColor用
 
@@ -193,14 +194,28 @@ function createControllers() {
  * @param {object} wp - Waypointモデル
  * @returns {{lat:number, lon:number}|null}
  */
+// 読込完了コールバックは参照を固定した関数を使う。行ごとに新しいクロージャを
+// 登録すると、読込完了時に登録数ぶんの全リスト再描画が雪崩のように発生する
+// (Set で重複排除される側と対で効く)
+function renderAllLists() {
+  for (const key of LIST_KEYS) controllers[key].render();
+}
+
+function onIconAssetsLoaded() {
+  iconMarkupCache.clear();
+  renderAllLists();
+}
+
 function getLatLon(wp) {
   const mapName = wp.parsed.map;
   if (!mapName) return null;
   // Genesis_WP はZ座標で陸・海の実効MapNameへ振り分けてから config を引く
-  const config = getCachedMapConfig(resolveEffectiveMapName(mapName, wp.parsed.z), () => {
-    for (const key of LIST_KEYS) controllers[key].render();
-  });
+  const config = getCachedMapConfig(resolveEffectiveMapName(mapName, wp.parsed.z), renderAllLists);
   if (!config) return null;
+  // config.json を読めなかったマップ(未校正のデフォルトconfig)では変換しない。
+  // 恒等変換のまま UE 生値を Lat/Lon として表示してしまわないため
+  // (waypoint_list.js 側の契約: null は「算出できない」として '…' 表示)
+  if (!config.isCalibrated) return null;
   return new CoordinateConverter(config).ueToGame(wp.parsed.x, wp.parsed.y);
 }
 
@@ -224,7 +239,7 @@ function getIconMarkup(wp) {
   if (hit) return hit;
   const html = renderWaypointIconHtml(
     { type: def.id, baseColor: c, iconColor: ic, size: 20 },
-    () => { iconMarkupCache.clear(); for (const k of LIST_KEYS) controllers[k].render(); }
+    onIconAssetsLoaded
   );
   // SVG読み込み中のプレースホルダーはメモ化しない(読み込み完了後に正しく作り直す)
   if (!html.includes('waypoint-icon-loading')) {
@@ -368,6 +383,11 @@ function applyCurrentMapFilter(persist) {
 // 再接続ボタンのクリックの中で許可を取り直して読み込む(v0.6.8)。
 const pendingReconnect = [];
 
+// 復元・再接続で読み込んだINI/Logの注意書き(座標が不完全な行など)の蓄積。
+// 完了メッセージへ付記するために使う(個別の setStatus で上書きされて
+// 警告が消えてしまわないようにするため)
+let accumulatedLoadNotices = '';
+
 async function tryRestoreLastSession() {
   const restored = [];
 
@@ -392,28 +412,30 @@ async function tryRestoreLastSession() {
   };
 
   await attempt('GameUserSettings.ini', 'readwrite', () => fm.loadLastIniHandle(), async (handle) => {
+    const result = await loadIniLikeFile(handle, 'ini');
     iniFileHandle = handle;
-    await loadIniLikeFile(handle, 'ini');
+    accumulatedLoadNotices += loadNoticeText(result);
     markRead('ini');
     markClean('ini');
   }, () => fm.clearLastIniHandle());
 
   await attempt('My Storage', 'readwrite', () => fm.loadLastJsonHandle(), async (handle) => {
+    const text = await fm.readFile(handle);
     storageFileHandle = handle;
-    const text = await fm.readFile(storageFileHandle);
     controllers.storage.setAll(parseStorage(text));
     markRead('storage');
     markClean('storage');
   }, () => fm.clearLastJsonHandle());
 
   await attempt('Waypoint Log', 'read', () => fm.loadLastLogHandle(), async (handle) => {
+    const result = await loadIniLikeFile(handle, 'log');
     logFileHandle = handle;
-    await loadIniLikeFile(handle, 'log');
+    accumulatedLoadNotices += loadNoticeText(result);
   }, () => fm.clearLastLogHandle());
 
   await attempt('Location Library', 'readwrite', () => fm.loadLastLibraryHandle(), async (handle) => {
+    const text = await fm.readFile(handle);
     libraryFileHandle = handle;
-    const text = await fm.readFile(libraryFileHandle);
     controllers.library.setAll(parseLibrary(text));
     markRead('library');
     markClean('library');
@@ -442,10 +464,12 @@ async function tryRestoreLastSession() {
   applySavedMapSelection();
 
   if (pendingReconnect.length > 0 && els.reconnectBtn) els.reconnectBtn.hidden = false;
+  const notices = accumulatedLoadNotices;
+  accumulatedLoadNotices = '';
   if (restored.length > 0 && pendingReconnect.length > 0) {
-    setStatus(`前回のセッション情報を復元しました(${restored.join('・')})。一部のファイルは再接続が必要です。`);
+    setStatus(`前回のセッション情報を復元しました(${restored.join('・')})。一部のファイルは再接続が必要です。${notices}`);
   } else if (restored.length > 0) {
-    setStatus(`前回のセッション情報を復元しました(${restored.join('・')})。`);
+    setStatus(`前回のセッション情報を復元しました(${restored.join('・')})。${notices}`);
   } else if (pendingReconnect.length > 0) {
     setStatus('前回のファイルへのアクセス許可が必要です。[ 前回のファイルを再接続 ]を押してください。');
   } else if (bundledCount > 0) {
@@ -478,9 +502,11 @@ async function onReconnectFiles() {
   if (els.reconnectBtn) els.reconnectBtn.hidden = true;
   if (restored.length > 0) {
     applySavedMapSelection();
-    setStatus(`再接続しました(${restored.join('・')})。`);
+    const notices = accumulatedLoadNotices;
+    accumulatedLoadNotices = '';
+    setStatus(`再接続しました(${restored.join('・')})。${notices}`);
   } else {
-    setStatus('再接続が許可されませんでした。利用するファイルは[Read]から読み込み直してください。');
+    setStatus('再接続が許可されませんでした。利用するファイルは[Load]から読み込み直してください。');
   }
 }
 
@@ -575,17 +601,20 @@ async function onIniRead() {
     await fm.saveLastIniHandle(handle);
     markRead('ini');
     markClean('ini');
-    setStatus(`GameUserSettings.iniから${result.list.length}件のWaypointを読み込みました。${loadNoticeText(result)}`);
     refreshMapSelection();
 
     // My Storage(ARKASAWaypointManager_MyStorage.txt)がまだ紐付いていない
-    // 場合、My Storageタブを開いて[Read]での新規作成を促す
+    // 場合、My Storageタブを開いて新規作成を促す。案内は読込結果の
+    // メッセージへ連結する(別途 setStatus すると、読込時の警告が
+    // 上書きされて消えてしまうため)
     // (File System Access APIの制約上、ファイルパス名だけから
     //  自動でファイルを作成・特定することはできないため)
+    let message = `GameUserSettings.iniから${result.list.length}件のWaypointを読み込みました。${loadNoticeText(result)}`;
     if (!storageFileHandle) {
       switchLibraryTab('storage');
-      setStatus(`My Storageタブの[Read]から ${STORAGE_FILE_NAME} を新規作成・読込してください。`);
+      message += `My Storageタブの[Load]から ${STORAGE_FILE_NAME} を新規作成・読込してください。`;
     }
+    setStatus(message);
   } catch (err) {
     console.error(err);
     setStatus('GameUserSettings.iniの読み込み中にエラーが発生しました: ' + err.message);
@@ -602,7 +631,7 @@ async function onIniRead() {
  * 追加の確認ダイアログを出す。上書き前の内容は緊急用バックアップ
  * としてIndexedDBへ保持する。 */
 async function onIniSave() {
-  if (!iniFileHandle) { setStatus('先に[Read]でGameUserSettings.iniを読み込んでください。'); return; }
+  if (!iniFileHandle) { setStatus('先に[Load]でGameUserSettings.iniを読み込んでください。'); return; }
   const choice = await showChoiceDialog(
     'GameUserSettings.iniへの保存確認',
     'ゲーム本体の設定ファイル(SavedMinimapMarks)を書き換えます。\nこの操作は元に戻せません。続行しますか?',
@@ -625,7 +654,7 @@ async function onIniSave() {
           '読み込み後にGameUserSettings.iniのWaypoint行が変更されています(ゲーム側で追加・削除された可能性があります)。\nアプリ側の一覧で上書きしますか?',
           [{ key: 'overwrite', label: 'アプリの一覧で保存' }, { key: 'cancel', label: 'キャンセル' }]
         );
-        if (c2 !== 'overwrite') { setStatus('保存を中止しました。最新の状態で作業するには[Read]で読み込み直してください。'); return; }
+        if (c2 !== 'overwrite') { setStatus('保存を中止しました。最新の状態で作業するには[Load]で読み込み直してください。'); return; }
       }
       baseText = currentText;
       usedFreshBase = true;
@@ -651,16 +680,16 @@ async function onIniSave() {
 
 async function onStorageRead() {
   try {
-    // 「Read」は既存ファイルを開くための操作であるため、ネイティブのOpen
+    // 「Load」は既存ファイルを開くための操作であるため、ネイティブのOpen
     // ダイアログ(showOpenFilePicker)を使う。v0.3.6よりMy Storageは
     // JSONではなくプレーンテキスト(.txt)形式のため、テキスト用の
     // ピッカーを使用する。
     const handle = await fm.pickOpenTextFile('ARK ASA My Storage (SavedMinimapMarks text)');
     if (!handle) return;
-    storageFileHandle = handle;
 
     const text = await fm.readFile(handle);
     const list = parseStorage(text);
+    storageFileHandle = handle;
     await fm.saveLastJsonHandle(handle);
     controllers.storage.setAll(list);
     markRead('storage');
@@ -698,13 +727,13 @@ async function onStorageSave() {
 
 async function onLibraryRead() {
   try {
-    // My Storageと同様、[Read]はネイティブのOpenダイアログを使う。
+    // My Storageと同様、[Load]はネイティブのOpenダイアログを使う。
     const handle = await fm.pickOpenJsonFile('Location Library JSON');
     if (!handle) return;
-    libraryFileHandle = handle;
 
     const text = await fm.readFile(handle);
     const list = parseLibrary(text);
+    libraryFileHandle = handle;
     await fm.saveLastLibraryHandle(handle);
     controllers.library.setAll(list);
     markRead('library');
@@ -851,6 +880,9 @@ function fillForm(parsed) {
 
   const def = findMarkIconByRawText(parsed.markIcon) ?? findMarkIconById(DEFAULT_MARK_ICON_ID);
   selectedMarkIconId = def.id;
+  // 定義に無いMarkIconはフォーム上デフォルト扱いになるが、元の値は保持し、
+  // アイコンを変更しないまま保存した場合は元の値を書き戻す(勝手に置換しない)
+  editingUnknownMarkIconRaw = findMarkIconByRawText(parsed.markIcon) ? null : (parsed.markIcon || null);
   updateWaypointPreview();
 }
 
@@ -967,7 +999,7 @@ function openIconPickerPopover(e) {
   popover.className = 'icon-picker-popover';
   popover.innerHTML = MARK_ICON_DEFINITIONS.map((def) => `
     <div class="icon-picker-row ${def.id === selectedMarkIconId ? 'selected' : ''}" data-id="${def.id}">
-      ${renderWaypointIconHtml({ type: def.id, baseColor: colorEditorApi?.getValue() ?? defaultColor(), iconColor: iconColorEditorApi?.getValue() ?? defaultColor(), size: 30, title: '' }, () => openIconPickerPopover(e))}
+      ${renderWaypointIconHtml({ type: def.id, baseColor: colorEditorApi?.getValue() ?? defaultColor(), iconColor: iconColorEditorApi?.getValue() ?? defaultColor(), size: 30, title: '' }, () => { if (els._iconPickerPopover) openIconPickerPopover(e); })}
     </div>
   `).join('');
   document.body.appendChild(popover);
@@ -1014,6 +1046,8 @@ function updateWaypointPreview() {
 }
 
 async function onModalSave() {
+  const ref = editingRef;
+  if (!ref) return;
   let map = els.formMap.value.trim();
   let zValue = els.formZ.value;
   const lat = Number(els.formLat.value);
@@ -1053,9 +1087,14 @@ async function onModalSave() {
     ({ x, y } = editingOriginalForm);
   } else {
     const config = await resolveMapConfig(resolveEffectiveMapName(map, Number(zValue)));
+    if (editingRef !== ref) return; // 変換待ちの間にモーダルが閉じられた/別の編集が始まった
     ({ x, y } = new CoordinateConverter(config).gameToUe(lat, lon));
   }
   const markIconDef = findMarkIconById(selectedMarkIconId);
+  // 未知MarkIconのWaypointで、アイコン選択がデフォルトのままなら元の値を保持する
+  const markIconRawText = (editingUnknownMarkIconRaw && selectedMarkIconId === DEFAULT_MARK_ICON_ID)
+    ? editingUnknownMarkIconRaw
+    : markIconDef.rawText;
 
   const parsed = {
     name: els.formName.value.trim(),
@@ -1066,7 +1105,7 @@ async function onModalSave() {
     // Categoryは Location Library専用の管理情報。GameUserSettings.ini /
     // My Storageのデータには保持しない(要件2への対応)。
     category: editingRef.listKey === 'library' ? els.formCategory.value.trim() : '',
-    markIcon: markIconDef.rawText,
+    markIcon: markIconRawText,
     color: colorEditorApi.getValue(),
     iconColor: iconColorEditorApi.getValue(),
   };
@@ -1074,7 +1113,7 @@ async function onModalSave() {
   const errors = validateWaypoint(parsed);
   if (errors.length > 0) { alert(errors.join('\n')); return; }
 
-  const { listKey, id } = editingRef;
+  const { listKey, id } = ref;
   const controller = controllers[listKey];
 
   // 要件5: Save時、保存対象リスト内に同じCustomTagが存在するか確認する
@@ -1100,6 +1139,8 @@ async function onModalSave() {
       }
     }
   }
+
+  if (editingRef !== ref) return; // 確認ダイアログ表示中にモーダルが閉じられた/別の編集が始まった
 
   if (id) {
     if (removeConflictId && removeConflictId !== id) controller.remove(removeConflictId);
@@ -1167,6 +1208,15 @@ function onDrop(e, targetKey) {
   moveWaypoint(payload.listKey, targetKey, wp);
 }
 
+/** 移動/コピー先リスト向けにWaypointを複製する。CustomTagを変更する場合は
+ * rawText も再構築し、一覧表示と保存内容を一致させる(表示だけ差し替えて
+ * rawText が古いままだと、保存時に元のタグへ戻ってしまうため)。 */
+function cloneWaypointForTarget(wp, targetKey, id, customTag) {
+  const parsed = customTag ? { ...wp.parsed, customTag } : { ...wp.parsed };
+  const rawText = customTag ? buildRawText(wp.rawText, parsed) : wp.rawText;
+  return createWaypoint({ id, rawText, parsed, source: SOURCE_FIELD[targetKey] });
+}
+
 /**
  * Waypointをsource側からtarget側へ移動/コピーする。
  * - source が ini/storage(編集可能リスト)の場合は移動元から削除する(真の移動)。
@@ -1202,7 +1252,7 @@ async function moveWaypoint(sourceKey, targetKey, wp) {
 
   if (!EDITABLE_LISTS.has(targetKey)) {
     // Location Library / Waypoint Log は編集不可のため、衝突確認なしで追加のみ行う
-    const copy = createWaypoint({ id: newId, rawText: wp.rawText, parsed: { ...wp.parsed }, source: SOURCE_FIELD[targetKey] });
+    const copy = cloneWaypointForTarget(wp, targetKey, newId);
     controllers[targetKey].add(copy);
     finalize(copy);
     setStatus(`Waypoint「${wp.parsed.name}」を${LABELS[targetKey]}へ追加しました。`);
@@ -1220,7 +1270,7 @@ async function moveWaypoint(sourceKey, targetKey, wp) {
       [{ key: 'overwrite', label: '上書き' }, { key: 'cancel', label: 'キャンセル' }]
     );
     if (choice !== 'overwrite') return;
-    const merged = createWaypoint({ id: locationConflict.id, rawText: wp.rawText, parsed: { ...wp.parsed }, source: SOURCE_FIELD[targetKey] });
+    const merged = cloneWaypointForTarget(wp, targetKey, locationConflict.id);
     controllers[targetKey].replace(locationConflict.id, merged);
     finalize(merged);
     setStatus(`Waypoint「${wp.parsed.name}」を${LABELS[targetKey]}へ${verb}しました(上書き)。`);
@@ -1238,7 +1288,7 @@ async function moveWaypoint(sourceKey, targetKey, wp) {
     if (choice === 'cancel' || !choice) return;
 
     if (choice === 'overwrite') {
-      const merged = createWaypoint({ id: tagConflict.id, rawText: wp.rawText, parsed: { ...wp.parsed }, source: SOURCE_FIELD[targetKey] });
+      const merged = cloneWaypointForTarget(wp, targetKey, tagConflict.id);
       controllers[targetKey].replace(tagConflict.id, merged);
       finalize(merged);
       setStatus(`Waypoint「${wp.parsed.name}」を${LABELS[targetKey]}へ${verb}しました(上書き)。`);
@@ -1246,7 +1296,7 @@ async function moveWaypoint(sourceKey, targetKey, wp) {
     }
 
     const newTag = generateUniqueTag(wp.parsed.customTag, targetList);
-    const renamed = createWaypoint({ id: newId, rawText: wp.rawText, parsed: { ...wp.parsed, customTag: newTag }, source: SOURCE_FIELD[targetKey] });
+    const renamed = cloneWaypointForTarget(wp, targetKey, newId, newTag);
     controllers[targetKey].add(renamed);
     finalize(renamed);
     setStatus(`Waypoint「${wp.parsed.name}」を${LABELS[targetKey]}へ${verb}しました(CustomTag: ${newTag})。`);
@@ -1254,7 +1304,7 @@ async function moveWaypoint(sourceKey, targetKey, wp) {
   }
 
   // 衝突なし
-  const moved = createWaypoint({ id: newId, rawText: wp.rawText, parsed: { ...wp.parsed }, source: SOURCE_FIELD[targetKey] });
+  const moved = cloneWaypointForTarget(wp, targetKey, newId);
   controllers[targetKey].add(moved);
   finalize(moved);
   setStatus(removesFromSource

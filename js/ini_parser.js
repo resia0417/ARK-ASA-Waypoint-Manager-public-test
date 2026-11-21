@@ -264,9 +264,11 @@ function setTopLevelField(text, key, valueText) {
   return text.slice(0, open + 1) + fields.join(',') + text.slice(close);
 }
 
-/** 引用符付き文字列値の文字列表現を作る。 */
+/** 引用符付き文字列値の文字列表現を作る。「\」を先にエスケープしてから
+ * 「"」をエスケープする(読み込み側 parseParenObject のアンエスケープと対称)。 */
 function quotedValue(value) {
-  return `"${String(value ?? '').replace(/"/g, '\\"')}"`;
+  const escaped = String(value ?? '').replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  return `"${escaped}"`;
 }
 
 /** Color=(R=...,G=...,B=...,A=...) の文字列表現を作る。 */

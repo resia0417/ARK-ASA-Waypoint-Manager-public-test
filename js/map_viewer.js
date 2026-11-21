@@ -429,10 +429,11 @@ export function createMapViewer(handlers, root) {
     render();
   });
   if (typeof ResizeObserver === 'function') {
-    let first = true;
+    // 初期 fit は loadMap 側で行う。ここではサイズ変化に追随して再描画するだけ
+    // (fit を呼ぶと、ユーザーのパン・ズームがリサイズのたびにリセットされてしまう)
     new ResizeObserver(() => {
       if (!state.imgW) return;
-      if (first) { first = false; fit(); } else { render(); }
+      render();
     }).observe(els.viewport);
   }
   bindViewportEvents();

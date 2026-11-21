@@ -239,16 +239,29 @@ export async function resolveMapConfig(mapName) {
  * @param {() => void} [onLoaded] - 読み込み完了時に呼ばれる(再描画のトリガー用)
  * @returns {MapConfig|null}
  */
+// 読込完了コールバックは呼び出し元ごとに保持する(waypoint_icon.js の
+// getCachedSvg と同方針。最初の呼び出し元の分だけ残すと再描画が漏れる)
+const pendingLoadCallbacks = new Map();
+
 export function getCachedMapConfig(mapName, onLoaded) {
   if (!mapName) return null;
   if (configCache.has(mapName)) return configCache.get(mapName);
 
+  if (onLoaded) {
+    if (!pendingLoadCallbacks.has(mapName)) pendingLoadCallbacks.set(mapName, new Set());
+    pendingLoadCallbacks.get(mapName).add(onLoaded);
+  }
   if (!pendingLoads.has(mapName)) {
+    const notifyLoaded = () => {
+      const callbacks = pendingLoadCallbacks.get(mapName) ?? [];
+      pendingLoadCallbacks.delete(mapName);
+      callbacks.forEach((cb) => cb());
+    };
     const promise = loadMapConfig(mapName)
       .then((config) => {
         configCache.set(mapName, config);
         pendingLoads.delete(mapName);
-        onLoaded?.();
+        notifyLoaded();
         return config;
       })
       .catch((err) => {
@@ -256,7 +269,7 @@ export function getCachedMapConfig(mapName, onLoaded) {
         const fallback = MapConfig.default(mapName);
         configCache.set(mapName, fallback);
         pendingLoads.delete(mapName);
-        onLoaded?.();
+        notifyLoaded();
         return fallback;
       });
     pendingLoads.set(mapName, promise);
