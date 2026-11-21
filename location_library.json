@@ -193,7 +193,7 @@
    "nameJa": "影のアーティファクト - 隠された洞穴（入口）"
   },
   {
-   "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.72,B=0.15,A=1),Location=(X=-14400,Y=259200,Z=0),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPing_Icon.T_UI_HUDPing_Icon'\",MapName=\"Aberration_WP\",CustomTag=\"Artifact 16\",Name=\"Artifact of the Stalker - Elemental Vault (Entrance)\")",
+   "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.72,B=0.15,A=1),Location=(X=-26326,Y=246738,Z=8287),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPing_Icon.T_UI_HUDPing_Icon'\",MapName=\"Aberration_WP\",CustomTag=\"Artifact 16\",Name=\"Artifact of the Stalker - Elemental Vault (Entrance)\")",
    "map": "Aberration_WP",
    "category": "Artifact",
    "nameJa": "追跡者のアーティファクト - エレメンタル・ヴォールト（入口）"
@@ -511,13 +511,13 @@
    "nameJa": "青のオベリスク"
   },
   {
-   "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.72,B=0.15,A=1),Location=(X=-246340,Y=-105874,Z=0),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPing_Icon.T_UI_HUDPing_Icon'\",MapName=\"TheCenter_WP\",CustomTag=\"Artifact 20\",Name=\"Artifact of the Clever - North Ice Cave (Ice Cave entrance)\")",
+   "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.72,B=0.15,A=1),Location=(X=-243584,Y=-109770,Z=8290),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPing_Icon.T_UI_HUDPing_Icon'\",MapName=\"TheCenter_WP\",CustomTag=\"Artifact 20\",Name=\"Artifact of the Clever - North Ice Cave (Ice Cave entrance)\")",
    "map": "TheCenter_WP",
    "category": "Artifact",
    "nameJa": "賢者のアーティファクト - 北の氷の洞窟（氷の洞窟の入口）"
   },
   {
-   "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.72,B=0.15,A=1),Location=(X=-246340,Y=-105874,Z=0),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPing_Icon.T_UI_HUDPing_Icon'\",MapName=\"TheCenter_WP\",CustomTag=\"Artifact 21\",Name=\"Artifact of the Devourer - North Ice Cave (Ice Cave entrance)\")",
+   "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.72,B=0.15,A=1),Location=(X=-243584,Y=-109770,Z=8290),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPing_Icon.T_UI_HUDPing_Icon'\",MapName=\"TheCenter_WP\",CustomTag=\"Artifact 21\",Name=\"Artifact of the Devourer - North Ice Cave (Ice Cave entrance)\")",
    "map": "TheCenter_WP",
    "category": "Artifact",
    "nameJa": "暴食のアーティファクト - 北の氷の洞窟（氷の洞窟の入口）"
@@ -559,7 +559,7 @@
    "nameJa": "群集のアーティファクト - 地下世界の遺跡の入口"
   },
   {
-   "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.72,B=0.15,A=1),Location=(X=-192395,Y=58036,Z=0),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPing_Icon.T_UI_HUDPing_Icon'\",MapName=\"TheCenter_WP\",CustomTag=\"Artifact 28\",Name=\"Artifact of the Devious - The Center Cave entrance 3\")",
+   "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.72,B=0.15,A=1),Location=(X=-188810,Y=60939,Z=-27986),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPing_Icon.T_UI_HUDPing_Icon'\",MapName=\"TheCenter_WP\",CustomTag=\"Artifact 28\",Name=\"Artifact of the Devious - The Center Cave entrance 3\")",
    "map": "TheCenter_WP",
    "category": "Artifact",
    "nameJa": "邪悪のアーティファクト - センターの洞窟の入口 3"
@@ -877,7 +877,7 @@
    "nameJa": "群集のアーティファクト - ラグナロクのクマ洞窟の入口"
   },
   {
-   "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.72,B=0.15,A=1),Location=(X=-282960,Y=-416580,Z=0),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPing_Icon.T_UI_HUDPing_Icon'\",MapName=\"Ragnarok_WP\",CustomTag=\"Artifact 34\",Name=\"Artifact of the Hunter - Cave 6 Entrance\")",
+   "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.72,B=0.15,A=1),Location=(X=-290802,Y=-411370,Z=-3509),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPing_Icon.T_UI_HUDPing_Icon'\",MapName=\"Ragnarok_WP\",CustomTag=\"Artifact 34\",Name=\"Artifact of the Hunter - Cave 6 Entrance\")",
    "map": "Ragnarok_WP",
    "category": "Artifact",
    "nameJa": "狩人のアーティファクト - 洞窟6の入口"
@@ -1099,19 +1099,19 @@
    "nameJa": "赤のオベリスク"
   },
   {
-   "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.72,B=0.15,A=1),Location=(X=-76704,Y=188496,Z=0),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPing_Icon.T_UI_HUDPing_Icon'\",MapName=\"Valguero_WP\",CustomTag=\"Artifact 41\",Name=\"Artifact of the Strong - Spider Cave (The Lair) entrance\")",
+   "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.72,B=0.15,A=1),Location=(X=-70699,Y=188965,Z=-6769),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPing_Icon.T_UI_HUDPing_Icon'\",MapName=\"Valguero_WP\",CustomTag=\"Artifact 41\",Name=\"Artifact of the Strong - Spider Cave (The Lair) entrance\")",
    "map": "Valguero_WP",
    "category": "Artifact",
    "nameJa": "強者のアーティファクト - クモの洞窟（巣窟）の入口"
   },
   {
-   "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.72,B=0.15,A=1),Location=(X=-76704,Y=188496,Z=0),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPing_Icon.T_UI_HUDPing_Icon'\",MapName=\"Valguero_WP\",CustomTag=\"Artifact 42\",Name=\"Artifact of the Immune - Spider Cave (The Lair) entrance\")",
+   "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.72,B=0.15,A=1),Location=(X=-70699,Y=188965,Z=-6769),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPing_Icon.T_UI_HUDPing_Icon'\",MapName=\"Valguero_WP\",CustomTag=\"Artifact 42\",Name=\"Artifact of the Immune - Spider Cave (The Lair) entrance\")",
    "map": "Valguero_WP",
    "category": "Artifact",
    "nameJa": "免疫のアーティファクト - クモの洞窟（巣窟）の入口"
   },
   {
-   "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.72,B=0.15,A=1),Location=(X=-76704,Y=188496,Z=0),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPing_Icon.T_UI_HUDPing_Icon'\",MapName=\"Valguero_WP\",CustomTag=\"Artifact 43\",Name=\"Artifact of the Pack - Spider Cave (The Lair) entrance\")",
+   "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.72,B=0.15,A=1),Location=(X=-70699,Y=188965,Z=-6769),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPing_Icon.T_UI_HUDPing_Icon'\",MapName=\"Valguero_WP\",CustomTag=\"Artifact 43\",Name=\"Artifact of the Pack - Spider Cave (The Lair) entrance\")",
    "map": "Valguero_WP",
    "category": "Artifact",
    "nameJa": "群集のアーティファクト - クモの洞窟（巣窟）の入口"
@@ -1147,13 +1147,13 @@
    "nameJa": "狡猾のアーティファクト - 雪原バイオームの洞窟の入口"
   },
   {
-   "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.72,B=0.15,A=1),Location=(X=345984,Y=-144432,Z=0),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPing_Icon.T_UI_HUDPing_Icon'\",MapName=\"Valguero_WP\",CustomTag=\"Artifact 49\",Name=\"Artifact of the Gatekeeper - Aberration Trench entrance\")",
+   "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.72,B=0.15,A=1),Location=(X=344128,Y=-147565,Z=3252),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPing_Icon.T_UI_HUDPing_Icon'\",MapName=\"Valguero_WP\",CustomTag=\"Artifact 49\",Name=\"Artifact of the Gatekeeper - Aberration Trench entrance\")",
    "map": "Valguero_WP",
    "category": "Artifact",
    "nameJa": "門番のアーティファクト - アベレーションの海溝の入口"
   },
   {
-   "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.72,B=0.15,A=1),Location=(X=327216,Y=233376,Z=0),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPing_Icon.T_UI_HUDPing_Icon'\",MapName=\"Valguero_WP\",CustomTag=\"Artifact 50\",Name=\"Artifact of the Skylord - Milton's Grotto (White Cliffs) entrance\")",
+   "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.72,B=0.15,A=1),Location=(X=329787,Y=230922,Z=-5016),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPing_Icon.T_UI_HUDPing_Icon'\",MapName=\"Valguero_WP\",CustomTag=\"Artifact 50\",Name=\"Artifact of the Skylord - Milton's Grotto (White Cliffs) entrance\")",
    "map": "Valguero_WP",
    "category": "Artifact",
    "nameJa": "天帝のアーティファクト - ミルトンの洞穴（ホワイトクリフ）の入口"
@@ -1183,7 +1183,7 @@
    "nameJa": "ビーバーダムの洞窟"
   },
   {
-   "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=0.62,G=0.35,B=1,A=1),Location=(X=64464,Y=-98736,Z=0),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPing_Icon.T_UI_HUDPing_Icon'\",MapName=\"Valguero_WP\",CustomTag=\"Cave 38\",Name=\"Cave of the Gatekeeper - Aberration Zone entrance\")",
+   "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=0.62,G=0.35,B=1,A=1),Location=(X=62779,Y=-102151,Z=-15234),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPing_Icon.T_UI_HUDPing_Icon'\",MapName=\"Valguero_WP\",CustomTag=\"Cave 38\",Name=\"Cave of the Gatekeeper - Aberration Zone entrance\")",
    "map": "Valguero_WP",
    "category": "Cave",
    "nameJa": "門番の洞窟 - アベレーションゾーンの入口"
@@ -1645,7 +1645,7 @@
    "nameJa": "赤のオベリスク"
   },
   {
-   "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.72,B=0.15,A=1),Location=(X=-646400,Y=-318400,Z=0),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPing_Icon.T_UI_HUDPing_Icon'\",MapName=\"Astraeos_WP\",CustomTag=\"Artifact 51\",Name=\"Artifact of the Hunter (Forgotten Temple Entrance)\")",
+   "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.72,B=0.15,A=1),Location=(X=-646546,Y=-321502,Z=11156),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPing_Icon.T_UI_HUDPing_Icon'\",MapName=\"Astraeos_WP\",CustomTag=\"Artifact 51\",Name=\"Artifact of the Hunter (Forgotten Temple Entrance)\")",
    "map": "Astraeos_WP",
    "category": "Artifact",
    "nameJa": "狩人のアーティファクト（忘れられた寺院・入口）"
@@ -1675,7 +1675,7 @@
    "nameJa": "野獣のアーティファクト（水没した寺院・入口）"
   },
   {
-   "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.72,B=0.15,A=1),Location=(X=208000,Y=284800,Z=0),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPing_Icon.T_UI_HUDPing_Icon'\",MapName=\"Astraeos_WP\",CustomTag=\"Artifact 56\",Name=\"Artifact of the Pack (Volcano Cave Entrance)\")",
+   "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.72,B=0.15,A=1),Location=(X=205415,Y=275199,Z=-10429),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPing_Icon.T_UI_HUDPing_Icon'\",MapName=\"Astraeos_WP\",CustomTag=\"Artifact 56\",Name=\"Artifact of the Pack (Volcano Cave Entrance)\")",
    "map": "Astraeos_WP",
    "category": "Artifact",
    "nameJa": "群集のアーティファクト（火山の洞窟・入口）"
@@ -1723,7 +1723,7 @@
    "nameJa": "強者のアーティファクト（ミノタウロス、角ある王の聖域・入口）"
   },
   {
-   "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=0.62,G=0.35,B=1,A=1),Location=(X=-646400,Y=-318400,Z=0),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPing_Icon.T_UI_HUDPing_Icon'\",MapName=\"Astraeos_WP\",CustomTag=\"Cave 65\",Name=\"Forgotten Temple\")",
+   "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=0.62,G=0.35,B=1,A=1),Location=(X=-646546,Y=-321502,Z=11156),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPing_Icon.T_UI_HUDPing_Icon'\",MapName=\"Astraeos_WP\",CustomTag=\"Cave 65\",Name=\"Forgotten Temple\")",
    "map": "Astraeos_WP",
    "category": "Cave",
    "nameJa": "忘れられた寺院"
@@ -1753,7 +1753,7 @@
    "nameJa": "水没した寺院"
   },
   {
-   "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=0.62,G=0.35,B=1,A=1),Location=(X=208000,Y=284800,Z=0),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPing_Icon.T_UI_HUDPing_Icon'\",MapName=\"Astraeos_WP\",CustomTag=\"Cave 70\",Name=\"Volcano Cave\")",
+   "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=0.62,G=0.35,B=1,A=1),Location=(X=205415,Y=275199,Z=-10429),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPing_Icon.T_UI_HUDPing_Icon'\",MapName=\"Astraeos_WP\",CustomTag=\"Cave 70\",Name=\"Volcano Cave\")",
    "map": "Astraeos_WP",
    "category": "Cave",
    "nameJa": "火山の洞窟"

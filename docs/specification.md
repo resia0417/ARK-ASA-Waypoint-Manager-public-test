@@ -1,4 +1,16 @@
-# ARK ASA Waypoint Manager Web — 仕様書 (v0.11.9)
+# ARK ASA Waypoint Manager Web — 仕様書 (v0.11.10)
+
+## 0.45 v0.11.10: DinoFinderデータ第2次反映(名前ベースの対応付けで15件の座標をUE座標へ)
+
+- 背景: Location Library の座標は出典(Wiki)の Lat/Lon を換算したもので丸め誤差が大きく、v0.11.8 の「XY距離3,000以内」という近接条件では、実際に対応するエントリを取りこぼしていた(利用者指摘: Library=Lat/Lon入力、MOD=UE座標で後者が正確)。
+- 第2次では名前(二つ名・場所名)で対応を特定し位置で裏付ける方式に変更。保留21点のうち対応が確定した10点で Library 15件の Location をファイルの UE 座標(XYZ)に差し替え(merge_dinofinder_pass2.py、冪等)。
+  - TheCenter: Devious(Cave entrance 3)、Clever/Devourer(北氷洞窟、2件)
+  - Ragnarok: Hunter(Cave 6 Entrance)
+  - Astraeos: Pack(Volcano Cave Entrance + Volcano Cave)、Hunter(Forgotten Temple Entrance + Forgotten Temple)
+  - Valguero: Gatekeeper(Aberration Trench)、Gatekeeper洞窟(Aberration Zone側入口。ファイル名はCragだが位置で判定)、Strong/Pack/Immune(Spider Cave入口、3件)、Skylord(Milton's Grotto)
+  - Aberration: Stalker(Elemental Vault Entrance。距離17,249だが二つ名が一意)
+- Z未設定は 256件 → 241件。総数867件は不変。
+- 残り11点は対応が確定できないため引き続き保留(アリーナ端末系、迷宮の出口、Library未収録の入口、名前が汎用的なもの等)。詳細は作業フォルダ library_data/DINOFINDER_MERGE.md。
 
 ## 0.44 v0.11.9: Island の Lost Faith / Lost Hope の対応入れ替わりを修正
 
