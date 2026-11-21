@@ -1,4 +1,8 @@
-# ARK ASA Waypoint Manager Web — 仕様書 (v0.11.4)
+# ARK ASA Waypoint Manager Web — 仕様書 (v0.11.5)
+
+## 0.40 v0.11.5: 座標のないドシエ2件を同梱データから削除
+
+- Location Library の Island ドシエ2件(Dossier: Carcharodontosaurus / Dossier: Rhyniognatha)を削除し、同梱データは 864件 → 862件(Explorer Note 565→563、TheIsland 242→240)になった。出典の ASA Explorer Map データではこの2件の Location 欄に座標ではなくスポーンコマンドのテキストが入っており、ワールド内の取得地点が存在しないため、座標の補完ができないプレースホルダ(0,0,0)だった。利用者の判断で削除した。残りの CustomTag は振り直さず一意性を維持している(Explorer Note 124/125 が欠番)。
 
 ## 0.39 v0.11.4: 日本語名をゲーム内公式表記へ照合・修正
 

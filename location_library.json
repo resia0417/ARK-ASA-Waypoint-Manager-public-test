@@ -2533,18 +2533,6 @@
    "nameJa": "カワウソの調査書"
   },
   {
-   "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=0,Y=0,Z=0),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 124\",Name=\"Dossier: Carcharodontosaurus\")",
-   "map": "TheIsland_WP",
-   "category": "Explorer Note",
-   "nameJa": "カルカロドントサウルスの調査書"
-  },
-  {
-   "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=0,Y=0,Z=0),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 125\",Name=\"Dossier: Rhyniognatha\")",
-   "map": "TheIsland_WP",
-   "category": "Explorer Note",
-   "nameJa": "リニオグナタの調査書"
-  },
-  {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=185102,Y=-197640,Z=-14320),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 126\",Name=\"Rockwell Record #1\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
