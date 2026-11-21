@@ -1,4 +1,8 @@
-# ARK ASA Waypoint Manager Web — 仕様書 (v0.11.5)
+# ARK ASA Waypoint Manager Web — 仕様書 (v0.11.6)
+
+## 0.41 v0.11.6: 地図ズーム範囲の拡大
+
+- 地図のズーム範囲を拡大した(利用者要望)。全11マップの config.json と MapConfig のデフォルト値・MapViewer のフォールバック値を、minZoom 0.5 → 0.25、maxZoom 4 → 10 に変更した。ズーム倍率は「マップ全体がペインに収まる大きさ」を 1 とした相対値。
 
 ## 0.40 v0.11.5: 座標のないドシエ2件を同梱データから削除
 

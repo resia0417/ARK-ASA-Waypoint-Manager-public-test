@@ -151,8 +151,8 @@ export class MapConfig {
     this.longitudeOrigin = numOr(data.longitudeOrigin, DEFAULT_NUMERIC_FIELDS.longitudeOrigin);
     // 以下はMap Viewerの初期ズーム・ズーム範囲に使う
     this.defaultZoom = numOr(data.defaultZoom, 1);
-    this.minZoom = numOr(data.minZoom, 0.5);
-    this.maxZoom = numOr(data.maxZoom, 4);
+    this.minZoom = numOr(data.minZoom, 0.25);
+    this.maxZoom = numOr(data.maxZoom, 10);
     // config.jsonから読み込めたかどうか(デフォルト値のままなら false)
     this.isCalibrated = Boolean(data.isCalibrated);
   }

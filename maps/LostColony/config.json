@@ -6,6 +6,6 @@
   "latitudeOrigin": -408000,
   "longitudeOrigin": -408000,
   "defaultZoom": 1.0,
-  "minZoom": 0.5,
-  "maxZoom": 4.0
+  "minZoom": 0.25,
+  "maxZoom": 10.0
 }

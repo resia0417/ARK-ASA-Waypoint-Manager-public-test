@@ -298,8 +298,8 @@ export function createMapViewer(handlers, root) {
   }
 
   function clampZoom(z) {
-    const min = state.config ? state.config.minZoom : 0.5;
-    const max = state.config ? state.config.maxZoom : 4;
+    const min = state.config ? state.config.minZoom : 0.25;
+    const max = state.config ? state.config.maxZoom : 10;
     return Math.min(max, Math.max(min, z));
   }
 
