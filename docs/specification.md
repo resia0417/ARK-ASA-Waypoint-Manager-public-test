@@ -1,4 +1,8 @@
-# ARK ASA Waypoint Manager Web — 仕様書 (v0.11.2)
+# ARK ASA Waypoint Manager Web — 仕様書 (v0.11.3)
+
+## 0.38 v0.11.3: ドシエの日本語名を「～の調査書」へ
+
+- Location Library の日本語名で、Dossier(生物の調査書)132件の表記を「ドシエ: 〇〇」から「〇〇の調査書」へ変更した(利用者要望)。生成スクリプト library_data/build_name_ja.py のルールを変更して再生成し、同梱JSONと作業用JSONの両方へ反映済み。
 
 ## 0.37 v0.11.2: 確認ダイアログの独自化と「次回から確認しない」
 

@@ -1930,619 +1930,619 @@
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-317379,Y=274738,Z=-38985),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 23\",Name=\"Dossier: Dilophosaur\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ディロフォサウルス"
+   "nameJa": "ディロフォサウルスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-312870,Y=-5560,Z=-41493),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 24\",Name=\"Dossier: Titanomyrma\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ティタノミルマ"
+   "nameJa": "ティタノミルマの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-311987,Y=-269070,Z=-35552),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 25\",Name=\"Dossier: Allosaurus\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: アロサウルス"
+   "nameJa": "アロサウルスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-79634,Y=-203392,Z=-3198),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 26\",Name=\"Dossier: Anglerfish\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: アングラーフィッシュ"
+   "nameJa": "アングラーフィッシュの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-186423,Y=-275154,Z=-14094),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 27\",Name=\"Dossier: Ankylosaurus\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: アンキロサウルス"
+   "nameJa": "アンキロサウルスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-57973,Y=-250967,Z=-14363),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 28\",Name=\"Dossier: Archaeopteryx\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: アーケオプテリクス"
+   "nameJa": "アーケオプテリクスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=30860,Y=-226984,Z=34795),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 29\",Name=\"Dossier: Argentavis\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: アルゲンタヴィス"
+   "nameJa": "アルゲンタヴィスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=152037,Y=-285869,Z=-10219),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 30\",Name=\"Dossier: Arthropleura\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: アースロプレウラ"
+   "nameJa": "アースロプレウラの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=174793,Y=-199274,Z=-13694),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 31\",Name=\"Dossier: Castoroides\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: カストロイデス"
+   "nameJa": "カストロイデスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=279670,Y=-267929,Z=-12999),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 32\",Name=\"Dossier: Dung Beetle\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: フンコロガシ"
+   "nameJa": "フンコロガシの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=251621,Y=-281587,Z=-14379),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 33\",Name=\"Dossier: Beelzebufo\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ベルゼブフォ"
+   "nameJa": "ベルゼブフォの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-211393,Y=-187071,Z=23644),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 34\",Name=\"Dossier: Gigantopithecus\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ギガントピテクス"
+   "nameJa": "ギガントピテクスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-263105,Y=-147218,Z=-9405),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 35\",Name=\"Dossier: Brontosaurus\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ブロントサウルス"
+   "nameJa": "ブロントサウルスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-71954,Y=-133468,Z=1848),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 36\",Name=\"Dossier: Carnotaurus\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: カルノタウルス"
+   "nameJa": "カルノタウルスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-168799,Y=-149845,Z=-84),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 37\",Name=\"Dossier: Chalicotherium\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: カリコテリウム"
+   "nameJa": "カリコテリウムの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-917,Y=-104340,Z=-2144),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 38\",Name=\"Dossier: Coelacanth\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: シーラカンス"
+   "nameJa": "シーラカンスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-6125,Y=-70510,Z=3385),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 39\",Name=\"Dossier: Compy\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: コンピー"
+   "nameJa": "コンピーの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=193653,Y=-172236,Z=-12346),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 40\",Name=\"Dossier: Dimetrodon\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ディメトロドン"
+   "nameJa": "ディメトロドンの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=164619,Y=-187066,Z=-11872),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 41\",Name=\"Dossier: Dimorphodon\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ディモルフォドン"
+   "nameJa": "ディモルフォドンの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-292112,Y=-199367,Z=-7364),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 42\",Name=\"Dossier: Diplodocus\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ディプロドクス"
+   "nameJa": "ディプロドクスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=260594,Y=-179335,Z=-8380),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 43\",Name=\"Dossier: Diplocaulus\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ディプロカウルス"
+   "nameJa": "ディプロカウルスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=270646,Y=-77225,Z=-8835),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 44\",Name=\"Dossier: Dire Bear\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ダイアベア"
+   "nameJa": "ダイアベアの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-233381,Y=-60262,Z=-11502),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 45\",Name=\"Dossier: Direwolf\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ダイアウルフ"
+   "nameJa": "ダイアウルフの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-228562,Y=53703,Z=-1858),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 46\",Name=\"Dossier: Dodo\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ドードー"
+   "nameJa": "ドードーの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-179002,Y=-24602,Z=-5460),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 47\",Name=\"Dossier: Doedicurus\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ドエディクルス"
+   "nameJa": "ドエディクルスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-68306,Y=34135,Z=-12407),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 48\",Name=\"Dossier: Meganeura\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: メガネウラ"
+   "nameJa": "メガネウラの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=41889,Y=-48121,Z=-12993),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 49\",Name=\"Dossier: Dunkleosteus\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ダンクルオステウス"
+   "nameJa": "ダンクルオステウスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-7852,Y=-46749,Z=-9398),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 50\",Name=\"Dossier: Eurypterid\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ユーリプテリド"
+   "nameJa": "ユーリプテリドの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=98834,Y=-35046,Z=-12365),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 51\",Name=\"Dossier: Gallimimus\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ガリミムス"
+   "nameJa": "ガリミムスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=132437,Y=-43966,Z=-10591),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 52\",Name=\"Dossier: Giganotosaurus\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ギガノトサウルス"
+   "nameJa": "ギガノトサウルスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=237734,Y=23306,Z=-13738),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 53\",Name=\"Dossier: Ichthyosaurus(Dolphin)\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: イクチオサウルス（イルカ）"
+   "nameJa": "イクチオサウルス（イルカ）の調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=237145,Y=-59612,Z=-7904),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 54\",Name=\"Dossier: Kairuku\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: カイルク"
+   "nameJa": "カイルクの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=15434,Y=263527,Z=-23107),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 55\",Name=\"Dossier: Kaprosuchus\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: カプロスクス"
+   "nameJa": "カプロスクスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=27321,Y=282719,Z=-24481),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 56\",Name=\"Dossier: Leech\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: リーチ"
+   "nameJa": "リーチの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=74402,Y=149321,Z=-21873),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 57\",Name=\"Dossier: Lystrosaurus\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: リストロサウルス"
+   "nameJa": "リストロサウルスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=78725,Y=170624,Z=-27399),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 58\",Name=\"Dossier: Mammoth\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: マンモス"
+   "nameJa": "マンモスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=289347,Y=151489,Z=-24575),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 59\",Name=\"Dossier: Manta\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: マンタ"
+   "nameJa": "マンタの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=284448,Y=139826,Z=-24947),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 60\",Name=\"Dossier: Megaloceros\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: メガロケロス"
+   "nameJa": "メガロケロスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-21085,Y=-72348,Z=-3044),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 61\",Name=\"Dossier: Megalodon\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: メガロドン"
+   "nameJa": "メガロドンの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=272749,Y=-267136,Z=-25604),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 62\",Name=\"Dossier: Megalosaurus\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: メガロサウルス"
+   "nameJa": "メガロサウルスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=275428,Y=-271419,Z=-25501),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 63\",Name=\"Dossier: Mesopithecus\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: メソピテクス"
+   "nameJa": "メソピテクスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=275901,Y=-268793,Z=-21610),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 64\",Name=\"Dossier: Mosasaurus\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: モササウルス"
+   "nameJa": "モササウルスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-242715,Y=131021,Z=-4220),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 65\",Name=\"Dossier: Onyc\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: オニク"
+   "nameJa": "オニクの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-215594,Y=71119,Z=-9397),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 66\",Name=\"Dossier: Oviraptor\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: オヴィラプトル"
+   "nameJa": "オヴィラプトルの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-73709,Y=123919,Z=-8625),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 67\",Name=\"Dossier: Pachy\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: パキ"
+   "nameJa": "パキの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-148530,Y=120579,Z=-11619),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 68\",Name=\"Dossier: Paraceratherium\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: パラケラテリウム"
+   "nameJa": "パラケラテリウムの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-143234,Y=172594,Z=-11538),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 69\",Name=\"Dossier: Parasaur\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: パラサウル"
+   "nameJa": "パラサウルの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-22424,Y=170125,Z=-8495),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 70\",Name=\"Dossier: Pelagornis\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ペラゴルニス"
+   "nameJa": "ペラゴルニスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=30740,Y=179902,Z=-13646),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 71\",Name=\"Dossier: Phiomia\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: フィオミア"
+   "nameJa": "フィオミアの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=140784,Y=145031,Z=-11606),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 72\",Name=\"Dossier: Piranha\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ピラニア"
+   "nameJa": "ピラニアの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=76221,Y=147255,Z=-10808),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 73\",Name=\"Dossier: Plesiosaur\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: プレシオサウルス"
+   "nameJa": "プレシオサウルスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=225303,Y=178471,Z=-8604),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 74\",Name=\"Dossier: Procoptodon\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: プロコプトドン"
+   "nameJa": "プロコプトドンの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=214219,Y=135501,Z=-7830),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 75\",Name=\"Dossier: Pteranodon\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: プテラノドン"
+   "nameJa": "プテラノドンの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-213616,Y=299351,Z=-14002),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 76\",Name=\"Dossier: Quetzal\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ケツァール"
+   "nameJa": "ケツァールの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-201098,Y=293187,Z=-9836),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 77\",Name=\"Dossier: Raptor\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ラプトル"
+   "nameJa": "ラプトルの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-141979,Y=233653,Z=-11509),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 78\",Name=\"Dossier: Woolly Rhino\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ケブカサイ"
+   "nameJa": "ケブカサイの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-191415,Y=217078,Z=-14121),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 79\",Name=\"Dossier: Sabertooth\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: サーベルタイガー"
+   "nameJa": "サーベルタイガーの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=18272,Y=300230,Z=-13661),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 80\",Name=\"Dossier: Sabertooth Salmon\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: サーベルタイガーサーモン"
+   "nameJa": "サーベルタイガーサーモンの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-56722,Y=222896,Z=-11196),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 81\",Name=\"Dossier: Sarco\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: サルコ"
+   "nameJa": "サルコの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=95353,Y=245194,Z=-10776),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 82\",Name=\"Dossier: Pulmonoscorpius\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: プルモノスコルピウス"
+   "nameJa": "プルモノスコルピウスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-33889,Y=-83145,Z=-6895),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 83\",Name=\"Dossier: Araneo\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: アラネオ"
+   "nameJa": "アラネオの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=238411,Y=205795,Z=-10104),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 84\",Name=\"Dossier: Spino\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: スピノ"
+   "nameJa": "スピノの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=232576,Y=226505,Z=-14192),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 85\",Name=\"Dossier: Stegosaurus\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ステゴサウルス"
+   "nameJa": "ステゴサウルスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-77951,Y=98153,Z=-10692),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 86\",Name=\"Dossier: Tapejara\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: タペジャラ"
+   "nameJa": "タペジャラの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-72763,Y=97285,Z=-10972),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 87\",Name=\"Dossier: Terror Bird\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: テラーバード"
+   "nameJa": "テラーバードの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-74077,Y=94128,Z=-11144),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 88\",Name=\"Dossier: Titanosaur\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ティタノサウルス"
+   "nameJa": "ティタノサウルスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=336472,Y=-110779,Z=-44006),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 89\",Name=\"Dossier: Titanoboa\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ティタノボア"
+   "nameJa": "ティタノボアの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=339810,Y=24803,Z=-44487),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 90\",Name=\"Dossier: Rex\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: レックス"
+   "nameJa": "レックスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=331482,Y=301099,Z=-43122),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 91\",Name=\"Dossier: Triceratops\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: トリケラトプス"
+   "nameJa": "トリケラトプスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-227920,Y=-314010,Z=-39482),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 92\",Name=\"Dossier: Trilobite\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: 三葉虫"
+   "nameJa": "三葉虫の調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-76305,Y=-313247,Z=-40304),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 93\",Name=\"Dossier: Carbonemys\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: カルボネミス"
+   "nameJa": "カルボネミスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=225561,Y=206388,Z=-11227),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 94\",Name=\"Dossier: Achatina\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: アカティナ"
+   "nameJa": "アカティナの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-261160,Y=114179,Z=-11454),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 95\",Name=\"Dossier: Moschops\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: モスコプス"
+   "nameJa": "モスコプスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-234723,Y=221169,Z=-10152),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 96\",Name=\"Dossier: Pachyrhinosaurus\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: パキリノサウルス"
+   "nameJa": "パキリノサウルスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=253638,Y=-952,Z=-26358),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 97\",Name=\"Dossier: Cnidaria\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: クニダリア"
+   "nameJa": "クニダリアの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=230572,Y=199826,Z=-10450),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 98\",Name=\"Dossier: Troodon\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: トロオドン"
+   "nameJa": "トロオドンの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-229389,Y=79618,Z=-23975),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 99\",Name=\"Dossier: Tusoteuthis\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: トゥソテウティス"
+   "nameJa": "トゥソテウティスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=103373,Y=257540,Z=-9903),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 100\",Name=\"Dossier: Pegomastax\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ペゴマスタクス"
+   "nameJa": "ペゴマスタクスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-11814,Y=140436,Z=-14354),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 101\",Name=\"Dossier: Therizinosaur\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: テリジノサウルス"
+   "nameJa": "テリジノサウルスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=192858,Y=186542,Z=-11662),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 102\",Name=\"Dossier: Ovis\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: オヴィス"
+   "nameJa": "オヴィスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=224698,Y=-159839,Z=-3295),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 103\",Name=\"Dossier: Baryonyx\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: バリオニクス"
+   "nameJa": "バリオニクスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-258105,Y=19723,Z=-8925),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 104\",Name=\"Dossier: Basilosaurus\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: バシロサウルス"
+   "nameJa": "バシロサウルスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-120978,Y=-107295,Z=4160),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 105\",Name=\"Dossier: Purlovia\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: パーロヴィア"
+   "nameJa": "パーロヴィアの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=9128,Y=296844,Z=-13349),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 106\",Name=\"Dossier: Ammonite\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: アンモナイト"
+   "nameJa": "アンモナイトの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=251333,Y=-108399,Z=7785),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 107\",Name=\"Dossier: Electrophorus\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: エレクトロフォルス"
+   "nameJa": "エレクトロフォルスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-227187,Y=-11924,Z=-8217),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 108\",Name=\"Dossier: Microraptor\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ミクロラプトル"
+   "nameJa": "ミクロラプトルの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=129682,Y=-140732,Z=-6401),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 109\",Name=\"Dossier: Thylacoleo\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ティラコレオ"
+   "nameJa": "ティラコレオの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-132838,Y=108561,Z=-8358),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 110\",Name=\"Dossier: Equus\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: エクウス"
+   "nameJa": "エクウスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-212396,Y=265060,Z=-10807),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 111\",Name=\"Dossier: Leedsichthys\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: リードシクティス"
+   "nameJa": "リードシクティスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=115717,Y=182211,Z=-12747),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 112\",Name=\"Dossier: Ichthyornis\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: イクチオルニス"
+   "nameJa": "イクチオルニスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-202549,Y=99121,Z=-13685),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 113\",Name=\"Dossier: Iguanodon\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: イグアノドン"
+   "nameJa": "イグアノドンの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=88965,Y=165499,Z=-14374),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 114\",Name=\"Dossier: Bee\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ハチ"
+   "nameJa": "ハチの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=23826,Y=304927,Z=-13407),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 115\",Name=\"Dossier: Daeodon\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ダエオドン"
+   "nameJa": "ダエオドンの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-211503,Y=226380,Z=-12199),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 116\",Name=\"Dossier: Kentrosaurus\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ケントロサウルス"
+   "nameJa": "ケントロサウルスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-205993,Y=225081,Z=-12762),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 117\",Name=\"Dossier: Liopleurodon\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: リオプレウロドン"
+   "nameJa": "リオプレウロドンの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=254920,Y=248074,Z=-14322),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 118\",Name=\"Dossier: Hyaenodon\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ハイエノドン"
+   "nameJa": "ハイエノドンの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=273283,Y=275182,Z=-11732),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 119\",Name=\"Dossier: Megalania\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: メガラニア"
+   "nameJa": "メガラニアの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-211546,Y=191462,Z=-6104),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 120\",Name=\"Dossier: Yutyrannus\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ユウティラヌス"
+   "nameJa": "ユウティラヌスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-228948,Y=199068,Z=-9538),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 121\",Name=\"Dossier: Megatherium\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: メガテリウム"
+   "nameJa": "メガテリウムの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=273072,Y=253368,Z=-14188),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 122\",Name=\"Dossier: Hesperornis\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ヘスペロルニス"
+   "nameJa": "ヘスペロルニスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=72524,Y=-114458,Z=25573),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 123\",Name=\"Dossier: Otter\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: カワウソ"
+   "nameJa": "カワウソの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=0,Y=0,Z=0),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 124\",Name=\"Dossier: Carcharodontosaurus\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: カルカロドントサウルス"
+   "nameJa": "カルカロドントサウルスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=0,Y=0,Z=0),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 125\",Name=\"Dossier: Rhyniognatha\")",
    "map": "TheIsland_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: リニオグナタ"
+   "nameJa": "リニオグナタの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=185102,Y=-197640,Z=-14320),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"TheIsland_WP\",CustomTag=\"Explorer Note 126\",Name=\"Rockwell Record #1\")",
@@ -3298,79 +3298,79 @@
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-29984,Y=-250872,Z=-15803),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"ScorchedEarth_WP\",CustomTag=\"Explorer Note 251\",Name=\"Dossier: Deathworm\")",
    "map": "ScorchedEarth_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: デスワーム"
+   "nameJa": "デスワームの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=273716,Y=-255616,Z=-10737),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"ScorchedEarth_WP\",CustomTag=\"Explorer Note 252\",Name=\"Dossier: Mantis\")",
    "map": "ScorchedEarth_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: マンティス"
+   "nameJa": "マンティスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-301460,Y=-104695,Z=-15905),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"ScorchedEarth_WP\",CustomTag=\"Explorer Note 253\",Name=\"Dossier: Jerboa\")",
    "map": "ScorchedEarth_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ジャーボア"
+   "nameJa": "ジャーボアの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=77700,Y=-119534,Z=-10555),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"ScorchedEarth_WP\",CustomTag=\"Explorer Note 254\",Name=\"Dossier: Jug Bug\")",
    "map": "ScorchedEarth_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ジャグバグ"
+   "nameJa": "ジャグバグの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-139135,Y=120189,Z=-7835),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"ScorchedEarth_WP\",CustomTag=\"Explorer Note 255\",Name=\"Dossier: Moth\")",
    "map": "ScorchedEarth_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: モス"
+   "nameJa": "モスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-140106,Y=235925,Z=-13157),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"ScorchedEarth_WP\",CustomTag=\"Explorer Note 256\",Name=\"Dossier: Rock Elemental\")",
    "map": "ScorchedEarth_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ロックエレメンタル"
+   "nameJa": "ロックエレメンタルの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-286006,Y=249354,Z=-8832),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"ScorchedEarth_WP\",CustomTag=\"Explorer Note 257\",Name=\"Dossier: Thorny Dragon\")",
    "map": "ScorchedEarth_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ソーニードラゴン"
+   "nameJa": "ソーニードラゴンの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-29740,Y=-303517,Z=-12093),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"ScorchedEarth_WP\",CustomTag=\"Explorer Note 258\",Name=\"Dossier: Wyvern\")",
    "map": "ScorchedEarth_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ワイバーン"
+   "nameJa": "ワイバーンの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=138313,Y=-254514,Z=-11358),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"ScorchedEarth_WP\",CustomTag=\"Explorer Note 259\",Name=\"Dossier: Vulture\")",
    "map": "ScorchedEarth_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ハゲワシ"
+   "nameJa": "ハゲワシの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=16743,Y=264470,Z=-13483),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"ScorchedEarth_WP\",CustomTag=\"Explorer Note 260\",Name=\"Dossier: Morellatops\")",
    "map": "ScorchedEarth_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: モレラトプス"
+   "nameJa": "モレラトプスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-283047,Y=277777,Z=-11089),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"ScorchedEarth_WP\",CustomTag=\"Explorer Note 261\",Name=\"Dossier: Phoenix\")",
    "map": "ScorchedEarth_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: フェニックス"
+   "nameJa": "フェニックスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-96525,Y=181630,Z=-21379),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"ScorchedEarth_WP\",CustomTag=\"Explorer Note 262\",Name=\"Dossier: Fasolusuchus\")",
    "map": "ScorchedEarth_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ファソラスカス"
+   "nameJa": "ファソラスカスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-274181,Y=76736,Z=-32733),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"ScorchedEarth_WP\",CustomTag=\"Explorer Note 263\",Name=\"Dossier: Oasisaur\")",
    "map": "ScorchedEarth_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: オアシザウルス"
+   "nameJa": "オアシザウルスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-81694,Y=-313251,Z=-9694),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"ScorchedEarth_WP\",CustomTag=\"Explorer Note 264\",Name=\"Raia Tablet #1\")",
@@ -4186,97 +4186,97 @@
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=49044,Y=-108932,Z=33319),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"Aberration_WP\",CustomTag=\"Explorer Note 399\",Name=\"Dossier: Basilisk\")",
    "map": "Aberration_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: バシリスク"
+   "nameJa": "バシリスクの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-21799,Y=-111786,Z=48109),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"Aberration_WP\",CustomTag=\"Explorer Note 400\",Name=\"Dossier: Ravager\")",
    "map": "Aberration_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ラヴェジャー"
+   "nameJa": "ラヴェジャーの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=39036,Y=-48755,Z=12028),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"Aberration_WP\",CustomTag=\"Explorer Note 401\",Name=\"Dossier: Nameless\")",
    "map": "Aberration_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ネームレス"
+   "nameJa": "ネームレスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=113432,Y=-31423,Z=11573),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"Aberration_WP\",CustomTag=\"Explorer Note 402\",Name=\"Dossier: Karkinos\")",
    "map": "Aberration_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: カルキノス"
+   "nameJa": "カルキノスの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=189931,Y=56945,Z=20439),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"Aberration_WP\",CustomTag=\"Explorer Note 403\",Name=\"Dossier: Lamprey\")",
    "map": "Aberration_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ランプリー"
+   "nameJa": "ランプリーの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-182321,Y=-13281,Z=69498),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"Aberration_WP\",CustomTag=\"Explorer Note 404\",Name=\"Dossier: Featherlight\")",
    "map": "Aberration_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: フェザーライト"
+   "nameJa": "フェザーライトの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=17662,Y=41024,Z=19102),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"Aberration_WP\",CustomTag=\"Explorer Note 405\",Name=\"Dossier: Shinehorn\")",
    "map": "Aberration_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: シャインホーン"
+   "nameJa": "シャインホーンの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=177125,Y=-25358,Z=12582),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"Aberration_WP\",CustomTag=\"Explorer Note 406\",Name=\"Dossier: Glowtail \")",
    "map": "Aberration_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: グロウテイル"
+   "nameJa": "グロウテイルの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=145971,Y=13586,Z=18721),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"Aberration_WP\",CustomTag=\"Explorer Note 407\",Name=\"Dossier: Bulbdog\")",
    "map": "Aberration_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: バルブドッグ"
+   "nameJa": "バルブドッグの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=133883,Y=-11390,Z=18682),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"Aberration_WP\",CustomTag=\"Explorer Note 408\",Name=\"Dossier: Glowbug \")",
    "map": "Aberration_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: グロウバグ"
+   "nameJa": "グロウバグの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=108981,Y=-182282,Z=48935),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"Aberration_WP\",CustomTag=\"Explorer Note 409\",Name=\"Dossier: Roll Rat\")",
    "map": "Aberration_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ロールラット"
+   "nameJa": "ロールラットの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=49113,Y=120123,Z=2430),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"Aberration_WP\",CustomTag=\"Explorer Note 410\",Name=\"Dossier: Reaper\")",
    "map": "Aberration_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: リーパー"
+   "nameJa": "リーパーの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-240435,Y=250809,Z=53381),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"Aberration_WP\",CustomTag=\"Explorer Note 411\",Name=\"Dossier: Seeker\")",
    "map": "Aberration_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: シーカー"
+   "nameJa": "シーカーの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-6711,Y=16067,Z=-100556),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"Aberration_WP\",CustomTag=\"Explorer Note 412\",Name=\"Dossier: Rock Drake\")",
    "map": "Aberration_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: ロックドレイク"
+   "nameJa": "ロックドレイクの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=7152,Y=-61092,Z=37421),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"Aberration_WP\",CustomTag=\"Explorer Note 413\",Name=\"Dossier: Yi Ling\")",
    "map": "Aberration_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: イーリン"
+   "nameJa": "イーリンの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=117864,Y=16888,Z=13770),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"Aberration_WP\",CustomTag=\"Explorer Note 414\",Name=\"Dossier: Cosmo\")",
    "map": "Aberration_WP",
    "category": "Explorer Note",
-   "nameJa": "ドシエ: コスモ"
+   "nameJa": "コスモの調査書"
   },
   {
    "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.55,B=0.25,A=1),Location=(X=-280722,Y=-45283,Z=51902),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPointOfInterest_Collectible.T_UI_HUDPointOfInterest_Collectible'\",MapName=\"Aberration_WP\",CustomTag=\"Explorer Note 415\",Name=\"Meiyin Note #1\")",
