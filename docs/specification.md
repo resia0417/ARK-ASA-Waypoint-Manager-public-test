@@ -1,4 +1,11 @@
-# ARK ASA Waypoint Manager Web — 仕様書 (v0.11.7)
+# ARK ASA Waypoint Manager Web — 仕様書 (v0.11.8)
+
+## 0.43 v0.11.8: DinoFinder系MODデータによる座標修正と入口/本体の区別
+
+- 利用者が調査して持ち込んだ DinoFinder 系 MOD の Waypoint データ(73件)を使い、Location Library の座標を修正した。詳細と保留分の一覧は作業フォルダの library_data/DINOFINDER_MERGE.md に記録。
+- XY 差 3,000 以内の46点で Library 63件の Location を実座標に差し替え(Explorer Note は ASA Explorer Map の実座標があるため除外)。Extinction の King Titan Terminal もファイル座標に差し替え(マップ範囲外の位置が実在)。
+- 新規追加5件: Desert / Forest Titan Terminal(Boss)、アーティファクト本体 3件(Extinction の Growth / Chaos / Void、名前に (Pedestal)、日本語名は「○○のアーティファクト（本体）」、アイコンはピン)。総数 862 → 867件、Z=0 は 320 → 256件。
+- Artifact カテゴリの既存63件は全て洞窟の入口の位置であるため、入口と分かるようにした: 名前に入口表記を追加(Island / Astraeos の括弧形式24件と Ragnarok の Devourer)、アイコンをピンから洞窟と同じ下矢印へ変更(62件。The Center の Brute は外洋で入口がないため対象外)。
 
 ## 0.42 v0.11.7: 確認ダイアログがSettingsモーダルの後ろに隠れる問題の修正
 
