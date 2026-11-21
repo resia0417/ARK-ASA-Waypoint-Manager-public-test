@@ -1183,14 +1183,15 @@ async function onModalSave() {
 // 衝突は1件ずつ確認せず、まとめて固定ルールで処理する:
 // - 同じ座標のものはスキップ(再実行しても安全なように)
 // - CustomTagが同じものは、ドラッグ時と同じ自動連番で追加
-// - Waypoint Logへは、単体ドラッグと同じく確認なしでそのまま追加
+// 移動先は INI / My Storage のみ(Location Library は固定データ、
+// Waypoint Log は履歴=読み取り専用のため、どちらも移動先にならない)
 
 async function onBulkMove(sourceKey) {
   const items = controllers[sourceKey].getVisibleItems();
   if (items.length === 0) { setStatus(t('status.bulkNone')); return; }
   const verb = t(EDITABLE_LISTS.has(sourceKey) ? 'verb.move' : 'verb.copy');
   const choices = LIST_KEYS
-    .filter((k) => k !== sourceKey && k !== 'library')
+    .filter((k) => k !== sourceKey && k !== 'library' && k !== 'log')
     .map((k) => ({ key: k, label: t('dialog.bulkTo', { list: LABELS[k] }) }));
   choices.push({ key: 'cancel', label: t('btn.cancel') });
   const choice = await showChoiceDialog(
@@ -1206,28 +1207,21 @@ function bulkMove(sourceKey, targetKey, items) {
   const removesFromSource = EDITABLE_LISTS.has(sourceKey);
   const verbPast = t(removesFromSource ? 'verb.movePast' : 'verb.copyPast');
   const target = controllers[targetKey];
-  const targetIsEditable = EDITABLE_LISTS.has(targetKey);
   const movedPairs = [];
   let skipped = 0;
   let renamed = 0;
 
   for (const wp of items) {
-    if (targetIsEditable) {
-      const targetList = target.getAll();
-      if (targetList.some((existing) => isSameLocation(existing, wp))) { skipped++; continue; }
-      let newTag;
-      if (targetList.some((existing) => isSameCustomTag(existing, wp))) {
-        newTag = generateUniqueTag(wp.parsed.customTag, targetList);
-        renamed++;
-      }
-      const clone = cloneWaypointForTarget(wp, targetKey, removesFromSource ? wp.id : undefined, newTag);
-      target.add(clone);
-      movedPairs.push({ src: wp, dst: clone });
-    } else {
-      const clone = cloneWaypointForTarget(wp, targetKey, removesFromSource ? wp.id : undefined);
-      target.add(clone);
-      movedPairs.push({ src: wp, dst: clone });
+    const targetList = target.getAll();
+    if (targetList.some((existing) => isSameLocation(existing, wp))) { skipped++; continue; }
+    let newTag;
+    if (targetList.some((existing) => isSameCustomTag(existing, wp))) {
+      newTag = generateUniqueTag(wp.parsed.customTag, targetList);
+      renamed++;
     }
+    const clone = cloneWaypointForTarget(wp, targetKey, removesFromSource ? wp.id : undefined, newTag);
+    target.add(clone);
+    movedPairs.push({ src: wp, dst: clone });
   }
 
   if (removesFromSource) {
@@ -1529,6 +1523,7 @@ function restoreLayoutSettings() {
   if (savedMapsHeight) els.mapsRow.style.height = `${savedMapsHeight}px`;
 
   if (settingsStore.get('layout.mapsCollapsed', false)) applyMapsCollapsed(true, false);
+  else els.mapsToggleBtn.textContent = t('header.mapsShowAll');
 }
 
 // --- ヘッダー(Settings) -----------------------------------

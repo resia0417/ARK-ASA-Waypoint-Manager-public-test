@@ -1,4 +1,10 @@
-# ARK ASA Waypoint Manager Web — 仕様書 (v0.11.0)
+# ARK ASA Waypoint Manager Web — 仕様書 (v0.11.1)
+
+## 0.36 v0.11.1: v0.11.0 の表示まわりの修正
+
+- **列見出しを両言語とも英語に戻した**: Icon / Name / Map を日本語化すると、固定幅の列(Icon 44px 等)からはみ出して表示が崩れたため。Lat / Lon / CustomTag と同じく、列見出しはフィールド名として英語で統一する。
+- **起動時のマップ表示トグルの表記**: 地図が展開状態で保存されている場合、起動時に `applyMapsCollapsed` が呼ばれず、ボタンの初期表記(HTML の日本語文言)が残っていた。英語設定で再読み込みすると「全Waypoint表示」と日本語のままになる問題を修正し、展開状態でも現在の言語で表記を設定するようにした。
+- **一括移動の移動先から Waypoint Log を外した**: Waypoint Log は Python 版 WaypointLogger が記録した履歴(読み取り専用)であり、移動先にする用途がないため。移動先は INI / My Storage のみになった(移動元としては従来どおり使える)。
 
 ## 0.35 v0.11.0: 表示言語(日本語/English)と一括移動
 

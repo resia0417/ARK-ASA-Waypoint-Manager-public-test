@@ -36,9 +36,9 @@ const STRINGS = {
     'empty.log': 'Python版WaypointLoggerの出力ファイルを開いてください。',
     'category.all': '全カテゴリ',
     'category.none': '(未設定)',
-    'col.icon': 'アイコン',
-    'col.name': '名前',
-    'col.map': 'マップ',
+    'col.icon': 'Icon',
+    'col.name': 'Name',
+    'col.map': 'Map',
 
     // --- 詳細バー ---
     'detail.placeholder': 'Waypointを選択すると詳細が表示されます。',
@@ -162,7 +162,7 @@ const STRINGS = {
     // --- 一括移動 ---
     'btn.bulkMove': '一括移動',
     'dialog.bulkTitle': '一括移動',
-    'dialog.bulkMessage': '{list}で表示中の{n}件を、どこへ{verb}しますか?\n・INI / My Storage へ: 同じ座標のものはスキップし、CustomTagが同じものは自動で末尾に番号を追加します\n・Waypoint Log へ: そのまま追加します',
+    'dialog.bulkMessage': '{list}で表示中の{n}件を、どこへ{verb}しますか?\n・同じ座標のものはスキップします\n・CustomTagが同じものは、自動で末尾に番号を追加します',
     'dialog.bulkTo': '{list} へ',
     'status.bulkNone': '表示中のWaypointがありません。',
     'status.bulkDone': '{n}件を{list}へ{verbPast}しました。',
@@ -325,7 +325,7 @@ const STRINGS = {
     // --- Bulk move ---
     'btn.bulkMove': 'Bulk Move',
     'dialog.bulkTitle': 'Bulk move',
-    'dialog.bulkMessage': '{verb} the {n} Waypoints currently shown in {list} to where?\n- To INI / My Storage: items at the same location are skipped, and items with the same CustomTag get a number suffix automatically\n- To Waypoint Log: items are added as-is',
+    'dialog.bulkMessage': '{verb} the {n} Waypoints currently shown in {list} to where?\n- Items at the same location are skipped\n- Items with the same CustomTag get a number suffix automatically',
     'dialog.bulkTo': 'To {list}',
     'status.bulkNone': 'No Waypoints are currently shown.',
     'status.bulkDone': '{verbPast} {n} Waypoints to {list}.',
