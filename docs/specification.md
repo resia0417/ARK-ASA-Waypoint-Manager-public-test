@@ -1,4 +1,8 @@
-# ARK ASA Waypoint Manager Web — 仕様書 (v0.11.6)
+# ARK ASA Waypoint Manager Web — 仕様書 (v0.11.7)
+
+## 0.42 v0.11.7: 確認ダイアログがSettingsモーダルの後ろに隠れる問題の修正
+
+- 不具合修正(利用者報告): Settings の「設定をリセット」から開く確認ダイアログが、Settings モーダルの後ろに隠れて操作できなかった。原因は、全モーダル共通の .modal-overlay(z-index: 50)同士では DOM の後勝ちになり、#choiceModal より #settingsModal が後に置かれていたこと。#choiceModal に z-index: 70 を与え、どのモーダルから呼ばれても最前面に出るようにした。
 
 ## 0.41 v0.11.6: 地図ズーム範囲の拡大
 

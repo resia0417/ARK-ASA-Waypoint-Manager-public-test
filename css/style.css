@@ -246,6 +246,8 @@ html, body {
   display: flex; align-items: center; justify-content: center; z-index: 50;
 }
 .modal-overlay.hidden { display: none; }
+/* 確認ダイアログは他のモーダル(Settings等)の中から呼ばれることがあるため、モーダル同士の中で最前面にする */
+#choiceModal { z-index: 70; }
 .modal {
   padding: 24px; width: 380px; max-width: 90vw; max-height: 85vh; overflow-y: auto;
   position: relative;
