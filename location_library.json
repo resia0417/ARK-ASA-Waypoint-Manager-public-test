@@ -49,13 +49,13 @@
    "nameJa": "大物のアーティファクト（南東の洞窟／溶岩洞窟・入口）"
   },
   {
-   "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.72,B=0.15,A=1),Location=(X=-316815,Y=29622,Z=-40123),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPing_Icon.T_UI_HUDPing_Icon'\",MapName=\"TheIsland_WP\",CustomTag=\"Artifact 9\",Name=\"Artifact of the Brute (Caverns of Lost Faith Entrance)\")",
+   "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.72,B=0.15,A=1),Location=(X=311235,Y=-32866,Z=-31059),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPing_Icon.T_UI_HUDPing_Icon'\",MapName=\"TheIsland_WP\",CustomTag=\"Artifact 9\",Name=\"Artifact of the Brute (Caverns of Lost Faith Entrance)\")",
    "map": "TheIsland_WP",
    "category": "Artifact",
    "nameJa": "野獣のアーティファクト（失われた信仰の洞窟・入口）"
   },
   {
-   "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.72,B=0.15,A=1),Location=(X=311235,Y=-32866,Z=-31059),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPing_Icon.T_UI_HUDPing_Icon'\",MapName=\"TheIsland_WP\",CustomTag=\"Artifact 10\",Name=\"Artifact of the Cunning (Caverns of Lost Hope Entrance)\")",
+   "rawText": "SavedMinimapMarks=(IconColor=(R=1,G=1,B=1,A=1),Color=(R=1,G=0.72,B=0.15,A=1),Location=(X=-316815,Y=29622,Z=-40123),MarkIcon=\"/Script/Engine.Texture2D'/Game/PrimalEarth/UI/Textures/T_UI_HUDPing_Icon.T_UI_HUDPing_Icon'\",MapName=\"TheIsland_WP\",CustomTag=\"Artifact 10\",Name=\"Artifact of the Cunning (Caverns of Lost Hope Entrance)\")",
    "map": "TheIsland_WP",
    "category": "Artifact",
    "nameJa": "狡猾のアーティファクト（失われた希望の洞窟・入口）"

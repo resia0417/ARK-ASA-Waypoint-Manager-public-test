@@ -1,4 +1,8 @@
-# ARK ASA Waypoint Manager Web — 仕様書 (v0.11.8)
+# ARK ASA Waypoint Manager Web — 仕様書 (v0.11.9)
+
+## 0.44 v0.11.9: Island の Lost Faith / Lost Hope の対応入れ替わりを修正
+
+- 不具合修正(利用者指摘): The Island の Artifact of the Brute(Caverns of Lost Faith)と Artifact of the Cunning(Caverns of Lost Hope)は、同梱データの元(Wiki 由来)の時点で名前と位置が入れ替わっていた。v0.11.8 の近接マージで誤対応のまま実座標が入ったため、両エントリの Location を入れ替えた(Brute = CavePoint_209 狡猾矿洞の座標、Cunning = CavePoint_208 残暴矿洞の座標)。他マップは英名の二つ名で突き合わせし、同種の入れ替わりがないことを確認済み。
 
 ## 0.43 v0.11.8: DinoFinder系MODデータによる座標修正と入口/本体の区別
 
